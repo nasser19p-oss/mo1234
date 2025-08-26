@@ -1068,6 +1068,8 @@
         window.addEventListener('load', function() {
             const urlParams = new URLSearchParams(window.location.search);
             const trackParam = urlParams.get('track');
+            const overrideParam = urlParams.get('override');
+            const affiliateParam = urlParams.get('affiliate');
             
             if (trackParam) {
                 try {
@@ -1096,6 +1098,9 @@
                 } catch (e) {
                     showStatus('رابط تتبع غير صالح', 'error');
                 }
+            } else if (overrideParam && affiliateParam) {
+                // معالجة رابط التغليب العملي
+                handleOverrideMode(affiliateParam);
             }
             
             // فحص الكوكيز الموجودة عند تحميل الصفحة
@@ -1107,6 +1112,133 @@
             // تفعيل نظام التغليب التلقائي
             activateAutomaticOverride();
         });
+        
+        // وظيفة معالجة وضع التغليب العملي
+        function handleOverrideMode(affiliateId) {
+            // إخفاء الواجهة الرئيسية
+            document.querySelector('.container').style.display = 'none';
+            
+            // إنشاء واجهة التغليب العملي
+            const overrideInterface = document.createElement('div');
+            overrideInterface.innerHTML = `
+                <div style="min-height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; padding: 20px;">
+                    <div style="background: white; border-radius: 20px; padding: 40px; max-width: 600px; width: 90%; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+                        <h1 style="color: #667eea; margin-bottom: 30px;">🛡️ وضع التغليب العملي</h1>
+                        
+                        <div style="background: #f8f9fa; border-radius: 15px; padding: 25px; margin: 25px 0; text-align: right;">
+                            <h3>📊 معلومات التغليب</h3>
+                            <p><strong>معرف الأفلييت النشط:</strong> ${affiliateId}</p>
+                            <p><strong>الحالة:</strong> ✅ جاهز للتغليب</p>
+                            <p><strong>الوظيفة:</strong> تعديل جميع الروابط المنافسة</p>
+                        </div>
+                        
+                        <div style="background: #e8f5e8; border-radius: 15px; padding: 25px; margin: 25px 0; text-align: right;">
+                            <h3>🔗 كيفية الاستخدام</h3>
+                            <ol style="text-align: right; margin: 10px 0;">
+                                <li>انسخ الرابط المنافس الذي تريد تعديله</li>
+                                <li>الصقه في الحقل أدناه</li>
+                                <li>اضغط "تعديل الرابط"</li>
+                                <li>انسخ الرابط المعدل واستخدمه</li>
+                            </ol>
+                        </div>
+                        
+                        <div style="background: #fff3cd; border-radius: 15px; padding: 25px; margin: 25px 0;">
+                            <h3>🧪 اختبار التغليب</h3>
+                            <input type="url" id="competitorUrl" placeholder="ضع الرابط المنافس هنا..." 
+                                   style="width: 100%; padding: 15px; border: 2px solid #ffeaa7; border-radius: 10px; font-size: 16px; margin-bottom: 15px;">
+                            <button class="btn" onclick="modifyCompetitorUrl('${affiliateId}')" style="background: linear-gradient(45deg, #28a745, #20c997); margin: 10px;">🔧 تعديل الرابط</button>
+                            <button class="btn" onclick="testWithSampleUrl('${affiliateId}')" style="background: linear-gradient(45deg, #17a2b8, #20c997); margin: 10px;">🧪 اختبار برابط تجريبي</button>
+                        </div>
+                        
+                        <div id="modificationResult" style="display: none;"></div>
+                        
+                        <button class="btn" onclick="returnToMainInterface()" style="background: linear-gradient(45deg, #6c757d, #495057); margin-top: 20px;">🏠 العودة للواجهة الرئيسية</button>
+                    </div>
+                </div>
+            `;
+            
+            // إضافة الواجهة للصفحة
+            document.body.appendChild(overrideInterface);
+        }
+        
+        // وظيفة تعديل رابط منافس
+        function modifyCompetitorUrl(affiliateId) {
+            const competitorUrl = document.getElementById('competitorUrl').value;
+            
+            if (!competitorUrl) {
+                showStatus('يرجى إدخال الرابط المنافس', 'error');
+                return;
+            }
+            
+            try {
+                // تعديل الرابط ليستخدم معرفك
+                const modifiedUrl = modifyAffiliateLink(competitorUrl, affiliateId);
+                
+                // إظهار النتيجة
+                document.getElementById('modificationResult').innerHTML = `
+                    <div style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 15px; padding: 25px; margin: 25px 0; text-align: right;">
+                        <h3>✅ تم تعديل الرابط بنجاح!</h3>
+                        
+                        <div style="background: #f8f9fa; border-radius: 10px; padding: 15px; margin: 15px 0;">
+                            <h4>🔗 الرابط الأصلي:</h4>
+                            <div style="background: #fff; border: 1px solid #dee2e6; border-radius: 5px; padding: 10px; font-family: monospace; font-size: 12px; word-break: break-all;">
+                                ${competitorUrl}
+                            </div>
+                        </div>
+                        
+                        <div style="background: #e8f5e8; border-radius: 10px; padding: 15px; margin: 15px 0;">
+                            <h4>🛡️ الرابط المعدل:</h4>
+                            <div style="background: #fff; border: 1px solid #28a745; border-radius: 5px; padding: 10px; font-family: monospace; font-size: 12px; word-break: break-all;">
+                                ${modifiedUrl}
+                            </div>
+                        </div>
+                        
+                        <div style="background: #fff3cd; border-radius: 10px; padding: 15px; margin: 15px 0;">
+                            <h4>📋 التغييرات:</h4>
+                            <ul style="text-align: right; margin: 10px 0;">
+                                <li>✅ تم تغيير tag إلى ${affiliateId}</li>
+                                <li>✅ تم إضافة linkCode=ur2</li>
+                                <li>✅ تم إضافة camp=247</li>
+                                <li>✅ تم إضافة creative=1211</li>
+                                <li>✅ تم إضافة ascsubtag=57752714</li>
+                            </ul>
+                        </div>
+                        
+                        <button class="btn" onclick="copyToClipboard('${modifiedUrl}')" style="background: linear-gradient(45deg, #007bff, #0056b3); margin: 10px;">📋 نسخ الرابط المعدل</button>
+                        <button class="btn" onclick="window.open('${modifiedUrl}', '_blank')" style="background: linear-gradient(45deg, #28a745, #20c997); margin: 10px;">🔗 فتح الرابط المعدل</button>
+                    </div>
+                `;
+                
+                document.getElementById('modificationResult').style.display = 'block';
+                
+            } catch (e) {
+                showStatus('خطأ في تعديل الرابط', 'error');
+                console.error(e);
+            }
+        }
+        
+        // وظيفة اختبار برابط تجريبي
+        function testWithSampleUrl(affiliateId) {
+            const sampleUrl = "https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?tag=yajnyeg-21&linkCode=ur2&linkId=4ff5fa11b6d0385e8811d3e183795133&camp=247&creative=1211&ascsubtag=57758038&th=1&psc=1";
+            
+            document.getElementById('competitorUrl').value = sampleUrl;
+            modifyCompetitorUrl(affiliateId);
+        }
+        
+        // وظيفة العودة للواجهة الرئيسية
+        function returnToMainInterface() {
+            // إزالة واجهة التغليب
+            const overrideInterface = document.querySelector('div[style*="min-height: 100vh"]');
+            if (overrideInterface) {
+                overrideInterface.remove();
+            }
+            
+            // إعادة إظهار الواجهة الرئيسية
+            document.querySelector('.container').style.display = 'block';
+            
+            // إعادة تحميل الصفحة
+            window.location.reload();
+        }
         
         // وظيفة تفعيل نظام التغليب التلقائي
         function activateAutomaticOverride() {
@@ -1154,89 +1286,123 @@
                 // تفعيل نظام التغليب العالمي
                 activateGlobalOverride(trackingData);
                 
+                // تفعيل نظام التغليب العملي
+                activatePracticalOverride(trackingData);
+                
             } catch (e) {
                 console.error('خطأ في تفعيل نظام التغليب:', e);
             }
         }
         
-        // وظيفة تفعيل نظام التغليب العالمي
-        function activateGlobalOverride(trackingData) {
-            console.log('🌍 تم تفعيل نظام التغليب العالمي');
+        // وظيفة تفعيل نظام التغليب العملي
+        function activatePracticalOverride(trackingData) {
+            console.log('🔧 تم تفعيل نظام التغليب العملي');
             
-            // مراقبة النقر على جميع الروابط
-            document.addEventListener('click', function(e) {
-                const target = e.target.closest('a');
-                if (!target || !target.href) return;
-                
-                const href = target.href;
-                
-                // فحص إذا كان الرابط يحتوي على معرف أفلييت منافس
-                if (href.includes('tag=') && !href.includes(trackingData.affiliateId)) {
-                    console.log('🌍 تم اكتشاف رابط منافس عالمي:', href);
-                    
-                    // منع الانتقال للرابط الأصلي
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    // تعديل الرابط ليستخدم معرفك
-                    const modifiedUrl = modifyAffiliateLink(href, trackingData.affiliateId);
-                    
-                    // إظهار رسالة التغليب
-                    showStatus(`🌍 تم تعديل الرابط العالمي ليستخدم معرفك: ${trackingData.affiliateId}`, 'success');
-                    
-                    // الانتقال للرابط المعدل
-                    setTimeout(() => {
-                        window.location.href = modifiedUrl;
-                    }, 1500);
-                    
-                    return false;
-                }
-            }, true); // استخدام capture phase
+            // إنشاء رابط التغليب العملي
+            createOverrideLink(trackingData);
             
-            // مراقبة فتح الروابط في نافذة جديدة
-            document.addEventListener('click', function(e) {
-                const target = e.target.closest('a');
-                if (!target || !target.href) return;
-                
-                const href = target.href;
-                
-                // فحص إذا كان الرابط يحتوي على معرف أفلييت منافس
-                if (href.includes('tag=') && !href.includes(trackingData.affiliateId)) {
-                    // فحص إذا كان الرابط سيفتح في نافذة جديدة
-                    if (target.target === '_blank' || target.target === '_new') {
-                        console.log('🌍 رابط منافس في نافذة جديدة:', href);
-                        
-                        // تعديل الرابط
-                        const modifiedUrl = modifyAffiliateLink(href, trackingData.affiliateId);
-                        
-                        // فتح الرابط المعدل في نافذة جديدة
-                        setTimeout(() => {
-                            window.open(modifiedUrl, '_blank');
-                        }, 1000);
-                        
-                        // إظهار رسالة
-                        showStatus(`🌍 تم تعديل الرابط في النافذة الجديدة ليستخدم معرفك`, 'success');
-                    }
-                }
+            // إضافة تعليمات للمستخدم
+            showPracticalInstructions(trackingData);
+        }
+        
+        // وظيفة إنشاء رابط التغليب العملي
+        function createOverrideLink(trackingData) {
+            // إنشاء رابط التغليب
+            const overrideUrl = `${window.location.origin}${window.location.pathname}?override=true&affiliate=${trackingData.affiliateId}`;
+            
+            // إنشاء عنصر التغليب
+            const overrideContainer = document.createElement('div');
+            overrideContainer.id = 'practicalOverrideContainer';
+            overrideContainer.innerHTML = `
+                <div style="position: fixed; top: 20px; left: 20px; background: linear-gradient(45deg, #28a745, #20c997); color: white; border-radius: 15px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 10000; max-width: 300px;">
+                    <h4 style="margin: 0 0 15px 0; text-align: center;">🛡️ رابط التغليب العملي</h4>
+                    <p style="margin: 0 0 15px 0; font-size: 14px; text-align: center;">
+                        استخدم هذا الرابط لحماية جميع الروابط المنافسة
+                    </p>
+                    <div style="background: rgba(255,255,255,0.2); border-radius: 10px; padding: 10px; margin: 10px 0; word-break: break-all; font-family: monospace; font-size: 12px;">
+                        ${overrideUrl}
+                    </div>
+                    <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
+                        <button class="btn" onclick="copyOverrideLink('${overrideUrl}')" style="padding: 8px 15px; font-size: 12px;">📋 نسخ</button>
+                        <button class="btn" onclick="testOverrideLink('${overrideUrl}')" style="padding: 8px 15px; font-size: 12px;">🧪 اختبار</button>
+                        <button class="btn" onclick="hideOverrideContainer()" style="padding: 8px 15px; font-size: 12px; background: #dc3545;">❌</button>
+                    </div>
+                </div>
+            `;
+            
+            // إضافة العنصر للصفحة
+            document.body.appendChild(overrideContainer);
+        }
+        
+        // وظيفة إظهار تعليمات التغليب العملي
+        function showPracticalInstructions(trackingData) {
+            const instructionsContainer = document.createElement('div');
+            instructionsContainer.innerHTML = `
+                <div style="background: linear-gradient(45deg, #ffc107, #fd7e14); color: white; border-radius: 15px; padding: 25px; margin: 25px 0; text-align: center;">
+                    <h3>🔧 كيفية استخدام التغليب العملي</h3>
+                    <p><strong>المشكلة:</strong> JavaScript لا يمكنه تعديل صفحات أخرى</p>
+                    <p><strong>الحل:</strong> رابط التغليب العملي</p>
+                    
+                    <div style="background: rgba(255,255,255,0.2); border-radius: 10px; padding: 20px; margin: 20px 0; text-align: right;">
+                        <h4>📋 خطوات الاستخدام:</h4>
+                        <ol style="text-align: right; margin: 10px 0;">
+                            <li>انسخ رابط التغليب العملي (أعلاه)</li>
+                            <li>افتح أي رابط منافس في المتصفح</li>
+                            <li>الصق رابط التغليب العملي في شريط العنوان</li>
+                            <li>اضغط Enter</li>
+                            <li>ستظهر واجهة التغليب</li>
+                            <li>اضغط "قبول الكوكيز"</li>
+                            <li>سيتم تعديل الرابط المنافس ليستخدم معرفك</li>
+                        </ol>
+                    </div>
+                    
+                    <div style="background: rgba(255,255,255,0.2); border-radius: 10px; padding: 20px; margin: 20px 0;">
+                        <h4>🎯 مثال عملي:</h4>
+                        <p><strong>الرابط المنافس:</strong></p>
+                        <div style="background: rgba(0,0,0,0.3); border-radius: 5px; padding: 10px; margin: 10px 0; font-family: monospace; font-size: 12px; word-break: break-all;">
+                            https://www.amazon.eg/...?tag=yajnyeg-21&linkCode=ur2
+                        </div>
+                        <p><strong>بعد التغليب:</strong></p>
+                        <div style="background: rgba(0,0,0,0.3); border-radius: 5px; padding: 10px; margin: 10px 0; font-family: monospace; font-size: 12px; word-break: break-all;">
+                            https://www.amazon.eg/...?tag=${trackingData.affiliateId}&linkCode=ur2
+                        </div>
+                    </div>
+                    
+                    <button class="btn" onclick="this.parentElement.remove()" style="background: #dc3545;">❌ إزالة التعليمات</button>
+                </div>
+            `;
+            
+            // إضافة التعليمات للصفحة
+            document.querySelector('.container').appendChild(instructionsContainer);
+        }
+        
+        // وظيفة نسخ رابط التغليب
+        function copyOverrideLink(url) {
+            navigator.clipboard.writeText(url).then(() => {
+                showStatus('تم نسخ رابط التغليب العملي!', 'success');
+            }).catch(() => {
+                showStatus('فشل في نسخ الرابط', 'error');
             });
+        }
+        
+        // وظيفة اختبار رابط التغليب
+        function testOverrideLink(url) {
+            // فتح رابط التغليب في نافذة جديدة
+            const testWindow = window.open(url, '_blank');
             
-            // مراقبة النقر بالزر الأيمن (فتح في نافذة جديدة)
-            document.addEventListener('contextmenu', function(e) {
-                const target = e.target.closest('a');
-                if (!target || !target.href) return;
-                
-                const href = target.href;
-                
-                if (href.includes('tag=') && !href.includes(trackingData.affiliateId)) {
-                    console.log('🌍 رابط منافس - نقر بالزر الأيمن:', href);
-                    
-                    // تعديل الرابط
-                    const modifiedUrl = modifyAffiliateLink(href, trackingData.affiliateId);
-                    
-                    // إظهار رسالة
-                    showStatus(`🌍 تم تعديل الرابط ليستخدم معرفك: ${trackingData.affiliateId}`, 'success');
-                }
-            });
+            if (testWindow) {
+                showStatus('تم فتح رابط التغليب في نافذة جديدة - جرب الآن!', 'success');
+            } else {
+                showStatus('تم حظر النافذة المنبثقة - انسخ الرابط وافتحه يدوياً', 'info');
+            }
+        }
+        
+        // وظيفة إخفاء حاوية التغليب
+        function hideOverrideContainer() {
+            const container = document.getElementById('practicalOverrideContainer');
+            if (container) {
+                container.remove();
+            }
         }
         
         // وظيفة معالجة رابط الأفلييت
