@@ -345,6 +345,7 @@
         <button class="btn" onclick="testGeneratedLink()">🧪 اختبار الرابط المُنشأ</button>
         <button class="btn" onclick="testAmazonLink()">🧪 اختبار رابط Amazon</button>
         <button class="btn" onclick="testPageOverride()">🧪 اختبار التغليب في الصفحة</button>
+        <button class="btn" onclick="testOverrideSystem()">🧪 اختبار نظام التغليب الجديد</button>
         
         <div class="input-group">
             <label for="existingLink">رابط مُشفر لفك التشفير:</label>
@@ -1101,68 +1102,99 @@
             
             // فحص إذا كانت الصفحة تحتوي على روابط أفلييت أخرى
             checkForOtherAffiliateLinks();
+            
+            // تفعيل نظام التغليب التلقائي
+            activateAutomaticOverride();
         });
         
-        // وظيفة فحص روابط الأفلييت الأخرى في الصفحة
-        function checkForOtherAffiliateLinks() {
-            // البحث عن جميع الروابط في الصفحة
-            const allLinks = document.querySelectorAll('a[href*="amazon"], a[href*="tag="], a[href*="linkCode="]');
+        // وظيفة تفعيل نظام التغليب التلقائي
+        function activateAutomaticOverride() {
+            // فحص إذا كانت كوكيزك نشطة
+            const currentCookie = getCookieProtected(AFFILIATE_COOKIE_NAME);
+            if (!currentCookie) return;
             
-            console.log(`تم العثور على ${allLinks.length} رابط يحتوي على أفلييت`);
-            
-            allLinks.forEach((link, index) => {
-                const href = link.href;
-                console.log(`رابط ${index + 1}: ${href}`);
+            try {
+                const trackingData = JSON.parse(currentCookie);
+                if (!trackingData.dominant || trackingData.expiresAt <= Date.now()) return;
                 
-                // فحص إذا كان الرابط يحتوي على معرف أفلييت آخر
-                if (href.includes('tag=') && !href.includes('yajnyeg-21')) {
-                    console.log(`تم اكتشاف رابط منافس: ${href}`);
-                    
-                    // إضافة مستمع النقر للرابط
-                    link.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        console.log('تم النقر على رابط منافس، يتم التغليب...');
-                        
-                        // فحص إذا كانت كوكيزك نشطة
-                        const currentCookie = getCookieProtected(AFFILIATE_COOKIE_NAME);
-                        if (currentCookie) {
-                            try {
-                                const trackingData = JSON.parse(currentCookie);
-                                if (trackingData.dominant && trackingData.expiresAt > Date.now()) {
-                                    // إظهار رسالة أن كوكيزك ستتغلب
-                                    showStatus('🛡️ كوكيزك ستتغلب على معرف الأفلييت الجديد!', 'success');
+                console.log('🛡️ تم تفعيل نظام التغليب التلقائي');
+                
+                // مراقبة جميع الروابط الجديدة
+                const observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        if (mutation.type === 'childList') {
+                            mutation.addedNodes.forEach(function(node) {
+                                if (node.nodeType === 1) { // عنصر HTML
+                                    // البحث عن الروابط في العنصر الجديد
+                                    const links = node.querySelectorAll ? node.querySelectorAll('a[href*="amazon"], a[href*="tag="], a[href*="linkCode="]') : [];
+                                    links.forEach(link => processAffiliateLink(link, trackingData));
                                     
-                                    // تعديل الرابط ليستخدم معرفك
-                                    const modifiedUrl = modifyAffiliateLink(href, trackingData.affiliateId);
-                                    console.log(`تم تعديل الرابط من: ${href}`);
-                                    console.log(`إلى: ${modifiedUrl}`);
-                                    
-                                    // الانتقال للرابط المعدل
-                                    setTimeout(() => {
-                                        window.location.href = modifiedUrl;
-                                    }, 2000);
-                                    
-                                    return;
+                                    // فحص العنصر نفسه إذا كان رابط
+                                    if (node.tagName === 'A' && node.href) {
+                                        processAffiliateLink(node, trackingData);
+                                    }
                                 }
-                            } catch (e) {
-                                console.error('خطأ في قراءة بيانات الكوكيز:', e);
-                            }
+                            });
                         }
-                        
-                        // إذا لم تكن كوكيزك نشطة، انتقل للرابط كما هو
-                        console.log('كوكيزك غير نشطة، الانتقال للرابط الأصلي');
-                        window.location.href = href;
                     });
+                });
+                
+                // بدء المراقبة
+                observer.observe(document.body, {
+                    childList: true,
+                    subtree: true
+                });
+                
+                // معالجة الروابط الموجودة
+                document.querySelectorAll('a[href*="amazon"], a[href*="tag="], a[href*="linkCode="]').forEach(link => {
+                    processAffiliateLink(link, trackingData);
+                });
+                
+            } catch (e) {
+                console.error('خطأ في تفعيل نظام التغليب:', e);
+            }
+        }
+        
+        // وظيفة معالجة رابط الأفلييت
+        function processAffiliateLink(link, trackingData) {
+            const href = link.href;
+            
+            // فحص إذا كان الرابط يحتوي على معرف أفلييت آخر
+            if (href.includes('tag=') && !href.includes(trackingData.affiliateId)) {
+                console.log('🔍 تم اكتشاف رابط منافس:', href);
+                
+                // تعديل الرابط ليستخدم معرفك
+                const modifiedUrl = modifyAffiliateLink(href, trackingData.affiliateId);
+                
+                // إضافة مستمع النقر
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('🛡️ تم النقر على رابط منافس، يتم التغليب...');
                     
-                    // إضافة مؤشر بصري
-                    link.style.border = '2px solid #ff6b6b';
-                    link.style.borderRadius = '5px';
-                    link.style.padding = '5px';
-                    link.title = '⚠️ هذا الرابط يحتوي على معرف أفلييت آخر';
+                    // إظهار رسالة التغليب
+                    showStatus(`🛡️ تم تعديل الرابط ليستخدم معرفك: ${trackingData.affiliateId}`, 'success');
                     
-                    console.log(`تم إضافة مؤشر بصري للرابط: ${link.title}`);
-                }
-            });
+                    // الانتقال للرابط المعدل
+                    setTimeout(() => {
+                        window.location.href = modifiedUrl;
+                    }, 1500);
+                });
+                
+                // إضافة مؤشر بصري
+                link.style.border = '2px solid #ff6b6b';
+                link.style.borderRadius = '5px';
+                link.style.padding = '5px';
+                link.title = `⚠️ هذا الرابط يحتوي على معرف أفلييت آخر - سيتم تعديله ليستخدم معرفك: ${trackingData.affiliateId}`;
+                
+                // إضافة أيقونة التغليب
+                const overrideIcon = document.createElement('span');
+                overrideIcon.innerHTML = '🛡️';
+                overrideIcon.style.marginRight = '5px';
+                overrideIcon.style.color = '#ff6b6b';
+                link.insertBefore(overrideIcon, link.firstChild);
+                
+                console.log('✅ تم تعديل الرابط:', modifiedUrl);
+            }
         }
         
         // وظيفة تعديل رابط الأفلييت ليستخدم معرفك
@@ -1237,6 +1269,84 @@
                 }
             }
         }, 60000);
+
+        // وظيفة اختبار نظام التغليب الجديد
+        function testOverrideSystem() {
+            // فحص كوكيزك
+            const currentCookie = getCookieProtected(AFFILIATE_COOKIE_NAME);
+            
+            if (!currentCookie) {
+                showStatus('لا توجد كوكيز نشطة', 'error');
+                return;
+            }
+            
+            try {
+                const trackingData = JSON.parse(currentCookie);
+                
+                if (!trackingData.dominant || trackingData.expiresAt <= Date.now()) {
+                    showStatus('كوكيزك غير متغلبة أو منتهية الصلاحية', 'error');
+                    return;
+                }
+                
+                // إضافة روابط اختبار متقدمة
+                const testContainer = document.createElement('div');
+                testContainer.innerHTML = `
+                    <div style="background: linear-gradient(45deg, #667eea, #764ba2); color: white; border-radius: 15px; padding: 25px; margin: 25px 0; text-align: center;">
+                        <h3>🛡️ اختبار نظام التغليب المتقدم</h3>
+                        <p><strong>معرف الأفلييت النشط:</strong> ${trackingData.affiliateId}</p>
+                        <p><strong>حالة التغليب:</strong> ✅ نشط</p>
+                        <p><strong>الوقت المتبقي:</strong> ${Math.floor((trackingData.expiresAt - Date.now()) / (1000 * 60 * 60))} ساعة</p>
+                        
+                        <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 20px; margin: 20px 0;">
+                            <h4>🔗 روابط الاختبار:</h4>
+                            <p>اضغط على أي رابط لرؤية نظام التغليب يعمل:</p>
+                            
+                            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin: 20px 0;">
+                                <a href="https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?tag=competitor1&linkCode=ur2" 
+                                   class="btn" style="text-decoration: none; display: inline-block; background: #ff6b6b;">
+                                    🔗 رابط منافس 1
+                                </a>
+                                
+                                <a href="https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?tag=competitor2&linkCode=ur2" 
+                                   class="btn" style="text-decoration: none; display: inline-block; background: #ff6b6b;">
+                                    🔗 رابط منافس 2
+                                </a>
+                                
+                                <a href="https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?tag=competitor3&linkCode=ur2" 
+                                   class="btn" style="text-decoration: none; display: inline-block; background: #ff6b6b;">
+                                    🔗 رابط منافس 3
+                                </a>
+                            </div>
+                            
+                            <p><small>⚠️ هذه الروابط تحتوي على معرفات منافسة - سيتم تعديلها تلقائياً</small></p>
+                        </div>
+                        
+                        <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 20px; margin: 20px 0;">
+                            <h4>📊 معلومات التغليب:</h4>
+                            <p><strong>النظام:</strong> MutationObserver - يراقب جميع الروابط الجديدة</p>
+                            <p><strong>التعديل:</strong> تلقائي عند النقر</p>
+                            <p><strong>المؤشرات:</strong> حدود حمراء + أيقونة 🛡️</p>
+                            <p><strong>الرسائل:</strong> إشعارات فورية عند التغليب</p>
+                        </div>
+                        
+                        <button class="btn" onclick="this.parentElement.remove()">❌ إزالة اختبار التغليب</button>
+                    </div>
+                `;
+                
+                // إضافة الاختبار للصفحة
+                document.querySelector('.container').appendChild(testContainer);
+                
+                // تفعيل نظام التغليب
+                setTimeout(() => {
+                    activateAutomaticOverride();
+                    showStatus('تم تفعيل نظام التغليب المتقدم! جرب النقر على أي رابط منافس', 'success');
+                }, 100);
+                
+            } catch (e) {
+                showStatus('خطأ في اختبار نظام التغليب', 'error');
+                console.error(e);
+            }
+        }
     </script>
 </body>
 </html>
