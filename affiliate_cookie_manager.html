@@ -346,6 +346,7 @@
         <button class="btn" onclick="testAmazonLink()">🧪 اختبار رابط Amazon</button>
         <button class="btn" onclick="testPageOverride()">🧪 اختبار التغليب في الصفحة</button>
         <button class="btn" onclick="testOverrideSystem()">🧪 اختبار نظام التغليب الجديد</button>
+        <button class="btn" onclick="testGlobalOverride()">🌍 اختبار التغليب العالمي</button>
         
         <div class="input-group">
             <label for="existingLink">رابط مُشفر لفك التشفير:</label>
@@ -1150,9 +1151,92 @@
                     processAffiliateLink(link, trackingData);
                 });
                 
+                // تفعيل نظام التغليب العالمي
+                activateGlobalOverride(trackingData);
+                
             } catch (e) {
                 console.error('خطأ في تفعيل نظام التغليب:', e);
             }
+        }
+        
+        // وظيفة تفعيل نظام التغليب العالمي
+        function activateGlobalOverride(trackingData) {
+            console.log('🌍 تم تفعيل نظام التغليب العالمي');
+            
+            // مراقبة النقر على جميع الروابط
+            document.addEventListener('click', function(e) {
+                const target = e.target.closest('a');
+                if (!target || !target.href) return;
+                
+                const href = target.href;
+                
+                // فحص إذا كان الرابط يحتوي على معرف أفلييت منافس
+                if (href.includes('tag=') && !href.includes(trackingData.affiliateId)) {
+                    console.log('🌍 تم اكتشاف رابط منافس عالمي:', href);
+                    
+                    // منع الانتقال للرابط الأصلي
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // تعديل الرابط ليستخدم معرفك
+                    const modifiedUrl = modifyAffiliateLink(href, trackingData.affiliateId);
+                    
+                    // إظهار رسالة التغليب
+                    showStatus(`🌍 تم تعديل الرابط العالمي ليستخدم معرفك: ${trackingData.affiliateId}`, 'success');
+                    
+                    // الانتقال للرابط المعدل
+                    setTimeout(() => {
+                        window.location.href = modifiedUrl;
+                    }, 1500);
+                    
+                    return false;
+                }
+            }, true); // استخدام capture phase
+            
+            // مراقبة فتح الروابط في نافذة جديدة
+            document.addEventListener('click', function(e) {
+                const target = e.target.closest('a');
+                if (!target || !target.href) return;
+                
+                const href = target.href;
+                
+                // فحص إذا كان الرابط يحتوي على معرف أفلييت منافس
+                if (href.includes('tag=') && !href.includes(trackingData.affiliateId)) {
+                    // فحص إذا كان الرابط سيفتح في نافذة جديدة
+                    if (target.target === '_blank' || target.target === '_new') {
+                        console.log('🌍 رابط منافس في نافذة جديدة:', href);
+                        
+                        // تعديل الرابط
+                        const modifiedUrl = modifyAffiliateLink(href, trackingData.affiliateId);
+                        
+                        // فتح الرابط المعدل في نافذة جديدة
+                        setTimeout(() => {
+                            window.open(modifiedUrl, '_blank');
+                        }, 1000);
+                        
+                        // إظهار رسالة
+                        showStatus(`🌍 تم تعديل الرابط في النافذة الجديدة ليستخدم معرفك`, 'success');
+                    }
+                }
+            });
+            
+            // مراقبة النقر بالزر الأيمن (فتح في نافذة جديدة)
+            document.addEventListener('contextmenu', function(e) {
+                const target = e.target.closest('a');
+                if (!target || !target.href) return;
+                
+                const href = target.href;
+                
+                if (href.includes('tag=') && !href.includes(trackingData.affiliateId)) {
+                    console.log('🌍 رابط منافس - نقر بالزر الأيمن:', href);
+                    
+                    // تعديل الرابط
+                    const modifiedUrl = modifyAffiliateLink(href, trackingData.affiliateId);
+                    
+                    // إظهار رسالة
+                    showStatus(`🌍 تم تعديل الرابط ليستخدم معرفك: ${trackingData.affiliateId}`, 'success');
+                }
+            });
         }
         
         // وظيفة معالجة رابط الأفلييت
@@ -1270,6 +1354,136 @@
             }
         }, 60000);
 
+        // وظيفة اختبار التغليب العالمي
+        function testGlobalOverride() {
+            // فحص كوكيزك
+            const currentCookie = getCookieProtected(AFFILIATE_COOKIE_NAME);
+            
+            if (!currentCookie) {
+                showStatus('لا توجد كوكيز نشطة', 'error');
+                return;
+            }
+            
+            try {
+                const trackingData = JSON.parse(currentCookie);
+                
+                if (!trackingData.dominant || trackingData.expiresAt <= Date.now()) {
+                    showStatus('كوكيزك غير متغلبة أو منتهية الصلاحية', 'error');
+                    return;
+                }
+                
+                // إضافة اختبار التغليب العالمي
+                const testContainer = document.createElement('div');
+                testContainer.innerHTML = `
+                    <div style="background: linear-gradient(45deg, #17a2b8, #20c997); color: white; border-radius: 15px; padding: 25px; margin: 25px 0; text-align: center;">
+                        <h3>🌍 اختبار التغليب العالمي</h3>
+                        <p><strong>معرف الأفلييت النشط:</strong> ${trackingData.affiliateId}</p>
+                        <p><strong>حالة التغليب:</strong> 🌍 عالمي نشط</p>
+                        <p><strong>الوقت المتبقي:</strong> ${Math.floor((trackingData.expiresAt - Date.now()) / (1000 * 60 * 60))} ساعة</p>
+                        
+                        <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 20px; margin: 20px 0;">
+                            <h4>🔗 روابط اختبار التغليب العالمي:</h4>
+                            <p>جرب هذه الروابط بطرق مختلفة:</p>
+                            
+                            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin: 20px 0;">
+                                <a href="https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?tag=global-competitor1&linkCode=ur2" 
+                                   class="btn" style="text-decoration: none; display: inline-block; background: #ff6b6b;">
+                                    🔗 رابط منافس عالمي 1
+                                </a>
+                                
+                                <a href="https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?tag=global-competitor2&linkCode=ur2" 
+                                   class="btn" style="text-decoration: none; display: inline-block; background: #ff6b6b;">
+                                    🔗 رابط منافس عالمي 2
+                                </a>
+                                
+                                <a href="https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?tag=global-competitor3&linkCode=ur2" 
+                                   target="_blank" class="btn" style="text-decoration: none; display: inline-block; background: #ff6b6b;">
+                                    🔗 رابط منافس عالمي 3 (نافذة جديدة)
+                                </a>
+                            </div>
+                            
+                            <p><small>⚠️ جرب النقر العادي، النقر بالزر الأيمن، والنقر في نافذة جديدة</small></p>
+                        </div>
+                        
+                        <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 20px; margin: 20px 0;">
+                            <h4>📊 كيفية عمل التغليب العالمي:</h4>
+                            <ul style="text-align: right; margin: 10px 0; list-style: none;">
+                                <li>✅ <strong>النقر العادي:</strong> يتم تعديل الرابط والانتقال له</li>
+                                <li>✅ <strong>النقر في نافذة جديدة:</strong> يتم تعديل الرابط وفتحه</li>
+                                <li>✅ <strong>النقر بالزر الأيمن:</strong> يتم تعديل الرابط</li>
+                                <li>✅ <strong>النسخ واللصق:</strong> يتم تعديل الرابط عند النقر</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 20px; margin: 20px 0;">
+                            <h4>🧪 اختبارات إضافية:</h4>
+                            <button class="btn" onclick="testCopyPasteOverride()">📋 اختبار النسخ واللصق</button>
+                            <button class="btn" onclick="testRightClickOverride()">🖱️ اختبار النقر بالزر الأيمن</button>
+                            <button class="btn" onclick="testNewWindowOverride()">🪟 اختبار النافذة الجديدة</button>
+                        </div>
+                        
+                        <button class="btn" onclick="this.parentElement.remove()">❌ إزالة اختبار التغليب العالمي</button>
+                    </div>
+                `;
+                
+                // إضافة الاختبار للصفحة
+                document.querySelector('.container').appendChild(testContainer);
+                
+                // تفعيل النظام العالمي
+                setTimeout(() => {
+                    activateGlobalOverride(trackingData);
+                    showStatus('تم تفعيل التغليب العالمي! جرب جميع طرق النقر', 'success');
+                }, 100);
+                
+            } catch (e) {
+                showStatus('خطأ في اختبار التغليب العالمي', 'error');
+                console.error(e);
+            }
+        }
+        
+        // وظيفة اختبار النسخ واللصق
+        function testCopyPasteOverride() {
+            const testUrl = "https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?tag=copy-paste-test&linkCode=ur2";
+            
+            // نسخ الرابط
+            navigator.clipboard.writeText(testUrl).then(() => {
+                showStatus('تم نسخ الرابط المنافس - الآن الصقه في المتصفح وافتحه', 'info');
+                
+                // إنشاء رابط للاختبار
+                const testLink = document.createElement('a');
+                testLink.href = testUrl;
+                testLink.textContent = '🔗 انقر هنا لاختبار الرابط المنسوخ';
+                testLink.className = 'btn';
+                testLink.style.background = '#ff6b6b';
+                testLink.style.margin = '10px';
+                
+                // إضافة الرابط للصفحة
+                document.querySelector('.container').appendChild(testLink);
+                
+            }).catch(() => {
+                showStatus('فشل في نسخ الرابط', 'error');
+            });
+        }
+        
+        // وظيفة اختبار النقر بالزر الأيمن
+        function testRightClickOverride() {
+            showStatus('انقر بالزر الأيمن على أي رابط منافس لرؤية التغليب يعمل', 'info');
+        }
+        
+        // وظيفة اختبار النافذة الجديدة
+        function testNewWindowOverride() {
+            const testUrl = "https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?tag=new-window-test&linkCode=ur2";
+            
+            // فتح الرابط في نافذة جديدة
+            const newWindow = window.open(testUrl, '_blank');
+            
+            if (newWindow) {
+                showStatus('تم فتح الرابط في نافذة جديدة - سيتم تعديله تلقائياً', 'success');
+            } else {
+                showStatus('تم حظر النافذة المنبثقة - جرب النقر العادي', 'info');
+            }
+        }
+        
         // وظيفة اختبار نظام التغليب الجديد
         function testOverrideSystem() {
             // فحص كوكيزك
