@@ -375,6 +375,11 @@
         let pendingTrackingData = null;
         let isProductPage = false;
         
+        // وظيفة إنشاء معرف عشوائي
+        function generateRandomId() {
+            return Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+        }
+        
         // وظيفة اختبار رابط Amazon
         function testAmazonLink() {
             const amazonUrl = "https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?_encoding=UTF8&tag=yajnyeg-21&linkCode=ur2&linkId=4ff5fa11b6d0385e8811d3e183795133&camp=247&creative=1211&ascsubtag=57758038&th=1&psc=1";
