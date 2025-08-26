@@ -200,6 +200,85 @@
             margin: 20px 0;
             text-align: right;
         }
+
+        /* واجهة الكوكيز للمنتج */
+        .product-cookie-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
+            z-index: 9999;
+            transform: translateY(100%);
+            transition: transform 0.5s ease-in-out;
+        }
+        
+        .product-cookie-banner.show {
+            transform: translateY(0);
+        }
+        
+        .product-cookie-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .product-cookie-text {
+            flex: 1;
+            text-align: right;
+        }
+        
+        .product-cookie-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .product-cookie-banner .btn {
+            padding: 10px 20px;
+            font-size: 14px;
+            margin: 0;
+        }
+        
+        .product-cookie-banner .btn-success {
+            background: linear-gradient(45deg, #28a745, #20c997);
+        }
+        
+        .product-cookie-banner .btn-danger {
+            background: linear-gradient(45deg, #dc3545, #e83e8c);
+        }
+
+        /* مؤشر حالة الكوكيز */
+        .cookie-status-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 10px;
+            padding: 10px 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 9998;
+            font-size: 12px;
+            color: #333;
+            backdrop-filter: blur(10px);
+        }
+        
+        .cookie-status-indicator.active {
+            background: rgba(40, 167, 69, 0.9);
+            color: white;
+        }
+        
+        .cookie-status-indicator.expired {
+            background: rgba(220, 53, 69, 0.9);
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -214,6 +293,25 @@
                 <button class="btn btn-danger" onclick="rejectCookies()">❌ رفض الكوكيز</button>
             </div>
         </div>
+    </div>
+
+    <!-- واجهة الكوكيز للمنتج -->
+    <div id="productCookieBanner" class="product-cookie-banner">
+        <div class="product-cookie-content">
+            <div class="product-cookie-text">
+                <strong>🍪 إشعار الكوكيز</strong><br>
+                <small>نحن نستخدم الكوكيز لضمان حصولك على أفضل الصفقات. معرف الأفلييت: <span id="productAffiliateId"></span></small>
+            </div>
+            <div class="product-cookie-buttons">
+                <button class="btn btn-success" onclick="acceptProductCookies()">✅ قبول</button>
+                <button class="btn btn-danger" onclick="rejectProductCookies()">❌ رفض</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- مؤشر حالة الكوكيز -->
+    <div id="cookieStatusIndicator" class="cookie-status-indicator hidden">
+        <div id="cookieStatusText"></div>
     </div>
 
     <div class="container">
@@ -243,6 +341,7 @@
         <button class="btn" onclick="checkCookieStatus()">📊 فحص حالة الكوكيز</button>
         <button class="btn" onclick="clearAllCookies()">🗑️ مسح الكوكيز</button>
         <button class="btn" onclick="decodeExistingLink()">🔍 فك تشفير رابط موجود</button>
+        <button class="btn" onclick="testProductPage()">🧪 اختبار صفحة المنتج</button>
         
         <div class="input-group">
             <label for="existingLink">رابط مُشفر لفك التشفير:</label>
@@ -262,10 +361,12 @@
         const COOKIE_DURATION = 24 * 60 * 60 * 1000; // 24 ساعة
         const AFFILIATE_COOKIE_NAME = 'affiliate_tracking';
         const CONSENT_COOKIE_NAME = 'cookie_consent';
+        const DOMINANCE_COOKIE_NAME = 'affiliate_dominance';
         
         let timerInterval;
         let redirectInterval;
         let pendingTrackingData = null;
+        let isProductPage = false;
         
         // وظيفة إنشاء رابط التتبع المتقدم
         function generateTrackingLink() {
@@ -290,7 +391,8 @@
                 creative: '1211',
                 ascsubtag: '57752714',
                 expiresAt: Date.now() + COOKIE_DURATION,
-                protected: true // حماية إضافية
+                protected: true,
+                dominant: true // هذه الكوكيز ستتغلب على أي كوكيز أخرى
             };
             
             // تشفير البيانات
@@ -312,6 +414,158 @@
             `;
             
             showStatus('تم إنشاء رابط التتبع بنجاح!', 'success');
+        }
+        
+        // وظيفة اختبار صفحة المنتج
+        function testProductPage() {
+            isProductPage = true;
+            document.body.style.background = '#f8f9fa';
+            document.querySelector('.container').style.display = 'none';
+            
+            // إظهار واجهة الكوكيز للمنتج
+            showProductCookieBanner();
+            
+            // إظهار مؤشر حالة الكوكيز
+            showCookieStatusIndicator();
+            
+            showStatus('تم تفعيل وضع صفحة المنتج - جرب الآن!', 'success');
+        }
+        
+        // وظيفة إظهار واجهة الكوكيز للمنتج
+        function showProductCookieBanner() {
+            const banner = document.getElementById('productCookieBanner');
+            const affiliateId = document.getElementById('affiliateId').value || 'yajnyeg-21';
+            
+            document.getElementById('productAffiliateId').textContent = affiliateId;
+            banner.classList.add('show');
+            
+            // إخفاء تلقائي بعد 10 ثواني إذا لم يتم التفاعل
+            setTimeout(() => {
+                if (banner.classList.contains('show')) {
+                    banner.classList.remove('show');
+                }
+            }, 10000);
+        }
+        
+        // وظيفة إظهار مؤشر حالة الكوكيز
+        function showCookieStatusIndicator() {
+            const indicator = document.getElementById('cookieStatusIndicator');
+            indicator.classList.remove('hidden');
+            updateCookieStatusIndicator();
+        }
+        
+        // وظيفة تحديث مؤشر حالة الكوكيز
+        function updateCookieStatusIndicator() {
+            const indicator = document.getElementById('cookieStatusIndicator');
+            const statusText = document.getElementById('cookieStatusText');
+            
+            const cookieValue = getCookieProtected(AFFILIATE_COOKIE_NAME);
+            
+            if (cookieValue) {
+                try {
+                    const trackingData = JSON.parse(cookieValue);
+                    const timeLeft = trackingData.expiresAt - Date.now();
+                    
+                    if (timeLeft > 0) {
+                        const hoursLeft = Math.floor(timeLeft / (1000 * 60 * 60));
+                        const minutesLeft = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                        
+                        indicator.className = 'cookie-status-indicator active';
+                        statusText.innerHTML = `🛡️ ${trackingData.affiliateId}<br>⏰ ${hoursLeft}:${minutesLeft.toString().padStart(2, '0')}`;
+                    } else {
+                        indicator.className = 'cookie-status-indicator expired';
+                        statusText.innerHTML = '⏰ منتهي الصلاحية';
+                    }
+                } catch (e) {
+                    indicator.className = 'cookie-status-indicator';
+                    statusText.innerHTML = '❌ خطأ في البيانات';
+                }
+            } else {
+                indicator.className = 'cookie-status-indicator';
+                statusText.innerHTML = '🍪 لا توجد كوكيز';
+            }
+        }
+        
+        // وظيفة قبول الكوكيز من صفحة المنتج
+        function acceptProductCookies() {
+            const affiliateId = document.getElementById('affiliateId').value || 'yajnyeg-21';
+            
+            // إنشاء بيانات التتبع
+            const trackingData = {
+                affiliateId: affiliateId,
+                timestamp: Date.now(),
+                targetUrl: window.location.href,
+                linkCode: 'ur2',
+                linkId: generateRandomId(),
+                camp: '247',
+                creative: '1211',
+                ascsubtag: '57752714',
+                expiresAt: Date.now() + COOKIE_DURATION,
+                protected: true,
+                dominant: true
+            };
+            
+            // حفظ الكوكيز مع التغليب
+            setDominantCookie(trackingData);
+            
+            // إخفاء البانر
+            document.getElementById('productCookieBanner').classList.remove('show');
+            
+            // تحديث المؤشر
+            updateCookieStatusIndicator();
+            
+            showStatus('تم قبول الكوكيز بنجاح! ستتغلب على أي كوكيز أخرى', 'success');
+        }
+        
+        // وظيفة رفض الكوكيز من صفحة المنتج
+        function rejectProductCookies() {
+            document.getElementById('productCookieBanner').classList.remove('show');
+            showStatus('تم رفض الكوكيز', 'info');
+        }
+        
+        // وظيفة حفظ الكوكيز مع التغليب
+        function setDominantCookie(trackingData) {
+            // حفظ الكوكيز الأساسية
+            setCookieProtected(AFFILIATE_COOKIE_NAME, JSON.stringify(trackingData), COOKIE_DURATION);
+            
+            // حفظ كوكيز التغليب
+            const dominanceData = {
+                affiliateId: trackingData.affiliateId,
+                timestamp: Date.now(),
+                expiresAt: Date.now() + COOKIE_DURATION,
+                dominant: true
+            };
+            setCookie(DOMINANCE_COOKIE_NAME, JSON.stringify(dominanceData), COOKIE_DURATION);
+            
+            // حفظ موافقة المستخدم
+            setCookie(CONSENT_COOKIE_NAME, 'accepted', COOKIE_DURATION);
+            
+            // إزالة أي كوكيز أخرى للأفلييت
+            removeOtherAffiliateCookies(trackingData.affiliateId);
+        }
+        
+        // وظيفة إزالة كوكيز الأفلييت الأخرى
+        function removeOtherAffiliateCookies(currentAffiliateId) {
+            // البحث عن جميع الكوكيز
+            const allCookies = document.cookie.split(';');
+            
+            allCookies.forEach(cookie => {
+                const [name, value] = cookie.trim().split('=');
+                
+                // فحص إذا كانت كوكيز أفلييت أخرى
+                if (name.includes('affiliate') && name !== AFFILIATE_COOKIE_NAME) {
+                    try {
+                        const cookieData = JSON.parse(decodeURIComponent(value));
+                        if (cookieData.affiliateId && cookieData.affiliateId !== currentAffiliateId) {
+                            // إزالة الكوكيز الأخرى
+                            document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+                            console.log(`تم إزالة كوكيز الأفلييت: ${cookieData.affiliateId}`);
+                        }
+                    } catch (e) {
+                        // تجاهل الأخطاء
+                    }
+                }
+            });
         }
         
         // وظيفة فك تشفير رابط موجود
@@ -349,6 +603,7 @@
                         <p><strong>الرابط المقصود:</strong> <a href="${decodedData.targetUrl}" target="_blank">${decodedData.targetUrl}</a></p>
                         <p><strong>تاريخ الإنشاء:</strong> ${new Date(decodedData.timestamp).toLocaleString('ar-EG')}</p>
                         <p><strong>تاريخ الانتهاء:</strong> ${new Date(decodedData.expiresAt).toLocaleString('ar-EG')}</p>
+                        <p><strong>التغليب:</strong> ${decodedData.dominant ? '✅ نعم' : '❌ لا'}</p>
                     </div>
                 `;
                 
@@ -375,13 +630,12 @@
         // وظيفة قبول الكوكيز
         function acceptCookies() {
             if (pendingTrackingData) {
-                // حفظ الكوكيز مع حماية إضافية
-                setCookieProtected(AFFILIATE_COOKIE_NAME, JSON.stringify(pendingTrackingData), COOKIE_DURATION);
-                setCookie(CONSENT_COOKIE_NAME, 'accepted', COOKIE_DURATION);
+                // حفظ الكوكيز مع التغليب
+                setDominantCookie(pendingTrackingData);
                 
                 document.getElementById('cookieConsentOverlay').classList.add('hidden');
                 
-                showStatus('تم قبول وحفظ الكوكيز بنجاح!', 'success');
+                showStatus('تم قبول وحفظ الكوكيز بنجاح! ستتغلب على أي كوكيز أخرى', 'success');
                 startTimer();
                 
                 // إعادة التوجيه مع عداد تنازلي
@@ -411,18 +665,6 @@
             // حفظ متعدد لضمان الثبات
             document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax; Secure`;
             document.cookie = `${name}_backup=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`;
-            
-            // حفظ في التخزين المحلي كنسخة احتياطية (لن يعمل في الـ artifact)
-            try {
-                const storageData = {
-                    value: value,
-                    expires: Date.now() + duration
-                };
-                // هذا مجرد مثال - لن يعمل في Claude artifacts
-                // localStorage.setItem(name, JSON.stringify(storageData));
-            } catch (e) {
-                // تجاهل أخطاء التخزين المحلي
-            }
         }
         
         // وظيفة حفظ الكوكيز العادية
@@ -521,11 +763,12 @@
                             <p><strong>الحملة:</strong> ${trackingData.camp || 'غير محدد'}</p>
                             <p><strong>الوقت المتبقي:</strong> ${hoursLeft} ساعة و ${minutesLeft} دقيقة</p>
                             <p><strong>حالة الحماية:</strong> ${trackingData.protected ? '🛡️ محمية' : '⚠️ غير محمية'}</p>
+                            <p><strong>التغليب:</strong> ${trackingData.dominant ? '✅ نعم - ستتغلب على أي كوكيز أخرى' : '❌ لا'}</p>
                             <p><strong>تاريخ الإنشاء:</strong> ${new Date(trackingData.timestamp).toLocaleString('ar-EG')}</p>
                         </div>
                     `;
                     
-                    showStatus('الكوكيز نشطة ومحمية ✅', 'success');
+                    showStatus('الكوكيز نشطة ومحمية ومتغلبة ✅', 'success');
                     startTimer();
                 } else {
                     showStatus('انتهت صلاحية الكوكيز', 'error');
@@ -536,11 +779,12 @@
             }
         }
         
-        // بقية الوظائف (مسح الكوكيز، المؤقت، إلخ...)
+        // وظيفة مسح جميع الكوكيز
         function clearAllCookies() {
             document.cookie = `${AFFILIATE_COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
             document.cookie = `${AFFILIATE_COOKIE_NAME}_backup=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
             document.cookie = `${CONSENT_COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+            document.cookie = `${DOMINANCE_COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
             
             showStatus('تم مسح جميع الكوكيز', 'info');
             document.getElementById('cookieInfo').innerHTML = '';
@@ -549,6 +793,11 @@
             
             if (timerInterval) clearInterval(timerInterval);
             if (redirectInterval) clearInterval(redirectInterval);
+            
+            // تحديث المؤشر
+            if (isProductPage) {
+                updateCookieStatusIndicator();
+            }
         }
         
         function startTimer() {
@@ -573,7 +822,7 @@
                         document.getElementById('timer').innerHTML = `
                             <div class="timer">
                                 ⏰ الوقت المتبقي: ${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}
-                                <br><small>🛡️ الكوكيز محمية ضد الكتابة</small>
+                                <br><small>🛡️ الكوكيز محمية ومتغلبة ضد أي كوكيز أخرى</small>
                             </div>
                         `;
                     } else {
@@ -583,6 +832,11 @@
                     }
                 } catch (e) {
                     clearInterval(timerInterval);
+                }
+                
+                // تحديث المؤشر إذا كنا في وضع صفحة المنتج
+                if (isProductPage) {
+                    updateCookieStatusIndicator();
                 }
             }, 1000);
         }
@@ -619,8 +873,8 @@
                         const previousConsent = getCookie(CONSENT_COOKIE_NAME);
                         
                         if (previousConsent === 'accepted') {
-                            // حفظ مباشر للكوكيز
-                            setCookieProtected(AFFILIATE_COOKIE_NAME, JSON.stringify(trackingData), trackingData.expiresAt - Date.now());
+                            // حفظ مباشر للكوكيز مع التغليب
+                            setDominantCookie(trackingData);
                             showStatus('تم حفظ كوكيز التتبع تلقائياً (موافقة سابقة)', 'success');
                             startTimer();
                             
@@ -657,14 +911,6 @@
                     // تجاهل الأخطاء
                 }
             }
-        }, 60000); // كل دقيقة
-    </script>
-</body>
-</html>
-                } catch (e) {
-                    // تجاهل الأخطاء
-                }
-            }
         });
         
         // حماية إضافية - إعادة حفظ الكوكيز كل دقيقة
@@ -676,4 +922,24 @@
                     const timeLeft = trackingData.expiresAt - Date.now();
                     if (timeLeft > 0) {
                         setCookieProtected(AFFILIATE_COOKIE_NAME, cookieValue, timeLeft);
+                        
+                        // التأكد من أن كوكيز التغليب لا تزال نشطة
+                        const dominanceValue = getCookie(DOMINANCE_COOKIE_NAME);
+                        if (!dominanceValue) {
+                            const dominanceData = {
+                                affiliateId: trackingData.affiliateId,
+                                timestamp: Date.now(),
+                                expiresAt: Date.now() + COOKIE_DURATION,
+                                dominant: true
+                            };
+                            setCookie(DOMINANCE_COOKIE_NAME, JSON.stringify(dominanceData), COOKIE_DURATION);
+                        }
                     }
+                } catch (e) {
+                    // تجاهل الأخطاء
+                }
+            }
+        }, 60000);
+    </script>
+</body>
+</html>
