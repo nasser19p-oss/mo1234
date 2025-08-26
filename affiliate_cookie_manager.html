@@ -347,6 +347,7 @@
         <button class="btn" onclick="testPageOverride()">🧪 اختبار التغليب في الصفحة</button>
         <button class="btn" onclick="testOverrideSystem()">🧪 اختبار نظام التغليب الجديد</button>
         <button class="btn" onclick="testGlobalOverride()">🌍 اختبار التغليب العالمي</button>
+        <button class="btn" onclick="createBookmarklet()">🚀 إنشاء Bookmarklet للتغليب</button>
         
         <div class="input-group">
             <label for="existingLink">رابط مُشفر لفك التشفير:</label>
@@ -1726,6 +1727,190 @@
                 showStatus('خطأ في اختبار نظام التغليب', 'error');
                 console.error(e);
             }
+        }
+        
+        // وظيفة إنشاء Bookmarklet للتغليب التلقائي
+        function createBookmarklet() {
+            // فحص كوكيزك
+            const currentCookie = getCookieProtected(AFFILIATE_COOKIE_NAME);
+            
+            if (!currentCookie) {
+                showStatus('لا توجد كوكيز نشطة', 'error');
+                return;
+            }
+            
+            try {
+                const trackingData = JSON.parse(currentCookie);
+                
+                if (!trackingData.dominant || trackingData.expiresAt <= Date.now()) {
+                    showStatus('كوكيزك غير متغلبة أو منتهية الصلاحية', 'error');
+                    return;
+                }
+                
+                // إنشاء Bookmarklet
+                createOverrideBookmarklet(trackingData);
+                
+                showStatus('تم إنشاء Bookmarklet للتغليب التلقائي!', 'success');
+                
+            } catch (e) {
+                showStatus('خطأ في إنشاء Bookmarklet', 'error');
+                console.error(e);
+            }
+        }
+        
+        // وظيفة إنشاء Bookmarklet للتغليب التلقائي
+        function createOverrideBookmarklet(trackingData) {
+            const bookmarkletCode = `
+                javascript:(function(){
+                    // فحص إذا كانت الصفحة تحتوي على روابط Amazon
+                    if(window.location.href.includes('amazon')) {
+                        // البحث عن جميع الروابط في الصفحة
+                        const allLinks = document.querySelectorAll('a[href*="tag="], a[href*="linkCode="]');
+                        
+                        allLinks.forEach(link => {
+                            const href = link.href;
+                            
+                            // فحص إذا كان الرابط يحتوي على معرف أفلييت منافس
+                            if(href.includes('tag=') && !href.includes('${trackingData.affiliateId}')) {
+                                console.log('🛡️ تم اكتشاف رابط منافس:', href);
+                                
+                                // تعديل الرابط ليستخدم معرفك
+                                const modifiedUrl = href.replace(/tag=[^&]+/, 'tag=${trackingData.affiliateId}');
+                                
+                                // إضافة معاملات إضافية إذا لم تكن موجودة
+                                let finalUrl = modifiedUrl;
+                                if(!finalUrl.includes('linkCode=')) {
+                                    finalUrl += (finalUrl.includes('?') ? '&' : '?') + 'linkCode=ur2';
+                                }
+                                if(!finalUrl.includes('camp=')) {
+                                    finalUrl += '&camp=247';
+                                }
+                                if(!finalUrl.includes('creative=')) {
+                                    finalUrl += '&creative=1211';
+                                }
+                                if(!finalUrl.includes('ascsubtag=')) {
+                                    finalUrl += '&ascsubtag=57752714';
+                                }
+                                
+                                // تعديل الرابط
+                                link.href = finalUrl;
+                                
+                                // إضافة مؤشر بصري
+                                link.style.border = '2px solid #28a745';
+                                link.style.borderRadius = '5px';
+                                link.style.padding = '5px';
+                                link.title = '🛡️ تم تعديل الرابط ليستخدم معرفك: ${trackingData.affiliateId}';
+                                
+                                // إضافة أيقونة التغليب
+                                const overrideIcon = document.createElement('span');
+                                overrideIcon.innerHTML = '🛡️';
+                                overrideIcon.style.marginRight = '5px';
+                                overrideIcon.style.color = '#28a745';
+                                link.insertBefore(overrideIcon, link.firstChild);
+                                
+                                console.log('✅ تم تعديل الرابط:', finalUrl);
+                            }
+                        });
+                        
+                        // إظهار رسالة نجاح
+                        const successMsg = document.createElement('div');
+                        successMsg.style.cssText = 'position:fixed;top:20px;right:20px;background:#28a745;color:white;padding:15px;border-radius:10px;z-index:10000;box-shadow:0 5px 15px rgba(0,0,0,0.3);';
+                        successMsg.innerHTML = '🛡️ تم تعديل جميع الروابط المنافسة!';
+                        document.body.appendChild(successMsg);
+                        
+                        setTimeout(() => successMsg.remove(), 3000);
+                    } else {
+                        alert('هذه الصفحة لا تحتوي على روابط Amazon');
+                    }
+                })();
+            `;
+            
+            // إنشاء عنصر Bookmarklet
+            const bookmarkletContainer = document.createElement('div');
+            bookmarkletContainer.innerHTML = `
+                <div style="background: linear-gradient(45deg, #dc3545, #e83e8c); color: white; border-radius: 15px; padding: 25px; margin: 25px 0; text-align: center;">
+                    <h3>🚀 Bookmarklet للتغليب التلقائي</h3>
+                    <p><strong>الحل الأفضل:</strong> يعمل في جميع الصفحات تلقائياً</p>
+                    
+                    <div style="background: rgba(255,255,255,0.2); border-radius: 10px; padding: 20px; margin: 20px 0; text-align: right;">
+                        <h4>📋 كيفية الاستخدام:</h4>
+                        <ol style="text-align: right; margin: 10px 0;">
+                            <li>انسخ الكود أدناه</li>
+                            <li>أنشئ Bookmark جديد في المتصفح</li>
+                            <li>ضع الكود في حقل العنوان</li>
+                            <li>احفظ Bookmark</li>
+                            <li>عند فتح أي صفحة Amazon، اضغط على Bookmark</li>
+                            <li>سيتم تعديل جميع الروابط المنافسة تلقائياً</li>
+                        </ol>
+                    </div>
+                    
+                    <div style="background: rgba(255,255,255,0.2); border-radius: 10px; padding: 20px; margin: 20px 0;">
+                        <h4>🔧 كود Bookmarklet:</h4>
+                        <textarea readonly style="width: 100%; height: 150px; font-family: monospace; font-size: 12px; border: none; border-radius: 5px; padding: 10px; resize: none;" onclick="this.select()">${bookmarkletCode}</textarea>
+                        <button class="btn" onclick="copyBookmarkletCode('${bookmarkletCode}')" style="background: #007bff; margin: 10px;">📋 نسخ الكود</button>
+                    </div>
+                    
+                    <div style="background: rgba(255,255,255,0.2); border-radius: 10px; padding: 20px; margin: 20px 0;">
+                        <h4>🎯 المميزات:</h4>
+                        <ul style="text-align: right; margin: 10px 0; list-style: none;">
+                            <li>✅ <strong>يعمل في جميع الصفحات</strong> - حتى في Amazon</li>
+                            <li>✅ <strong>تعديل تلقائي</strong> لجميع الروابط المنافسة</li>
+                            <li>✅ <strong>مؤشرات بصرية</strong> للروابط المعدلة</li>
+                            <li>✅ <strong>سهولة الاستخدام</strong> - ضغطة واحدة</li>
+                        </ul>
+                    </div>
+                    
+                    <button class="btn" onclick="testBookmarklet('${trackingData.affiliateId}')" style="background: #28a745; margin: 10px;">🧪 اختبار Bookmarklet</button>
+                    <button class="btn" onclick="this.parentElement.remove()" style="background: #6c757d;">❌ إزالة Bookmarklet</button>
+                </div>
+            `;
+            
+            // إضافة Bookmarklet للصفحة
+            document.querySelector('.container').appendChild(bookmarkletContainer);
+        }
+        
+        // وظيفة نسخ كود Bookmarklet
+        function copyBookmarkletCode(code) {
+            navigator.clipboard.writeText(code).then(() => {
+                showStatus('تم نسخ كود Bookmarklet!', 'success');
+            }).catch(() => {
+                showStatus('فشل في نسخ الكود', 'error');
+            });
+        }
+        
+        // وظيفة اختبار Bookmarklet
+        function testBookmarklet(affiliateId) {
+            // إنشاء روابط تجريبية للاختبار
+            const testLinks = [
+                'https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?tag=competitor1&linkCode=ur2',
+                'https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?tag=competitor2&linkCode=ur2',
+                'https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?tag=competitor3&linkCode=ur2'
+            ];
+            
+            // إضافة الروابط للصفحة
+            const testContainer = document.createElement('div');
+            testContainer.innerHTML = `
+                <div style="background: #f8f9fa; border-radius: 10px; padding: 20px; margin: 20px 0; text-align: center;">
+                    <h4>🧪 روابط اختبار Bookmarklet</h4>
+                    <p>اضغط على Bookmarklet لرؤية التغليب يعمل:</p>
+                    
+                    <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin: 20px 0;">
+                        ${testLinks.map((link, index) => `
+                            <a href="${link}" class="btn" style="text-decoration: none; display: inline-block; background: #ff6b6b;">
+                                🔗 رابط منافس ${index + 1}
+                            </a>
+                        `).join('')}
+                    </div>
+                    
+                    <p><small>⚠️ هذه الروابط تحتوي على معرفات منافسة - استخدم Bookmarklet لتعديلها</small></p>
+                    <button class="btn" onclick="this.parentElement.remove()" style="background: #dc3545;">❌ إزالة روابط الاختبار</button>
+                </div>
+            `;
+            
+            // إضافة الاختبار للصفحة
+            document.querySelector('.container').appendChild(testContainer);
+            
+            showStatus('تم إضافة روابط الاختبار! استخدم Bookmarklet الآن', 'success');
         }
     </script>
 </body>
