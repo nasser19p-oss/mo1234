@@ -342,6 +342,8 @@
         <button class="btn" onclick="clearAllCookies()">🗑️ مسح الكوكيز</button>
         <button class="btn" onclick="decodeExistingLink()">🔍 فك تشفير رابط موجود</button>
         <button class="btn" onclick="testProductPage()">🧪 اختبار صفحة المنتج</button>
+        <button class="btn" onclick="testGeneratedLink()">🧪 اختبار الرابط المُنشأ</button>
+        <button class="btn" onclick="testAmazonLink()">🧪 اختبار رابط Amazon</button>
         
         <div class="input-group">
             <label for="existingLink">رابط مُشفر لفك التشفير:</label>
@@ -368,6 +370,105 @@
         let pendingTrackingData = null;
         let isProductPage = false;
         
+        // وظيفة اختبار رابط Amazon
+        function testAmazonLink() {
+            const amazonUrl = "https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?_encoding=UTF8&tag=yajnyeg-21&linkCode=ur2&linkId=4ff5fa11b6d0385e8811d3e183795133&camp=247&creative=1211&ascsubtag=57758038&th=1&psc=1";
+            
+            // فحص إذا كانت كوكيزك نشطة
+            const currentCookie = getCookieProtected(AFFILIATE_COOKIE_NAME);
+            
+            if (currentCookie) {
+                try {
+                    const trackingData = JSON.parse(currentCookie);
+                    if (trackingData.dominant && trackingData.expiresAt > Date.now()) {
+                        // إظهار رسالة أن كوكيزك ستتغلب
+                        document.getElementById('status').innerHTML = `
+                            <div class="status success">
+                                <h3>🛡️ اختبار رابط Amazon</h3>
+                                <p><strong>الرابط الأصلي:</strong> <a href="${amazonUrl}" target="_blank">${amazonUrl}</a></p>
+                                <p><strong>معرف الأفلييت الأصلي:</strong> yajnyeg-21</p>
+                                <p><strong>كوكيزك النشطة:</strong> ${trackingData.affiliateId}</p>
+                                <p><strong>الحالة:</strong> ✅ كوكيزك ستتغلب على معرف الأفلييت الأصلي!</p>
+                                <p><strong>الوقت المتبقي:</strong> ${Math.floor((trackingData.expiresAt - Date.now()) / (1000 * 60 * 60))} ساعة</p>
+                                <button class="btn" onclick="simulateAmazonRedirect('${amazonUrl}', '${trackingData.affiliateId}')">🚀 محاكاة إعادة التوجيه</button>
+                            </div>
+                        `;
+                        
+                        showStatus('كوكيزك نشطة وستتغلب على معرف الأفلييت الأصلي!', 'success');
+                    } else {
+                        showStatus('كوكيزك منتهية الصلاحية', 'error');
+                    }
+                } catch (e) {
+                    showStatus('خطأ في قراءة بيانات الكوكيز', 'error');
+                }
+            } else {
+                showStatus('لا توجد كوكيز نشطة', 'info');
+            }
+        }
+        
+        // وظيفة محاكاة إعادة التوجيه لـ Amazon
+        function simulateAmazonRedirect(originalUrl, yourAffiliateId) {
+            // تعديل الرابط ليستخدم معرفك
+            const modifiedUrl = modifyAffiliateLink(originalUrl, yourAffiliateId);
+            
+            document.getElementById('status').innerHTML = `
+                <div class="status info">
+                    <h3>🚀 محاكاة إعادة التوجيه</h3>
+                    <p><strong>الرابط الأصلي:</strong> ${originalUrl}</p>
+                    <p><strong>الرابط المعدل:</strong> <a href="${modifiedUrl}" target="_blank">${modifiedUrl}</a></p>
+                    <p><strong>معرف الأفلييت الجديد:</strong> ${yourAffiliateId}</p>
+                    <p><strong>الحالة:</strong> تم تعديل الرابط ليستخدم معرفك!</p>
+                    <button class="btn" onclick="window.open('${modifiedUrl}', '_blank')">🔗 فتح الرابط المعدل</button>
+                </div>
+            `;
+            
+            showStatus('تم تعديل الرابط ليستخدم معرفك!', 'success');
+        }
+        
+        // وظيفة اختبار الرابط المُنشأ
+        function testGeneratedLink() {
+            const affiliateId = document.getElementById('affiliateId').value || 'yajnyeg-21';
+            const targetUrl = document.getElementById('targetUrl').value;
+            
+            if (!targetUrl) {
+                showStatus('يرجى إدخال رابط المنتج أولاً', 'error');
+                return;
+            }
+            
+            // إنشاء رابط تجريبي
+            const testData = {
+                affiliateId: affiliateId.split('&')[0].trim(),
+                timestamp: Date.now(),
+                targetUrl: targetUrl,
+                linkCode: 'ur2',
+                linkId: generateRandomId(),
+                camp: '247',
+                creative: '1211',
+                ascsubtag: '57752714',
+                expiresAt: Date.now() + COOKIE_DURATION,
+                protected: true,
+                dominant: true
+            };
+            
+            const encodedData = btoa(JSON.stringify(testData));
+            const currentUrl = window.location.href.split('?')[0];
+            const testUrl = `${currentUrl}?track=${encodedData}`;
+            
+            // عرض معلومات الاختبار
+            document.getElementById('status').innerHTML = `
+                <div class="status info">
+                    <h3>🧪 اختبار الرابط المُنشأ</h3>
+                    <p><strong>الرابط التجريبي:</strong> <a href="${testUrl}" target="_blank">${testUrl}</a></p>
+                    <p><strong>معرف الأفلييت:</strong> ${testData.affiliateId}</p>
+                    <p><strong>الرابط المستهدف:</strong> <a href="${targetUrl}" target="_blank">${targetUrl}</a></p>
+                    <p><strong>الحالة:</strong> جاهز للاختبار</p>
+                    <button class="btn" onclick="window.open('${testUrl}', '_blank')">🔗 فتح الرابط في نافذة جديدة</button>
+                </div>
+            `;
+            
+            showStatus('تم إنشاء رابط الاختبار بنجاح!', 'success');
+        }
+        
         // وظيفة إنشاء رابط التتبع المتقدم
         function generateTrackingLink() {
             const affiliateId = document.getElementById('affiliateId').value || 'yajnyeg-21';
@@ -380,9 +481,12 @@
                 return;
             }
             
+            // تنظيف معرف الأفلييت من أي معلومات إضافية
+            const cleanAffiliateId = affiliateId.split('&')[0].trim();
+            
             // إنشاء بيانات التتبع المتقدمة
             const trackingData = {
-                affiliateId: affiliateId,
+                affiliateId: cleanAffiliateId,
                 timestamp: Date.now(),
                 targetUrl: targetUrl,
                 linkCode: linkCode,
@@ -398,8 +502,9 @@
             // تشفير البيانات
             const encodedData = btoa(JSON.stringify(trackingData));
             
-            // إنشاء رابط التتبع
-            const trackingUrl = `${window.location.origin}${window.location.pathname}?track=${encodedData}`;
+            // إنشاء رابط التتبع - استخدام رابط ويب صحيح
+            const currentUrl = window.location.href.split('?')[0]; // إزالة المعاملات الموجودة
+            const trackingUrl = `${currentUrl}?track=${encodedData}`;
             
             // عرض الرابط المُنشأ
             document.getElementById('generatedLink').innerHTML = `
@@ -895,7 +1000,90 @@
             
             // فحص الكوكيز الموجودة عند تحميل الصفحة
             checkCookieStatus();
+            
+            // فحص إذا كانت الصفحة تحتوي على روابط أفلييت أخرى
+            checkForOtherAffiliateLinks();
         });
+        
+        // وظيفة فحص روابط الأفلييت الأخرى في الصفحة
+        function checkForOtherAffiliateLinks() {
+            // البحث عن جميع الروابط في الصفحة
+            const allLinks = document.querySelectorAll('a[href*="amazon"], a[href*="tag="], a[href*="linkCode="]');
+            
+            allLinks.forEach(link => {
+                const href = link.href;
+                
+                // فحص إذا كان الرابط يحتوي على معرف أفلييت آخر
+                if (href.includes('tag=') && !href.includes('yajnyeg-21')) {
+                    // إضافة مستمع النقر للرابط
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        
+                        // فحص إذا كانت كوكيزك نشطة
+                        const currentCookie = getCookieProtected(AFFILIATE_COOKIE_NAME);
+                        if (currentCookie) {
+                            try {
+                                const trackingData = JSON.parse(currentCookie);
+                                if (trackingData.dominant && trackingData.expiresAt > Date.now()) {
+                                    // إظهار رسالة أن كوكيزك ستتغلب
+                                    showStatus('🛡️ كوكيزك ستتغلب على معرف الأفلييت الجديد!', 'success');
+                                    
+                                    // تعديل الرابط ليستخدم معرفك
+                                    const modifiedUrl = modifyAffiliateLink(href, trackingData.affiliateId);
+                                    
+                                    // الانتقال للرابط المعدل
+                                    setTimeout(() => {
+                                        window.location.href = modifiedUrl;
+                                    }, 2000);
+                                    
+                                    return;
+                                }
+                            } catch (e) {
+                                // تجاهل الأخطاء
+                            }
+                        }
+                        
+                        // إذا لم تكن كوكيزك نشطة، انتقل للرابط كما هو
+                        window.location.href = href;
+                    });
+                    
+                    // إضافة مؤشر بصري
+                    link.style.border = '2px solid #ff6b6b';
+                    link.style.borderRadius = '5px';
+                    link.style.padding = '5px';
+                    link.title = '⚠️ هذا الرابط يحتوي على معرف أفلييت آخر';
+                }
+            });
+        }
+        
+        // وظيفة تعديل رابط الأفلييت ليستخدم معرفك
+        function modifyAffiliateLink(originalUrl, yourAffiliateId) {
+            try {
+                const url = new URL(originalUrl);
+                
+                // تعديل معرف الأفلييت
+                url.searchParams.set('tag', yourAffiliateId);
+                
+                // إضافة معاملات إضافية إذا لم تكن موجودة
+                if (!url.searchParams.has('linkCode')) {
+                    url.searchParams.set('linkCode', 'ur2');
+                }
+                if (!url.searchParams.has('camp')) {
+                    url.searchParams.set('camp', '247');
+                }
+                if (!url.searchParams.has('creative')) {
+                    url.searchParams.set('creative', '1211');
+                }
+                if (!url.searchParams.has('ascsubtag')) {
+                    url.searchParams.set('ascsubtag', '57752714');
+                }
+                
+                return url.toString();
+            } catch (e) {
+                // إذا فشل في تعديل الرابط، إرجاع الرابط الأصلي
+                return originalUrl;
+            }
+        }
         
         // حماية الكوكيز من المسح
         window.addEventListener('beforeunload', function() {
