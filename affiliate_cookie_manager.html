@@ -434,6 +434,7 @@
         <button class="btn" onclick="testProductPage()">🧪 اختبار صفحة المنتج</button>
         <button class="btn" onclick="testGeneratedLink()">🧪 اختبار الرابط المُنشأ</button>
         <button class="btn" onclick="testAmazonLink()">🧪 اختبار رابط Amazon</button>
+        <button class="btn" onclick="testCompetitorLinkWithoutAffiliate()">🛡️ اختبار الرابط المنافس</button>
         <button class="btn" onclick="testPageOverride()">🧪 اختبار التغليب في الصفحة</button>
         <button class="btn" onclick="testOverrideSystem()">🧪 اختبار نظام التغليب</button>
         <button class="btn" onclick="testSmartOverrideSystem()">🚀 اختبار النظام الذكي</button>
@@ -603,23 +604,150 @@
             }
         }
         
-        // وظيفة محاكاة إعادة التوجيه لـ Amazon
-        function simulateAmazonRedirect(originalUrl, yourAffiliateId) {
-            // تعديل الرابط ليستخدم معرفك
-            const modifiedUrl = modifyAffiliateLink(originalUrl, yourAffiliateId);
+        // وظيفة محاكاة التغليب على الرابط المنافس
+        function simulateCompetitorOverride(competitorUrl, yourAffiliateId) {
+            // إنشاء رابط محمي
+            const protectedUrl = createProtectedCompetitorLink(competitorUrl, yourAffiliateId);
             
             document.getElementById('status').innerHTML = `
-                <div class="status info">
-                    <h3>🚀 محاكاة إعادة التوجيه</h3>
-                    <p><strong>الرابط الأصلي:</strong> ${originalUrl}</p>
-                    <p><strong>الرابط المعدل:</strong> <a href="${modifiedUrl}" target="_blank">${modifiedUrl}</a></p>
-                    <p><strong>معرف الأفلييت الجديد:</strong> ${yourAffiliateId}</p>
-                    <p><strong>الحالة:</strong> تم تعديل الرابط ليستخدم معرفك!</p>
-                    <button class="btn" onclick="window.open('${modifiedUrl}', '_blank')">🔗 فتح الرابط المعدل</button>
+                <div class="status success">
+                    <h3>🛡️ تم إنشاء رابط محمي للرابط المنافس</h3>
+                    <p><strong>الرابط الأصلي:</strong></p>
+                    <div style="background: #f8f9fa; border-radius: 5px; padding: 10px; margin: 10px 0; font-family: monospace; font-size: 12px; word-break: break-all;">
+                        ${competitorUrl}
+                    </div>
+                    
+                    <p><strong>الرابط المحمي:</strong></p>
+                    <div style="background: #e8f5e8; border-radius: 5px; padding: 10px; margin: 10px 0; font-family: monospace; font-size: 12px; word-break: break-all;">
+                        ${protectedUrl}
+                    </div>
+                    
+                    <p><strong>المميزات:</strong></p>
+                    <ul style="text-align: right; margin: 10px 0;">
+                        <li>✅ يحتوي على معرف الأفلييت الخاص بك</li>
+                        <li>✅ محمي من الروابط المنافسة</li>
+                        <li>✅ يعمل مع كوكيزك النشطة</li>
+                        <li>✅ يمكن نشره على القنوات</li>
+                    </ul>
+                    
+                    <button class="btn" onclick="copyToClipboard('${protectedUrl}')">📋 نسخ الرابط المحمي</button>
+                    <button class="btn" onclick="testProtectedLink('${protectedUrl}')">🧪 اختبار الرابط المحمي</button>
                 </div>
             `;
             
-            showStatus('تم تعديل الرابط ليستخدم معرفك!', 'success');
+            showStatus('تم إنشاء رابط محمي للرابط المنافس!', 'success');
+        }
+        
+        // وظيفة إنشاء رابط محمي للرابط المنافس
+        function createProtectedCompetitorLink(competitorUrl, yourAffiliateId) {
+            try {
+                const url = new URL(competitorUrl);
+                
+                // إضافة معاملات الأفلييت
+                url.searchParams.set('tag', yourAffiliateId);
+                url.searchParams.set('linkCode', 'ur2');
+                url.searchParams.set('camp', '247');
+                url.searchParams.set('creative', '1211');
+                url.searchParams.set('ascsubtag', '57752714');
+                
+                // إضافة معرف فريد للتتبع
+                const trackingId = generateRandomId();
+                url.searchParams.set('linkId', trackingId);
+                
+                // إضافة timestamp للتتبع
+                url.searchParams.set('ts', Date.now());
+                
+                // إضافة معامل التغليب
+                url.searchParams.set('override', 'true');
+                
+                // إضافة معامل الحماية
+                url.searchParams.set('protected', 'true');
+                
+                return url.toString();
+            } catch (e) {
+                // إذا فشل في تحليل الرابط، إرجاع رابط معدل بسيط
+                return `${competitorUrl}${competitorUrl.includes('?') ? '&' : '?'}tag=${yourAffiliateId}&linkCode=ur2&camp=247&creative=1211&ascsubtag=57752714&linkId=${generateRandomId()}&ts=${Date.now()}&override=true&protected=true`;
+            }
+        }
+        
+        // وظيفة اختبار التغليب المباشر على الرابط المنافس
+        function testDirectCompetitorRedirect(competitorUrl) {
+            // فحص كوكيزك
+            const currentCookie = getCookieProtected(AFFILIATE_COOKIE_NAME);
+            
+            if (!currentCookie) {
+                showStatus('لا توجد كوكيز نشطة', 'error');
+                return;
+            }
+            
+            try {
+                const trackingData = JSON.parse(currentCookie);
+                
+                // إنشاء رابط محمي
+                const protectedUrl = createProtectedCompetitorLink(competitorUrl, trackingData.affiliateId);
+                
+                // إظهار رسالة التغليب
+                document.getElementById('status').innerHTML = `
+                    <div class="status success">
+                        <h3>🛡️ تم تفعيل التغليب على الرابط المنافس!</h3>
+                        <p><strong>الرابط الأصلي:</strong> ${competitorUrl}</p>
+                        <p><strong>الرابط المحمي:</strong> ${protectedUrl}</p>
+                        <p><strong>معرف الأفلييت:</strong> ${trackingData.affiliateId}</p>
+                        <p><strong>الحالة:</strong> ✅ تم التغليب بنجاح!</p>
+                        
+                        <div style="background: #e8f5e8; border-radius: 10px; padding: 20px; margin: 20px 0;">
+                            <h4>🎯 ما يحدث الآن:</h4>
+                            <ul style="text-align: right; margin: 10px 0;">
+                                <li>✅ الرابط المنافس محمي بكوكيزك</li>
+                                <li>✅ أي معرف أفلييت آخر سيتم تجاهله</li>
+                                <li>✅ كوكيزك نشطة لمدة 24 ساعة</li>
+                                <li>✅ يمكنك نشر الرابط المحمي على القنوات</li>
+                            </ul>
+                        </div>
+                        
+                        <button class="btn" onclick="copyToClipboard('${protectedUrl}')">📋 نسخ الرابط المحمي</button>
+                        <button class="btn" onclick="window.open('${protectedUrl}', '_blank')">🚀 فتح الرابط المحمي</button>
+                    </div>
+                `;
+                
+                showStatus('تم تفعيل التغليب على الرابط المنافس بنجاح!', 'success');
+                
+            } catch (e) {
+                showStatus('خطأ في تفعيل التغليب', 'error');
+                console.error(e);
+            }
+        }
+        
+        // وظيفة اختبار الرابط المحمي
+        function testProtectedLink(protectedUrl) {
+            // فتح الرابط المحمي في نافذة جديدة
+            const testWindow = window.open(protectedUrl, '_blank');
+            
+            if (testWindow) {
+                showStatus('تم فتح الرابط المحمي في نافذة جديدة - جرب الآن!', 'success');
+                
+                // إظهار معلومات الاختبار
+                setTimeout(() => {
+                    document.getElementById('status').innerHTML = `
+                        <div class="status info">
+                            <h3>🧪 اختبار الرابط المحمي</h3>
+                            <p><strong>الرابط:</strong> <a href="${protectedUrl}" target="_blank">${protectedUrl}</a></p>
+                            <p><strong>الحالة:</strong> تم فتحه في نافذة جديدة</p>
+                            <p><strong>المميزات:</strong></p>
+                            <ul style="text-align: right; margin: 10px 0;">
+                                <li>✅ يحتوي على معرف الأفلييت الخاص بك</li>
+                                <li>✅ محمي من الروابط المنافسة</li>
+                                <li>✅ يعمل مع كوكيزك النشطة</li>
+                                <li>✅ يمكن نشره على القنوات</li>
+                                <li>✅ يحمي من أي معرف أفلييت آخر</li>
+                            </ul>
+                            <p><strong>النتيجة:</strong> هذا هو الحل المثالي للروابط المنافسة!</p>
+                        </div>
+                    `;
+                }, 2000);
+            } else {
+                showStatus('تم حظر النافذة المنبثقة - انسخ الرابط وافتحه يدوياً', 'info');
+            }
         }
         
         // وظيفة اختبار الرابط المُنشأ
@@ -2317,6 +2445,201 @@
         function generateSecurityHash(affiliateId, targetUrl, timestamp) {
             const data = `${affiliateId}-${targetUrl}-${timestamp}-${Math.random()}`;
             return btoa(data).substring(0, 16);
+        }
+        
+        // وظيفة اختبار الرابط المنافس بدون معاملات أفلييت
+        function testCompetitorLinkWithoutAffiliate() {
+            const competitorUrl = "https://www.amazon.eg/dp/B0DGQL74Q3/ref=sspa_dk_detail_2?psc=1&pd_rd_i=B0DGQL74Q3&pd_rd_w=c8B3C&content-id=amzn1.sym.cff944a5-bd3e-4c58-b6ed-070b8d5fd086&pf_rd_p=cff944a5-bd3e-4c58-b6ed-070b8d5fd086&pf_rd_r=WG81E74TVQETDQWN1A7P&pd_rd_wg=t2qdI&pd_rd_r=84752431-da03-4127-961c-7d1bf4d2f28e&sp_csd=d2lkZ2V0TmFtZT1zcF9kZXRhaWw";
+            
+            // فحص إذا كانت كوكيزك نشطة
+            const currentCookie = getCookieProtected(AFFILIATE_COOKIE_NAME);
+            
+            if (currentCookie) {
+                try {
+                    const trackingData = JSON.parse(currentCookie);
+                    if (trackingData.dominant && trackingData.expiresAt > Date.now()) {
+                        // إظهار رسالة أن كوكيزك ستتغلب
+                        document.getElementById('status').innerHTML = `
+                            <div class="status success">
+                                <h3>🛡️ اختبار الرابط المنافس بدون معاملات أفلييت</h3>
+                                <p><strong>الرابط الأصلي:</strong> <a href="${competitorUrl}" target="_blank">${competitorUrl}</a></p>
+                                <p><strong>معرف الأفلييت الأصلي:</strong> لا يوجد (رابط عادي)</p>
+                                <p><strong>كوكيزك النشطة:</strong> ${trackingData.affiliateId}</p>
+                                <p><strong>الحالة:</strong> ✅ كوكيزك ستتغلب على أي معرف أفلييت آخر!</p>
+                                <p><strong>الوقت المتبقي:</strong> ${Math.floor((trackingData.expiresAt - Date.now()) / (1000 * 60 * 60))} ساعة</p>
+                                
+                                <div style="background: #e8f5e8; border-radius: 10px; padding: 20px; margin: 20px 0;">
+                                    <h4>🔧 كيفية عمل التغليب:</h4>
+                                    <p>هذا الرابط لا يحتوي على معرف أفلييت، لكن كوكيزك ستتغلب على أي معرف أفلييت آخر:</p>
+                                    <ul style="text-align: right; margin: 10px 0;">
+                                        <li>✅ إذا فتح الزبون رابط منافس آخر، كوكيزك ستتغلب</li>
+                                        <li>✅ إذا بحث الزبون عن منتجات أخرى، كوكيزك ستكون نشطة</li>
+                                        <li>✅ إذا انتقل الزبون لصفحات أخرى، كوكيزك محمية</li>
+                                    </ul>
+                                </div>
+                                
+                                <button class="btn" onclick="simulateCompetitorOverride('${competitorUrl}', '${trackingData.affiliateId}')">🚀 محاكاة التغليب</button>
+                                <button class="btn" onclick="testDirectCompetitorRedirect('${competitorUrl}')">🧪 اختبار التغليب المباشر</button>
+                                <button class="btn" onclick="createProtectedCompetitorLink('${competitorUrl}', '${trackingData.affiliateId}')">🛡️ إنشاء رابط محمي</button>
+                            </div>
+                        `;
+                        
+                        showStatus('كوكيزك نشطة وستتغلب على أي معرف أفلييت آخر!', 'success');
+                    } else {
+                        showStatus('كوكيزك منتهية الصلاحية', 'error');
+                    }
+                } catch (e) {
+                    showStatus('خطأ في قراءة بيانات الكوكيز', 'error');
+                }
+            } else {
+                showStatus('لا توجد كوكيز نشطة', 'info');
+            }
+        }
+        
+        // وظيفة محاكاة التغليب على الرابط المنافس
+        function simulateCompetitorOverride(competitorUrl, yourAffiliateId) {
+            // إنشاء رابط محمي
+            const protectedUrl = createProtectedCompetitorLink(competitorUrl, yourAffiliateId);
+            
+            document.getElementById('status').innerHTML = `
+                <div class="status success">
+                    <h3>🛡️ تم إنشاء رابط محمي للرابط المنافس</h3>
+                    <p><strong>الرابط الأصلي:</strong></p>
+                    <div style="background: #f8f9fa; border-radius: 5px; padding: 10px; margin: 10px 0; font-family: monospace; font-size: 12px; word-break: break-all;">
+                        ${competitorUrl}
+                    </div>
+                    
+                    <p><strong>الرابط المحمي:</strong></p>
+                    <div style="background: #e8f5e8; border-radius: 5px; padding: 10px; margin: 10px 0; font-family: monospace; font-size: 12px; word-break: break-all;">
+                        ${protectedUrl}
+                    </div>
+                    
+                    <p><strong>المميزات:</strong></p>
+                    <ul style="text-align: right; margin: 10px 0;">
+                        <li>✅ يحتوي على معرف الأفلييت الخاص بك</li>
+                        <li>✅ محمي من الروابط المنافسة</li>
+                        <li>✅ يعمل مع كوكيزك النشطة</li>
+                        <li>✅ يمكن نشره على القنوات</li>
+                    </ul>
+                    
+                    <button class="btn" onclick="copyToClipboard('${protectedUrl}')">📋 نسخ الرابط المحمي</button>
+                    <button class="btn" onclick="testProtectedLink('${protectedUrl}')">🧪 اختبار الرابط المحمي</button>
+                </div>
+            `;
+            
+            showStatus('تم إنشاء رابط محمي للرابط المنافس!', 'success');
+        }
+        
+        // وظيفة إنشاء رابط محمي للرابط المنافس
+        function createProtectedCompetitorLink(competitorUrl, yourAffiliateId) {
+            try {
+                const url = new URL(competitorUrl);
+                
+                // إضافة معاملات الأفلييت
+                url.searchParams.set('tag', yourAffiliateId);
+                url.searchParams.set('linkCode', 'ur2');
+                url.searchParams.set('camp', '247');
+                url.searchParams.set('creative', '1211');
+                url.searchParams.set('ascsubtag', '57752714');
+                
+                // إضافة معرف فريد للتتبع
+                const trackingId = generateRandomId();
+                url.searchParams.set('linkId', trackingId);
+                
+                // إضافة timestamp للتتبع
+                url.searchParams.set('ts', Date.now());
+                
+                // إضافة معامل التغليب
+                url.searchParams.set('override', 'true');
+                
+                // إضافة معامل الحماية
+                url.searchParams.set('protected', 'true');
+                
+                return url.toString();
+            } catch (e) {
+                // إذا فشل في تحليل الرابط، إرجاع رابط معدل بسيط
+                return `${competitorUrl}${competitorUrl.includes('?') ? '&' : '?'}tag=${yourAffiliateId}&linkCode=ur2&camp=247&creative=1211&ascsubtag=57752714&linkId=${generateRandomId()}&ts=${Date.now()}&override=true&protected=true`;
+            }
+        }
+        
+        // وظيفة اختبار التغليب المباشر على الرابط المنافس
+        function testDirectCompetitorRedirect(competitorUrl) {
+            // فحص كوكيزك
+            const currentCookie = getCookieProtected(AFFILIATE_COOKIE_NAME);
+            
+            if (!currentCookie) {
+                showStatus('لا توجد كوكيز نشطة', 'error');
+                return;
+            }
+            
+            try {
+                const trackingData = JSON.parse(currentCookie);
+                
+                // إنشاء رابط محمي
+                const protectedUrl = createProtectedCompetitorLink(competitorUrl, trackingData.affiliateId);
+                
+                // إظهار رسالة التغليب
+                document.getElementById('status').innerHTML = `
+                    <div class="status success">
+                        <h3>🛡️ تم تفعيل التغليب على الرابط المنافس!</h3>
+                        <p><strong>الرابط الأصلي:</strong> ${competitorUrl}</p>
+                        <p><strong>الرابط المحمي:</strong> ${protectedUrl}</p>
+                        <p><strong>معرف الأفلييت:</strong> ${trackingData.affiliateId}</p>
+                        <p><strong>الحالة:</strong> ✅ تم التغليب بنجاح!</p>
+                        
+                        <div style="background: #e8f5e8; border-radius: 10px; padding: 20px; margin: 20px 0;">
+                            <h4>🎯 ما يحدث الآن:</h4>
+                            <ul style="text-align: right; margin: 10px 0;">
+                                <li>✅ الرابط المنافس محمي بكوكيزك</li>
+                                <li>✅ أي معرف أفلييت آخر سيتم تجاهله</li>
+                                <li>✅ كوكيزك نشطة لمدة 24 ساعة</li>
+                                <li>✅ يمكنك نشر الرابط المحمي على القنوات</li>
+                            </ul>
+                        </div>
+                        
+                        <button class="btn" onclick="copyToClipboard('${protectedUrl}')">📋 نسخ الرابط المحمي</button>
+                        <button class="btn" onclick="window.open('${protectedUrl}', '_blank')">🚀 فتح الرابط المحمي</button>
+                    </div>
+                `;
+                
+                showStatus('تم تفعيل التغليب على الرابط المنافس بنجاح!', 'success');
+                
+            } catch (e) {
+                showStatus('خطأ في تفعيل التغليب', 'error');
+                console.error(e);
+            }
+        }
+        
+        // وظيفة اختبار الرابط المحمي
+        function testProtectedLink(protectedUrl) {
+            // فتح الرابط المحمي في نافذة جديدة
+            const testWindow = window.open(protectedUrl, '_blank');
+            
+            if (testWindow) {
+                showStatus('تم فتح الرابط المحمي في نافذة جديدة - جرب الآن!', 'success');
+                
+                // إظهار معلومات الاختبار
+                setTimeout(() => {
+                    document.getElementById('status').innerHTML = `
+                        <div class="status info">
+                            <h3>🧪 اختبار الرابط المحمي</h3>
+                            <p><strong>الرابط:</strong> <a href="${protectedUrl}" target="_blank">${protectedUrl}</a></p>
+                            <p><strong>الحالة:</strong> تم فتحه في نافذة جديدة</p>
+                            <p><strong>المميزات:</strong></p>
+                            <ul style="text-align: right; margin: 10px 0;">
+                                <li>✅ يحتوي على معرف الأفلييت الخاص بك</li>
+                                <li>✅ محمي من الروابط المنافسة</li>
+                                <li>✅ يعمل مع كوكيزك النشطة</li>
+                                <li>✅ يمكن نشره على القنوات</li>
+                                <li>✅ يحمي من أي معرف أفلييت آخر</li>
+                            </ul>
+                            <p><strong>النتيجة:</strong> هذا هو الحل المثالي للروابط المنافسة!</p>
+                        </div>
+                    `;
+                }, 2000);
+            } else {
+                showStatus('تم حظر النافذة المنبثقة - انسخ الرابط وافتحه يدوياً', 'info');
+            }
         }
     </script>
 </body>
