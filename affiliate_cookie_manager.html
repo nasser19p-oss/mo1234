@@ -344,6 +344,7 @@
         <button class="btn" onclick="testProductPage()">🧪 اختبار صفحة المنتج</button>
         <button class="btn" onclick="testGeneratedLink()">🧪 اختبار الرابط المُنشأ</button>
         <button class="btn" onclick="testAmazonLink()">🧪 اختبار رابط Amazon</button>
+        <button class="btn" onclick="testPageOverride()">🧪 اختبار التغليب في الصفحة</button>
         
         <div class="input-group">
             <label for="existingLink">رابط مُشفر لفك التشفير:</label>
@@ -391,6 +392,7 @@
                                 <p><strong>الحالة:</strong> ✅ كوكيزك ستتغلب على معرف الأفلييت الأصلي!</p>
                                 <p><strong>الوقت المتبقي:</strong> ${Math.floor((trackingData.expiresAt - Date.now()) / (1000 * 60 * 60))} ساعة</p>
                                 <button class="btn" onclick="simulateAmazonRedirect('${amazonUrl}', '${trackingData.affiliateId}')">🚀 محاكاة إعادة التوجيه</button>
+                                <button class="btn" onclick="testDirectAmazonRedirect('${amazonUrl}')">🧪 اختبار التغليب المباشر</button>
                             </div>
                         `;
                         
@@ -403,6 +405,101 @@
                 }
             } else {
                 showStatus('لا توجد كوكيز نشطة', 'info');
+            }
+        }
+        
+        // وظيفة اختبار التغليب في الصفحة
+        function testPageOverride() {
+            // إضافة روابط تجريبية للصفحة
+            const testContainer = document.createElement('div');
+            testContainer.innerHTML = `
+                <div style="background: #f8f9fa; border-radius: 10px; padding: 20px; margin: 20px 0; text-align: center;">
+                    <h3>🧪 روابط اختبار التغليب</h3>
+                    <p>اضغط على أي من هذه الروابط لاختبار نظام التغليب:</p>
+                    
+                    <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin: 20px 0;">
+                        <a href="https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?tag=competitor1&linkCode=ur2" 
+                           class="btn" style="text-decoration: none; display: inline-block;">
+                            🔗 رابط منافس 1
+                        </a>
+                        
+                        <a href="https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?tag=competitor2&linkCode=ur2" 
+                           class="btn" style="text-decoration: none; display: inline-block;">
+                            🔗 رابط منافس 2
+                        </a>
+                        
+                        <a href="https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?tag=competitor3&linkCode=ur2" 
+                           class="btn" style="text-decoration: none; display: inline-block;">
+                            🔗 رابط منافس 3
+                        </a>
+                    </div>
+                    
+                    <p><small>⚠️ هذه الروابط تجريبية لاختبار نظام التغليب</small></p>
+                    <button class="btn" onclick="this.parentElement.remove()">❌ إزالة روابط الاختبار</button>
+                </div>
+            `;
+            
+            // إضافة الروابط للصفحة
+            document.querySelector('.container').appendChild(testContainer);
+            
+            // تفعيل نظام التغليب
+            setTimeout(() => {
+                checkForOtherAffiliateLinks();
+                showStatus('تم إضافة روابط الاختبار وتفعيل نظام التغليب!', 'success');
+            }, 100);
+        }
+        
+        // وظيفة اختبار التغليب المباشر
+            // فحص كوكيزك
+            const currentCookie = getCookieProtected(AFFILIATE_COOKIE_NAME);
+            
+            if (!currentCookie) {
+                showStatus('لا توجد كوكيز نشطة', 'error');
+                return;
+            }
+            
+            try {
+                const trackingData = JSON.parse(currentCookie);
+                
+                // تعديل الرابط ليستخدم معرفك
+                const modifiedUrl = modifyAffiliateLink(amazonUrl, trackingData.affiliateId);
+                
+                // إظهار النتيجة
+                document.getElementById('status').innerHTML = `
+                    <div class="status info">
+                        <h3>🧪 اختبار التغليب المباشر</h3>
+                        <p><strong>الرابط الأصلي:</strong></p>
+                        <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0; word-break: break-all; font-family: monospace; font-size: 12px;">
+                            ${amazonUrl}
+                        </div>
+                        <p><strong>الرابط المعدل:</strong></p>
+                        <div style="background: #e8f5e8; padding: 10px; border-radius: 5px; margin: 10px 0; word-break: break-all; font-family: monospace; font-size: 12px;">
+                            ${modifiedUrl}
+                        </div>
+                        <p><strong>التغييرات:</strong></p>
+                        <ul style="text-align: right; margin: 10px 0;">
+                            <li>✅ تم تغيير tag من yajnyeg-21 إلى ${trackingData.affiliateId}</li>
+                            <li>✅ تم إضافة linkCode=ur2</li>
+                            <li>✅ تم إضافة camp=247</li>
+                            <li>✅ تم إضافة creative=1211</li>
+                            <li>✅ تم إضافة ascsubtag=57752714</li>
+                        </ul>
+                        <button class="btn" onclick="window.open('${modifiedUrl}', '_blank')">🔗 فتح الرابط المعدل</button>
+                        <button class="btn" onclick="copyToClipboard('${modifiedUrl}')">📋 نسخ الرابط المعدل</button>
+                    </div>
+                `;
+                
+                showStatus('تم اختبار التغليب بنجاح!', 'success');
+                
+                // اختبار في Console
+                console.log('=== اختبار التغليب ===');
+                console.log('الرابط الأصلي:', amazonUrl);
+                console.log('الرابط المعدل:', modifiedUrl);
+                console.log('معرف الأفلييت الجديد:', trackingData.affiliateId);
+                
+            } catch (e) {
+                showStatus('خطأ في اختبار التغليب', 'error');
+                console.error(e);
             }
         }
         
@@ -1010,14 +1107,20 @@
             // البحث عن جميع الروابط في الصفحة
             const allLinks = document.querySelectorAll('a[href*="amazon"], a[href*="tag="], a[href*="linkCode="]');
             
-            allLinks.forEach(link => {
+            console.log(`تم العثور على ${allLinks.length} رابط يحتوي على أفلييت`);
+            
+            allLinks.forEach((link, index) => {
                 const href = link.href;
+                console.log(`رابط ${index + 1}: ${href}`);
                 
                 // فحص إذا كان الرابط يحتوي على معرف أفلييت آخر
                 if (href.includes('tag=') && !href.includes('yajnyeg-21')) {
+                    console.log(`تم اكتشاف رابط منافس: ${href}`);
+                    
                     // إضافة مستمع النقر للرابط
                     link.addEventListener('click', function(e) {
                         e.preventDefault();
+                        console.log('تم النقر على رابط منافس، يتم التغليب...');
                         
                         // فحص إذا كانت كوكيزك نشطة
                         const currentCookie = getCookieProtected(AFFILIATE_COOKIE_NAME);
@@ -1030,6 +1133,8 @@
                                     
                                     // تعديل الرابط ليستخدم معرفك
                                     const modifiedUrl = modifyAffiliateLink(href, trackingData.affiliateId);
+                                    console.log(`تم تعديل الرابط من: ${href}`);
+                                    console.log(`إلى: ${modifiedUrl}`);
                                     
                                     // الانتقال للرابط المعدل
                                     setTimeout(() => {
@@ -1039,11 +1144,12 @@
                                     return;
                                 }
                             } catch (e) {
-                                // تجاهل الأخطاء
+                                console.error('خطأ في قراءة بيانات الكوكيز:', e);
                             }
                         }
                         
                         // إذا لم تكن كوكيزك نشطة، انتقل للرابط كما هو
+                        console.log('كوكيزك غير نشطة، الانتقال للرابط الأصلي');
                         window.location.href = href;
                     });
                     
@@ -1052,6 +1158,8 @@
                     link.style.borderRadius = '5px';
                     link.style.padding = '5px';
                     link.title = '⚠️ هذا الرابط يحتوي على معرف أفلييت آخر';
+                    
+                    console.log(`تم إضافة مؤشر بصري للرابط: ${link.title}`);
                 }
             });
         }
