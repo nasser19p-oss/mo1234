@@ -1828,6 +1828,99 @@
                 showStatus('تم حظر النافذة المنبثقة - جرب النقر العادي', 'info');
             }
         }
+        
+        // وظيفة فحص الروابط المنافسة الأخرى
+        function checkForOtherAffiliateLinks() {
+            const currentCookie = getCookieProtected(AFFILIATE_COOKIE_NAME);
+            
+            if (!currentCookie) {
+                return;
+            }
+            
+            try {
+                const trackingData = JSON.parse(currentCookie);
+                
+                if (!trackingData.dominant || trackingData.expiresAt <= Date.now()) {
+                    return;
+                }
+                
+                // البحث عن جميع الروابط في الصفحة
+                const allLinks = document.querySelectorAll('a[href*="amazon"]');
+                
+                allLinks.forEach(link => {
+                    const href = link.href;
+                    
+                    // فحص إذا كان الرابط يحتوي على معرف أفلييت منافس
+                    if (href.includes('tag=') && !href.includes(trackingData.affiliateId)) {
+                        console.log('🛡️ تم اكتشاف رابط منافس:', href);
+                        
+                        // تعديل الرابط ليستخدم معرفك
+                        const modifiedUrl = modifyAffiliateLink(href, trackingData.affiliateId);
+                        
+                        // إضافة مستمع النقر
+                        link.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            console.log('🛡️ تم النقر على رابط منافس، يتم التغليب...');
+                            
+                            // إظهار رسالة التغليب
+                            showStatus(`🛡️ تم تعديل الرابط ليستخدم معرفك: ${trackingData.affiliateId}`, 'success');
+                            
+                            // الانتقال للرابط المعدل
+                            setTimeout(() => {
+                                window.location.href = modifiedUrl;
+                            }, 1500);
+                        });
+                        
+                        // إضافة مؤشر بصري
+                        link.style.border = '2px solid #ff6b6b';
+                        link.style.borderRadius = '5px';
+                        link.style.padding = '5px';
+                        link.title = `⚠️ هذا الرابط يحتوي على معرف أفلييت آخر - سيتم تعديله ليستخدم معرفك: ${trackingData.affiliateId}`;
+                        
+                        // إضافة أيقونة التغليب
+                        const overrideIcon = document.createElement('span');
+                        overrideIcon.innerHTML = '🛡️';
+                        overrideIcon.style.marginRight = '5px';
+                        overrideIcon.style.color = '#ff6b6b';
+                        link.insertBefore(overrideIcon, link.firstChild);
+                        
+                        console.log('✅ تم تعديل الرابط:', modifiedUrl);
+                    }
+                });
+                
+            } catch (e) {
+                console.error('خطأ في فحص الروابط المنافسة:', e);
+            }
+        }
+        
+        // وظيفة تعديل رابط الأفلييت ليستخدم معرفك
+        function modifyAffiliateLink(originalUrl, yourAffiliateId) {
+            try {
+                const url = new URL(originalUrl);
+                
+                // تعديل معرف الأفلييت
+                url.searchParams.set('tag', yourAffiliateId);
+                
+                // إضافة معاملات إضافية إذا لم تكن موجودة
+                if (!url.searchParams.has('linkCode')) {
+                    url.searchParams.set('linkCode', 'ur2');
+                }
+                if (!url.searchParams.has('camp')) {
+                    url.searchParams.set('camp', '247');
+                }
+                if (!url.searchParams.has('creative')) {
+                    url.searchParams.set('creative', '1211');
+                }
+                if (!url.searchParams.has('ascsubtag')) {
+                    url.searchParams.set('ascsubtag', '57752714');
+                }
+                
+                return url.toString();
+            } catch (e) {
+                // إذا فشل في تعديل الرابط، إرجاع الرابط الأصلي
+                return originalUrl;
+            }
+        }
     </script>
 </body>
 </html>
