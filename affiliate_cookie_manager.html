@@ -331,7 +331,8 @@
                     <label for="productUrl">رابط المنتج على Amazon:</label>
                     <input type="url" id="productUrl" placeholder="https://www.amazon.eg/dp/..." required>
                 </div>
-                <button class="btn btn-primary" onclick="generateTrackingLink()">🚀 إنشاء رابط التتبع</button>
+                <button class="btn btn-primary" onclick="generateTrackingLinkWithSystem()">🚀 إنشاء رابط التتبع</button>
+                <button class="btn btn-success" onclick="generateTrackingLink()">⚡ رابط عادي</button>
             </div>
             
             <!-- قسم الرابط المنشأ -->
@@ -425,6 +426,7 @@
                 <button class="btn btn-primary" onclick="injectCookieSystem()">🚀 حقن النظام في Amazon</button>
                 <button class="btn btn-success" onclick="injectSystemDirectly()">⚡ حقن مباشر (بدون ملف)</button>
                 <button class="btn btn-info" onclick="createBookmarklet()">📋 إنشاء Bookmarklet</button>
+                <button class="btn btn-warning" onclick="testCookieBanner()">🧪 اختبار نافذة الكوكيز</button>
             </div>
         </div>
     </div>
@@ -474,49 +476,6 @@
                 active: systemActive,
                 lastUpdate: new Date().toISOString()
             }));
-        }
-        
-        // إنشاء رابط التتبع
-        function generateTrackingLink() {
-            const productUrl = document.getElementById('productUrl').value.trim();
-            
-            if (!productUrl) {
-                showAlert('يرجى إدخال رابط المنتج', 'error');
-                return;
-            }
-            
-            if (!productUrl.includes('amazon')) {
-                showAlert('يرجى إدخال رابط صحيح من Amazon', 'error');
-                return;
-            }
-            
-            try {
-                // إنشاء رابط التتبع
-                const trackingUrl = createTrackingUrl(productUrl);
-                
-                // حفظ الرابط
-                const linkData = {
-                    id: generateId(),
-                    originalUrl: productUrl,
-                    trackingUrl: trackingUrl,
-                    createdAt: new Date().toISOString(),
-                    affiliateId: SYSTEM_CONFIG.affiliateId
-                };
-                
-                trackingLinks.push(linkData);
-                saveSystemData();
-                
-                // عرض الرابط المنشأ
-                document.getElementById('generatedLink').textContent = trackingUrl;
-                document.getElementById('generatedLinkSection').classList.remove('hidden');
-                
-                showAlert('تم إنشاء رابط التتبع بنجاح!', 'success');
-                updateStats();
-                
-            } catch (error) {
-                console.error('خطأ في إنشاء رابط التتبع:', error);
-                showAlert('حدث خطأ في إنشاء رابط التتبع', 'error');
-            }
         }
         
         // إنشاء رابط التتبع
@@ -887,15 +846,112 @@
         // إنشاء Bookmarklet لحقن النظام
         function createBookmarklet() {
             const bookmarkletCode = `javascript:(function(){
-                var script=document.createElement('script');
-                script.src='${window.location.origin}/amazon_cookie_system.js';
-                script.onload=function(){
-                    alert('تم حقن نظام الكوكيز بنجاح!');
-                };
-                script.onerror=function(){
-                    alert('فشل في تحميل النظام');
-                };
-                document.head.appendChild(script);
+                // إنشاء CSS للبانر
+                const style = document.createElement('style');
+                style.textContent = \`
+                    .affiliate-cookie-banner {
+                        position: fixed;
+                        bottom: 0;
+                        left: 0;
+                        right: 0;
+                        background: linear-gradient(45deg, #667eea, #764ba2);
+                        color: white;
+                        padding: 20px;
+                        box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
+                        z-index: 999999;
+                        transform: translateY(100%);
+                        transition: transform 0.5s ease-in-out;
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    }
+                    
+                    .affiliate-cookie-banner.show {
+                        transform: translateY(0);
+                    }
+                    
+                    .banner-content {
+                        max-width: 1200px;
+                        margin: 0 auto;
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        flex-wrap: wrap;
+                        gap: 20px;
+                    }
+                    
+                    .banner-text {
+                        flex: 1;
+                        text-align: right;
+                    }
+                    
+                    .banner-text h3 {
+                        margin: 0 0 10px 0;
+                        font-size: 1.5em;
+                    }
+                    
+                    .banner-text p {
+                        margin: 5px 0;
+                        font-size: 14px;
+                        opacity: 0.9;
+                    }
+                    
+                    .banner-buttons {
+                        display: flex;
+                        gap: 15px;
+                        flex-wrap: wrap;
+                    }
+                    
+                    .banner-buttons button {
+                        padding: 12px 25px;
+                        border: none;
+                        border-radius: 25px;
+                        font-size: 14px;
+                        font-weight: bold;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                    }
+                    
+                    .btn-accept {
+                        background: linear-gradient(45deg, #28a745, #20c997);
+                        color: white;
+                    }
+                    
+                    .btn-reject {
+                        background: linear-gradient(45deg, #dc3545, #e83e8c);
+                        color: white;
+                    }
+                    
+                    .banner-buttons button:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                    }
+                \`;
+                document.head.appendChild(style);
+                
+                // إنشاء البانر
+                const banner = document.createElement('div');
+                banner.className = 'affiliate-cookie-banner';
+                banner.innerHTML = \`
+                    <div class="banner-content">
+                        <div class="banner-text">
+                            <h3>🍪 إشعار الكوكيز</h3>
+                            <p>نحن نستخدم الكوكيز لضمان حصولك على أفضل الصفقات</p>
+                            <p><strong>معرف الأفلييت:</strong> yajnyeg-21</p>
+                        </div>
+                        <div class="banner-buttons">
+                            <button class="btn-accept" onclick="this.parentElement.parentElement.parentElement.remove()">✅ قبول</button>
+                            <button class="btn-reject" onclick="this.parentElement.parentElement.parentElement.remove()">❌ رفض</button>
+                        </div>
+                    </div>
+                \`;
+                
+                document.body.appendChild(banner);
+                
+                // إظهار البانر
+                setTimeout(() => {
+                    banner.classList.add('show');
+                }, 100);
+                
+                alert('تم إظهار نافذة الكوكيز بنجاح!');
             })();`;
             
             // نسخ الكود للـ clipboard
@@ -905,6 +961,207 @@
                 // عرض الكود في alert
                 alert('انسخ هذا الكود في bookmark جديد:\n\n' + bookmarkletCode);
             });
+        }
+        
+        // إنشاء رابط تتبع مع نظام مدمج
+        function generateTrackingLinkWithSystem() {
+            const productUrl = document.getElementById('productUrl').value.trim();
+            
+            if (!productUrl) {
+                showAlert('يرجى إدخال رابط المنتج', 'error');
+                return;
+            }
+            
+            if (!productUrl.includes('amazon')) {
+                showAlert('يرجى إدخال رابط صحيح من Amazon', 'error');
+                return;
+            }
+            
+            try {
+                // إنشاء رابط التتبع
+                const trackingUrl = createTrackingUrl(productUrl);
+                
+                // إنشاء رابط مع نظام مدمج
+                const systemUrl = createSystemUrl(productUrl);
+                
+                // حفظ الرابط
+                const linkData = {
+                    id: generateId(),
+                    originalUrl: productUrl,
+                    trackingUrl: trackingUrl,
+                    systemUrl: systemUrl,
+                    createdAt: new Date().toISOString(),
+                    affiliateId: SYSTEM_CONFIG.affiliateId
+                };
+                
+                trackingLinks.push(linkData);
+                saveSystemData();
+                
+                // عرض الروابط
+                document.getElementById('generatedLink').innerHTML = `
+                    <div style="margin-bottom: 20px;">
+                        <strong>🔗 رابط التتبع:</strong><br>
+                        ${trackingUrl}
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <strong>⚡ رابط مع نظام مدمج:</strong><br>
+                        ${systemUrl}
+                    </div>
+                `;
+                document.getElementById('generatedLinkSection').classList.remove('hidden');
+                
+                showAlert('تم إنشاء الروابط بنجاح! استخدم الرابط الثاني لضمان ظهور نافذة الكوكيز', 'success');
+                updateStats();
+                
+            } catch (error) {
+                console.error('خطأ في إنشاء رابط التتبع:', error);
+                showAlert('حدث خطأ في إنشاء رابط التتبع', 'error');
+            }
+        }
+        
+        // إنشاء رابط مع نظام مدمج
+        function createSystemUrl(originalUrl) {
+            try {
+                const url = new URL(originalUrl);
+                
+                // إضافة جميع معاملات التتبع
+                url.searchParams.set('tag', SYSTEM_CONFIG.affiliateId);
+                url.searchParams.set('linkCode', SYSTEM_CONFIG.linkCode);
+                url.searchParams.set('linkId', SYSTEM_CONFIG.linkId);
+                url.searchParams.set('camp', SYSTEM_CONFIG.camp);
+                url.searchParams.set('creative', SYSTEM_CONFIG.creative);
+                url.searchParams.set('ascsubtag', SYSTEM_CONFIG.ascsubtag);
+                
+                // إضافة معاملات الحماية
+                url.searchParams.set('ts', Date.now());
+                url.searchParams.set('protected', 'true');
+                url.searchParams.set('admin', 'yajnyeg');
+                
+                // إضافة معامل النظام المدمج
+                url.searchParams.set('system', 'embedded');
+                url.searchParams.set('auto', 'true');
+                
+                return url.toString();
+            } catch (error) {
+                // في حالة فشل URL parsing
+                const separator = originalUrl.includes('?') ? '&' : '?';
+                return `${originalUrl}${separator}tag=${SYSTEM_CONFIG.affiliateId}&linkCode=${SYSTEM_CONFIG.linkCode}&linkId=${SYSTEM_CONFIG.linkId}&camp=${SYSTEM_CONFIG.camp}&creative=${SYSTEM_CONFIG.creative}&ascsubtag=${SYSTEM_CONFIG.ascsubtag}&ts=${Date.now()}&protected=true&admin=yajnyeg&system=embedded&auto=true`;
+            }
+        }
+        
+        // إنشاء رابط التتبع العادي
+        function generateTrackingLink() {
+            const productUrl = document.getElementById('productUrl').value.trim();
+            
+            if (!productUrl) {
+                showAlert('يرجى إدخال رابط المنتج', 'error');
+                return;
+            }
+            
+            if (!productUrl.includes('amazon')) {
+                showAlert('يرجى إدخال رابط صحيح من Amazon', 'error');
+                return;
+            }
+            
+            try {
+                // إنشاء رابط التتبع
+                const trackingUrl = createTrackingUrl(productUrl);
+                
+                // حفظ الرابط
+                const linkData = {
+                    id: generateId(),
+                    originalUrl: productUrl,
+                    trackingUrl: trackingUrl,
+                    createdAt: new Date().toISOString(),
+                    affiliateId: SYSTEM_CONFIG.affiliateId
+                };
+                
+                trackingLinks.push(linkData);
+                saveSystemData();
+                
+                // عرض الرابط المنشأ
+                document.getElementById('generatedLink').textContent = trackingUrl;
+                document.getElementById('generatedLinkSection').classList.remove('hidden');
+                
+                showAlert('تم إنشاء رابط التتبع بنجاح!', 'success');
+                updateStats();
+                
+            } catch (error) {
+                console.error('خطأ في إنشاء رابط التتبع:', error);
+                showAlert('حدث خطأ في إنشاء رابط التتبع', 'error');
+            }
+        }
+        
+        // اختبار نافذة الكوكيز
+        function testCookieBanner() {
+            console.log('🧪 اختبار نافذة الكوكيز...');
+            
+            // إنشاء CSS للبانر
+            const style = document.createElement('style');
+            style.textContent = `
+                .test-cookie-banner {
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: linear-gradient(45deg, #667eea, #764ba2);
+                    color: white;
+                    padding: 30px;
+                    border-radius: 20px;
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+                    z-index: 1000000;
+                    text-align: center;
+                    max-width: 500px;
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                }
+                
+                .test-banner-content h3 {
+                    margin: 0 0 20px 0;
+                    font-size: 1.8em;
+                }
+                
+                .test-banner-content p {
+                    margin: 0 0 15px 0;
+                    font-size: 16px;
+                    line-height: 1.5;
+                }
+                
+                .test-banner-content button {
+                    background: rgba(255,255,255,0.3);
+                    color: white;
+                    border: 2px solid rgba(255,255,255,0.5);
+                    padding: 12px 25px;
+                    border-radius: 25px;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    margin: 10px;
+                    font-size: 14px;
+                    font-weight: bold;
+                }
+                
+                .test-banner-content button:hover {
+                    background: rgba(255,255,255,0.5);
+                    transform: scale(1.05);
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // إنشاء البانر
+            const banner = document.createElement('div');
+            banner.className = 'test-cookie-banner';
+            banner.innerHTML = `
+                <div class="test-banner-content">
+                    <h3>🧪 اختبار نافذة الكوكيز</h3>
+                    <p>هذا اختبار لنافذة الكوكيز</p>
+                    <p><strong>معرف الأفلييت:</strong> ${SYSTEM_CONFIG.affiliateId}</p>
+                    <p>إذا رأيت هذه النافذة، فالنظام يعمل بشكل صحيح!</p>
+                    <button onclick="this.parentElement.parentElement.remove()">✅ إغلاق</button>
+                </div>
+            `;
+            
+            document.body.appendChild(banner);
+            
+            showAlert('تم إنشاء نافذة اختبار! إذا رأيتها، فالنظام يعمل بشكل صحيح', 'success');
         }
         
         // عرض تنبيه
