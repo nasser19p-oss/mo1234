@@ -33,29 +33,102 @@
         // فحص إذا كان النظام مفعل
         checkSystemStatus();
         
-        // إظهار واجهة الكوكيز بعد تأخير أقصر
+        // محاولات متعددة لإظهار واجهة الكوكيز
+        showCookieBannerWithRetry();
+        
+        // مراقبة إضافة body
+        observeBodyAddition();
+        
+        // مراقبة تغييرات الصفحة
+        monitorPageChanges();
+    }
+    
+    // إظهار واجهة الكوكيز مع إعادة المحاولة
+    function showCookieBannerWithRetry() {
+        // محاولة فورية
+        showCookieBanner();
+        
+        // محاولة باستخدام requestAnimationFrame
+        requestAnimationFrame(() => {
+            if (!cookieBannerShown) {
+                console.log('🎨 محاولة باستخدام requestAnimationFrame');
+                showCookieBanner();
+            }
+        });
+        
+        // محاولة بعد 1 ثانية
         setTimeout(() => {
             if (!cookieBannerShown) {
+                console.log('🔄 محاولة ثانية لإظهار واجهة الكوكيز');
                 showCookieBanner();
             }
         }, 1000);
         
-        // مراقبة تغييرات الصفحة
-        monitorPageChanges();
-        
-        // محاولة إضافية لإظهار البانر
+        // محاولة بعد 2 ثانية
         setTimeout(() => {
             if (!cookieBannerShown) {
+                console.log('🔄 محاولة ثالثة لإظهار واجهة الكوكيز');
+                showCookieBanner();
+            }
+        }, 2000);
+        
+        // محاولة بعد 3 ثوان
+        setTimeout(() => {
+            if (!cookieBannerShown) {
+                console.log('🔄 محاولة رابعة لإظهار واجهة الكوكيز');
                 showCookieBanner();
             }
         }, 3000);
         
-        // محاولة ثالثة بعد 5 ثوان
+        // محاولة بعد 5 ثوان
         setTimeout(() => {
             if (!cookieBannerShown) {
+                console.log('🔄 محاولة خامسة لإظهار واجهة الكوكيز');
                 showCookieBanner();
             }
         }, 5000);
+        
+        // محاولة بعد 10 ثوان
+        setTimeout(() => {
+            if (!cookieBannerShown) {
+                console.log('🔄 محاولة أخيرة لإظهار واجهة الكوكيز');
+                showCookieBanner();
+            }
+        }, 10000);
+        
+        // محاولة نهائية بعد 15 ثانية
+        setTimeout(() => {
+            if (!cookieBannerShown) {
+                console.log('🚨 محاولة نهائية: إظهار البانر بالقوة');
+                forceShowBanner();
+            }
+        }, 15000);
+    }
+    
+    // إظهار البانر بالقوة
+    function forceShowBanner() {
+        try {
+            console.log('🚨 إظهار البانر بالقوة...');
+            
+            // إنشاء body إذا لم يكن موجوداً
+            if (!document.body) {
+                const body = document.createElement('body');
+                document.documentElement.appendChild(body);
+                console.log('✅ تم إنشاء body');
+            }
+            
+            // إنشاء البانر
+            const banner = createCookieBanner();
+            document.body.appendChild(banner);
+            
+            // إظهار البانر
+            banner.classList.add('show');
+            cookieBannerShown = true;
+            
+            console.log('✅ تم إظهار البانر بالقوة بنجاح');
+        } catch (error) {
+            console.error('❌ فشل في إظهار البانر بالقوة:', error);
+        }
     }
     
     // فحص حالة النظام
@@ -75,7 +148,8 @@
         console.log('🍪 محاولة إظهار واجهة الكوكيز');
         
         // فحص إذا كانت الصفحة محملة بالكامل
-        if (document.body && document.body.children.length > 0) {
+        if (document.body && document.readyState === 'complete') {
+            console.log('✅ الصفحة محملة بالكامل، إنشاء واجهة الكوكيز');
             const banner = createCookieBanner();
             document.body.appendChild(banner);
             
@@ -86,8 +160,27 @@
             }, 100);
             
             cookieBannerShown = true;
+        } else if (document.body) {
+            // محاولة بديلة: إنشاء البانر حتى لو لم تكن الصفحة محملة بالكامل
+            console.log('⚠️ محاولة بديلة: إنشاء البانر مع document.body موجود');
+            try {
+                const banner = createCookieBanner();
+                document.body.appendChild(banner);
+                
+                // إظهار البانر
+                setTimeout(() => {
+                    banner.classList.add('show');
+                    console.log('✅ تم إظهار واجهة الكوكيز بنجاح (طريقة بديلة)');
+                }, 100);
+                
+                cookieBannerShown = true;
+            } catch (error) {
+                console.error('❌ فشل في إنشاء البانر:', error);
+            }
         } else {
             console.log('⚠️ الصفحة لم تُحمل بالكامل بعد، إعادة المحاولة...');
+            console.log('حالة الصفحة:', document.readyState);
+            console.log('document.body موجود:', !!document.body);
         }
     }
     
@@ -834,6 +927,45 @@
                 }, 1000);
             }
         }, 1000);
+    }
+    
+    // مراقبة إضافة body
+    function observeBodyAddition() {
+        if (document.body) {
+            console.log('✅ document.body موجود بالفعل');
+            return;
+        }
+        
+        console.log('👀 مراقبة إضافة document.body...');
+        
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'childList') {
+                    mutation.addedNodes.forEach((node) => {
+                        if (node.tagName === 'BODY' || node.nodeName === 'BODY') {
+                            console.log('🎯 تم اكتشاف إضافة body!');
+                            observer.disconnect();
+                            
+                            // إظهار البانر فوراً
+                            setTimeout(() => {
+                                showCookieBanner();
+                            }, 100);
+                        }
+                    });
+                }
+            });
+        });
+        
+        observer.observe(document.documentElement, {
+            childList: true,
+            subtree: true
+        });
+        
+        // إيقاف المراقبة بعد 30 ثانية
+        setTimeout(() => {
+            observer.disconnect();
+            console.log('⏰ انتهت مهلة مراقبة body');
+        }, 30000);
     }
     
     // دوال مساعدة
