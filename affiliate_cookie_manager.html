@@ -287,6 +287,7 @@
         <button class="action-btn info" onclick="testOverrideSystem()">🧪 اختبار التغليب</button>
         <button class="action-btn info" onclick="checkPageLinks()">🔍 فحص الروابط</button>
         <button class="action-btn danger" onclick="clearAllCookies()">🗑️ مسح الكوكيز</button>
+        <button class="action-btn info" onclick="clearVisitedLinks()">🗑️ مسح الروابط</button>
     </div>
 
     <script>
@@ -351,6 +352,10 @@
             let isCompetitor = false;
             let reason = '';
             
+            // فحص إذا كان الرابط جديد (لم يتم فتحه من قبل)
+            const visitedLinks = JSON.parse(localStorage.getItem('visited_affiliate_links') || '[]');
+            const currentUrlKey = currentUrl.split('?')[0]; // بدون المعاملات
+            
             if (currentTag && currentTag !== AFFILIATE_CONFIG.tag) {
                 isCompetitor = true;
                 reason = 'معرف أفلييت مختلف';
@@ -362,6 +367,15 @@
             else if (currentLinkId && currentLinkId !== AFFILIATE_CONFIG.linkId) {
                 isCompetitor = true;
                 reason = 'linkId مختلف';
+            }
+            // فحص إذا كان الرابط جديد (ascsubtag مختلف حتى لو كان tag متطابق)
+            else if (currentAscsubtag && !visitedLinks.includes(currentUrlKey + '_' + currentAscsubtag)) {
+                isCompetitor = true;
+                reason = 'رابط جديد - ascsubtag مختلف';
+                
+                // حفظ الرابط كرابط تم زيارته
+                visitedLinks.push(currentUrlKey + '_' + currentAscsubtag);
+                localStorage.setItem('visited_affiliate_links', JSON.stringify(visitedLinks));
             }
             
             if (isCompetitor) {
@@ -721,6 +735,20 @@
                         isCompetitor = true;
                         reason = 'linkId مختلف';
                     }
+                    // فحص إذا كان الرابط جديد (ascsubtag مختلف حتى لو كان tag متطابق)
+                    else if (currentAscsubtag) {
+                        const visitedLinks = JSON.parse(localStorage.getItem('visited_affiliate_links') || '[]');
+                        const urlKey = href.split('?')[0];
+                        
+                        if (!visitedLinks.includes(urlKey + '_' + currentAscsubtag)) {
+                            isCompetitor = true;
+                            reason = 'رابط جديد - ascsubtag مختلف';
+                            
+                            // حفظ الرابط كرابط تم زيارته
+                            visitedLinks.push(urlKey + '_' + currentAscsubtag);
+                            localStorage.setItem('visited_affiliate_links', JSON.stringify(visitedLinks));
+                        }
+                    }
                     
                     if (isCompetitor) {
                         console.log('🛡️ تم اكتشاف رابط منافس:', href);
@@ -828,6 +856,20 @@
                             isCompetitor = true;
                             reason = 'linkId مختلف';
                         }
+                        // فحص إذا كان الرابط جديد (ascsubtag مختلف حتى لو كان tag متطابق)
+                        else if (currentAscsubtag) {
+                            const visitedLinks = JSON.parse(localStorage.getItem('visited_affiliate_links') || '[]');
+                            const urlKey = link.href.split('?')[0];
+                            
+                            if (!visitedLinks.includes(urlKey + '_' + currentAscsubtag)) {
+                                isCompetitor = true;
+                                reason = 'رابط جديد - ascsubtag مختلف';
+                                
+                                // حفظ الرابط كرابط تم زيارته
+                                visitedLinks.push(urlKey + '_' + currentAscsubtag);
+                                localStorage.setItem('visited_affiliate_links', JSON.stringify(visitedLinks));
+                            }
+                        }
                         
                         if (isCompetitor) {
                             console.log('🛡️ تم اكتشاف نقر على رابط منافس:', reason);
@@ -889,6 +931,19 @@
                     <p>اضغط على أي رابط لرؤية النظام يعمل:</p>
                     
                     <div style="margin: 20px 0;">
+                        <a href="https://www.amazon.eg/dp/B093ZW533Y/?smid=A1ZVRGNO5AYLOV&&_encoding=UTF8&tag=yajnyeg-21&linkCode=ur2&linkId=4ff5fa11b6d0385e8811d3e183795133&camp=247&creative=1211&ascsubtag=57861114" 
+                           style="
+                               display: inline-block;
+                               background: #ff6b6b;
+                               color: white;
+                               padding: 10px 20px;
+                               border-radius: 25px;
+                               text-decoration: none;
+                               margin: 10px;
+                           ">
+                            🔗 رابط منافس جديد (ascsubtag: 57861114)
+                        </a>
+                        
                         <a href="https://www.amazon.eg/Dabur-Ayurvedic-Toothpaste-Ingredients-Complete/dp/B0BT822SWP?th=1&_=undefined&_encoding=UTF8&tag=yajnyeg-21&linkCode=ur2&linkId=4ff5fa11b6d0385e8811d3e183795133&camp=247&creative=1211&ascsubtag=57859024" 
                            style="
                                display: inline-block;
@@ -931,10 +986,11 @@
                     
                     <div style="background: rgba(255,255,255,0.2); border-radius: 10px; padding: 15px; margin: 15px 0; text-align: right;">
                         <h4>📊 معلومات الاختبار:</h4>
-                        <p><strong>الرابط الأحمر:</strong> ascsubtag مختلف (57859024)</p>
+                        <p><strong>الرابط الأحمر الأول:</strong> رابط منافس جديد (ascsubtag: 57861114)</p>
+                        <p><strong>الرابط الأحمر الثاني:</strong> ascsubtag مختلف (57859024)</p>
                         <p><strong>الرابط الأخضر:</strong> ascsubtag أساسي (57859192)</p>
-                        <p><strong>الرابط الأحمر الثاني:</strong> معرف مختلف</p>
-                        <p><small>النظام الآن يتعرف على الروابط المنافسة حتى لو كانت تستخدم نفس المعرف!</small></p>
+                        <p><strong>الرابط الأحمر الثالث:</strong> معرف مختلف</p>
+                        <p><small>النظام الآن يتعرف على الروابط الجديدة حتى لو كانت متطابقة مع المعرف الأساسي!</small></p>
                     </div>
                     
                     <button class="action-btn danger" onclick="this.parentElement.remove()">❌ إغلاق</button>
@@ -964,6 +1020,12 @@
             document.getElementById('productCookieBanner').classList.remove('show');
             
             showStatus('تم مسح جميع الكوكيز', 'info');
+        }
+        
+        // مسح الروابط المحفوظة
+        function clearVisitedLinks() {
+            localStorage.removeItem('visited_affiliate_links');
+            showStatus('تم مسح الروابط المحفوظة', 'info');
         }
         
         // عرض حالة الكوكيز
@@ -1039,6 +1101,16 @@
                         else if (currentLinkId && currentLinkId !== AFFILIATE_CONFIG.linkId) {
                             isCompetitor = true;
                             reason = 'linkId مختلف';
+                        }
+                        // فحص إذا كان الرابط جديد (ascsubtag مختلف حتى لو كان tag متطابق)
+                        else if (currentAscsubtag) {
+                            const visitedLinks = JSON.parse(localStorage.getItem('visited_affiliate_links') || '[]');
+                            const urlKey = href.split('?')[0];
+                            
+                            if (!visitedLinks.includes(urlKey + '_' + currentAscsubtag)) {
+                                isCompetitor = true;
+                                reason = 'رابط جديد - ascsubtag مختلف';
+                            }
                         }
                         
                         if (isCompetitor) {
