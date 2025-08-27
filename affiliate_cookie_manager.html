@@ -285,6 +285,7 @@
         <button class="action-btn" onclick="showCookieStatus()">📊 حالة الكوكيز</button>
         <button class="action-btn success" onclick="activateOverrideSystem()">🛡️ تفعيل التغليب</button>
         <button class="action-btn info" onclick="testOverrideSystem()">🧪 اختبار التغليب</button>
+        <button class="action-btn info" onclick="checkPageLinks()">🔍 فحص الروابط</button>
         <button class="action-btn danger" onclick="clearAllCookies()">🗑️ مسح الكوكيز</button>
     </div>
 
@@ -319,9 +320,23 @@
             checkCookieStatus();
             
             // إظهار واجهة الكوكيز إذا لم تكن موجودة
+            // تأخير أطول لصفحات Amazon
             setTimeout(() => {
                 showProductCookieBanner();
-            }, 2000);
+            }, 3000);
+        });
+        
+        // إضافة مستمع إضافي لصفحات Amazon
+        document.addEventListener('DOMContentLoaded', function() {
+            // فحص إذا كنا في صفحة Amazon
+            if (window.location.href.includes('amazon')) {
+                console.log('🌐 تم اكتشاف صفحة Amazon');
+                
+                // تأخير إضافي لصفحات Amazon
+                setTimeout(() => {
+                    showProductCookieBanner();
+                }, 5000);
+            }
         });
         
         // فحص معرفات الأفلييت في الصفحة
@@ -330,30 +345,55 @@
             const urlParams = new URLSearchParams(window.location.search);
             const currentTag = urlParams.get('tag');
             const currentAscsubtag = urlParams.get('ascsubtag');
+            const currentLinkId = urlParams.get('linkId');
             
             // فحص إذا كان الرابط يحتوي على معرف أفلييت منافس
-            if (currentTag && (currentTag !== AFFILIATE_CONFIG.tag || 
-                (currentAscsubtag && currentAscsubtag !== AFFILIATE_CONFIG.ascsubtag))) {
-                
-                console.log('🛡️ تم اكتشاف رابط منافس!');
+            let isCompetitor = false;
+            let reason = '';
+            
+            if (currentTag && currentTag !== AFFILIATE_CONFIG.tag) {
+                isCompetitor = true;
+                reason = 'معرف أفلييت مختلف';
+            }
+            else if (currentAscsubtag && currentAscsubtag !== AFFILIATE_CONFIG.ascsubtag) {
+                isCompetitor = true;
+                reason = 'ascsubtag مختلف';
+            }
+            else if (currentLinkId && currentLinkId !== AFFILIATE_CONFIG.linkId) {
+                isCompetitor = true;
+                reason = 'linkId مختلف';
+            }
+            
+            if (isCompetitor) {
+                console.log('🛡️ تم اكتشاف رابط منافس في الصفحة الحالية!');
+                console.log('السبب:', reason);
                 console.log('معرف الأفلييت الحالي:', currentTag);
                 console.log('ascsubtag الحالي:', currentAscsubtag);
+                console.log('linkId الحالي:', currentLinkId);
                 console.log('معرفك الأساسي:', AFFILIATE_CONFIG.tag);
                 console.log('ascsubtag الأساسي:', AFFILIATE_CONFIG.ascsubtag);
+                console.log('linkId الأساسي:', AFFILIATE_CONFIG.linkId);
                 
-                showOverrideMessage(currentTag, currentAscsubtag);
+                showOverrideMessage(currentTag, currentAscsubtag, reason);
             }
         }
         
         // إظهار رسالة التغليب
-        function showOverrideMessage(competitorTag, competitorAscsubtag = null) {
+        function showOverrideMessage(competitorTag, competitorAscsubtag = null, reason = '') {
             const message = document.createElement('div');
             message.className = 'override-message';
             
             let messageContent = `
                 <h3>🛡️ تم اكتشاف رابط منافس!</h3>
-                <p><strong>معرف الأفلييت:</strong> ${competitorTag}</p>
             `;
+            
+            if (reason) {
+                messageContent += `<p><strong>سبب التغليب:</strong> ${reason}</p>`;
+            }
+            
+            if (typeof competitorTag === 'string') {
+                messageContent += `<p><strong>معرف الأفلييت:</strong> ${competitorTag}</p>`;
+            }
             
             if (competitorAscsubtag) {
                 messageContent += `<p><strong>ascsubtag:</strong> ${competitorAscsubtag}</p>`;
@@ -656,19 +696,38 @@
                 const href = link.href;
                 
                 // فحص إذا كان الرابط يحتوي على معرف أفلييت منافس
-                // حتى لو كان يستخدم نفس المعرف، نتحقق من ascsubtag
-                if (href.includes('tag=') && href.includes('ascsubtag=')) {
+                if (href.includes('tag=')) {
                     const urlParams = new URLSearchParams(href);
                     const currentTag = urlParams.get('tag');
                     const currentAscsubtag = urlParams.get('ascsubtag');
+                    const currentLinkId = urlParams.get('linkId');
                     
-                    // فحص إذا كان الرابط منافس (معرف مختلف أو ascsubtag مختلف)
-                    if (currentTag !== trackingData.affiliateId || 
-                        (currentAscsubtag && currentAscsubtag !== trackingData.ascsubtag)) {
-                        
+                    // فحص إذا كان الرابط منافس
+                    let isCompetitor = false;
+                    let reason = '';
+                    
+                    // فحص المعرف
+                    if (currentTag !== trackingData.affiliateId) {
+                        isCompetitor = true;
+                        reason = 'معرف أفلييت مختلف';
+                    }
+                    // فحص ascsubtag
+                    else if (currentAscsubtag && currentAscsubtag !== trackingData.ascsubtag) {
+                        isCompetitor = true;
+                        reason = 'ascsubtag مختلف';
+                    }
+                    // فحص linkId
+                    else if (currentLinkId && currentLinkId !== trackingData.linkId) {
+                        isCompetitor = true;
+                        reason = 'linkId مختلف';
+                    }
+                    
+                    if (isCompetitor) {
                         console.log('🛡️ تم اكتشاف رابط منافس:', href);
+                        console.log('السبب:', reason);
                         console.log('معرف الأفلييت الحالي:', currentTag);
                         console.log('ascsubtag الحالي:', currentAscsubtag);
+                        console.log('linkId الحالي:', currentLinkId);
                         
                         // تعديل الرابط
                         const modifiedUrl = modifyAffiliateLink(href, trackingData);
@@ -747,19 +806,35 @@
             document.addEventListener('click', function(e) {
                 const link = e.target.closest('a');
                 if (link && link.href && link.href.includes('amazon')) {
-                    if (link.href.includes('tag=') && link.href.includes('ascsubtag=')) {
+                    if (link.href.includes('tag=')) {
                         const urlParams = new URLSearchParams(link.href);
                         const currentTag = urlParams.get('tag');
                         const currentAscsubtag = urlParams.get('ascsubtag');
+                        const currentLinkId = urlParams.get('linkId');
                         
                         // فحص إذا كان الرابط منافس
-                        if (currentTag !== trackingData.affiliateId || 
-                            (currentAscsubtag && currentAscsubtag !== trackingData.ascsubtag)) {
-                            
+                        let isCompetitor = false;
+                        let reason = '';
+                        
+                        if (currentTag !== trackingData.affiliateId) {
+                            isCompetitor = true;
+                            reason = 'معرف أفلييت مختلف';
+                        }
+                        else if (currentAscsubtag && currentAscsubtag !== trackingData.ascsubtag) {
+                            isCompetitor = true;
+                            reason = 'ascsubtag مختلف';
+                        }
+                        else if (currentLinkId && currentLinkId !== trackingData.linkId) {
+                            isCompetitor = true;
+                            reason = 'linkId مختلف';
+                        }
+                        
+                        if (isCompetitor) {
+                            console.log('🛡️ تم اكتشاف نقر على رابط منافس:', reason);
                             e.preventDefault();
                             
                             const modifiedUrl = modifyAffiliateLink(link.href, trackingData);
-                            showOverrideMessage(modifiedUrl, trackingData);
+                            showOverrideMessage(modifiedUrl, trackingData, reason);
                             
                             setTimeout(() => {
                                 window.location.href = modifiedUrl;
@@ -934,6 +1009,118 @@
         // إنشاء معرف عشوائي
         function generateRandomId() {
             return Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+        }
+        
+        // وظيفة فحص الروابط في الصفحة
+        function checkPageLinks() {
+            const allLinks = document.querySelectorAll('a[href*="amazon"]');
+            let competitorLinks = [];
+            
+            allLinks.forEach(link => {
+                const href = link.href;
+                if (href.includes('tag=')) {
+                    try {
+                        const urlParams = new URLSearchParams(href);
+                        const currentTag = urlParams.get('tag');
+                        const currentAscsubtag = urlParams.get('ascsubtag');
+                        const currentLinkId = urlParams.get('linkId');
+                        
+                        let isCompetitor = false;
+                        let reason = '';
+                        
+                        if (currentTag !== AFFILIATE_CONFIG.tag) {
+                            isCompetitor = true;
+                            reason = 'معرف أفلييت مختلف';
+                        }
+                        else if (currentAscsubtag && currentAscsubtag !== AFFILIATE_CONFIG.ascsubtag) {
+                            isCompetitor = true;
+                            reason = 'ascsubtag مختلف';
+                        }
+                        else if (currentLinkId && currentLinkId !== AFFILIATE_CONFIG.linkId) {
+                            isCompetitor = true;
+                            reason = 'linkId مختلف';
+                        }
+                        
+                        if (isCompetitor) {
+                            competitorLinks.push({
+                                url: href,
+                                reason: reason,
+                                tag: currentTag,
+                                ascsubtag: currentAscsubtag,
+                                linkId: currentLinkId
+                            });
+                        }
+                    } catch (e) {
+                        console.error('خطأ في فحص الرابط:', e);
+                    }
+                }
+            });
+            
+            if (competitorLinks.length > 0) {
+                console.log('🛡️ تم اكتشاف روابط منافسة في الصفحة:', competitorLinks);
+                showCompetitorLinksSummary(competitorLinks);
+            } else {
+                console.log('✅ لا توجد روابط منافسة في الصفحة');
+            }
+            
+            return competitorLinks;
+        }
+        
+        // إظهار ملخص الروابط المنافسة
+        function showCompetitorLinksSummary(competitorLinks) {
+            const summary = document.createElement('div');
+            summary.className = 'override-message';
+            summary.style.maxWidth = '600px';
+            
+            let summaryContent = `
+                <h3>🛡️ ملخص الروابط المنافسة في الصفحة</h3>
+                <p>تم اكتشاف <strong>${competitorLinks.length}</strong> رابط منافس:</p>
+            `;
+            
+            competitorLinks.forEach((link, index) => {
+                summaryContent += `
+                    <div style="
+                        background: rgba(255,255,255,0.2);
+                        border-radius: 10px;
+                        padding: 15px;
+                        margin: 10px 0;
+                        text-align: right;
+                    ">
+                        <h4>🔗 رابط منافس ${index + 1}</h4>
+                        <p><strong>السبب:</strong> ${link.reason}</p>
+                        <p><strong>معرف الأفلييت:</strong> ${link.tag}</p>
+                        ${link.ascsubtag ? `<p><strong>ascsubtag:</strong> ${link.ascsubtag}</p>` : ''}
+                        ${link.linkId ? `<p><strong>linkId:</strong> ${link.linkId}</p>` : ''}
+                        <p><strong>الرابط:</strong></p>
+                        <div style="
+                            background: rgba(0,0,0,0.3);
+                            border-radius: 5px;
+                            padding: 10px;
+                            margin: 10px 0;
+                            font-family: monospace;
+                            font-size: 12px;
+                            word-break: break-all;
+                        ">
+                            ${link.url}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            summaryContent += `
+                <p><strong>ملاحظة:</strong> هذه الروابط ستُعدل تلقائياً عند النقر عليها</p>
+                <button class="action-btn success" onclick="this.parentElement.remove()">✅ فهمت</button>
+            `;
+            
+            summary.innerHTML = summaryContent;
+            document.body.appendChild(summary);
+            
+            // إزالة الملخص تلقائياً بعد 15 ثانية
+            setTimeout(() => {
+                if (summary.parentNode) {
+                    summary.remove();
+                }
+            }, 15000);
         }
         
         console.log('✅ تم تحميل نظام إدارة الكوكيز للأفلييت');
