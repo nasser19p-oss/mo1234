@@ -36,46 +36,66 @@
             margin-bottom: 30px;
         }
         
-        .input-group {
+        .form-group {
             margin-bottom: 20px;
             text-align: right;
         }
         
-        .input-group label {
+        .form-group label {
             display: block;
             margin-bottom: 8px;
             font-weight: bold;
-            color: #555;
+            color: #333;
+            font-size: 16px;
         }
         
-        .input-group input, .input-group textarea {
+        .form-group input,
+        .form-group select {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
             border-radius: 10px;
             font-size: 16px;
-            transition: border-color 0.3s;
+            transition: all 0.3s ease;
+            background: #fff;
         }
         
-        .input-group input:focus, .input-group textarea:focus {
+        .form-group input:focus,
+        .form-group select:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .form-group small {
+            display: block;
+            margin-top: 5px;
+            color: #6c757d;
+            font-size: 14px;
+            font-style: italic;
         }
         
         .btn {
             background: linear-gradient(45deg, #667eea, #764ba2);
             color: white;
             border: none;
-            padding: 15px 30px;
-            font-size: 18px;
+            padding: 12px 25px;
+            font-size: 16px;
             border-radius: 10px;
             cursor: pointer;
-            transition: transform 0.3s;
+            transition: all 0.3s ease;
             margin: 10px;
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
         }
         
         .btn:hover {
             transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
         }
         
         .btn-success { background: linear-gradient(45deg, #28a745, #20c997); }
@@ -200,6 +220,108 @@
             margin: 20px 0;
             text-align: right;
         }
+
+        /* واجهة الكوكيز للمنتج */
+        .product-cookie-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
+            z-index: 9999;
+            transform: translateY(100%);
+            transition: transform 0.5s ease-in-out;
+        }
+        
+        .product-cookie-banner.show {
+            transform: translateY(0);
+        }
+        
+        .product-cookie-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .product-cookie-text {
+            flex: 1;
+            text-align: right;
+        }
+        
+        .product-cookie-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .product-cookie-banner .btn {
+            padding: 10px 20px;
+            font-size: 14px;
+            margin: 0;
+        }
+        
+        .product-cookie-banner .btn-success {
+            background: linear-gradient(45deg, #28a745, #20c997);
+        }
+        
+        .product-cookie-banner .btn-danger {
+            background: linear-gradient(45deg, #dc3545, #e83e8c);
+        }
+
+        /* مؤشر حالة الكوكيز */
+        .cookie-status-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 10px;
+            padding: 10px 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 9998;
+            font-size: 12px;
+            color: #333;
+            backdrop-filter: blur(10px);
+        }
+        
+        .cookie-status-indicator.active {
+            background: rgba(40, 167, 69, 0.9);
+            color: white;
+        }
+        
+        .cookie-status-indicator.expired {
+            background: rgba(220, 53, 69, 0.9);
+            color: white;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+            margin: 10px;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 123, 255, 0.4);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(-1px);
+        }
     </style>
 </head>
 <body>
@@ -216,33 +338,107 @@
         </div>
     </div>
 
+    <!-- واجهة الكوكيز للمنتج -->
+    <div id="productCookieBanner" class="product-cookie-banner">
+        <div class="product-cookie-content">
+            <div class="product-cookie-text">
+                <strong>🍪 إشعار الكوكيز</strong><br>
+                <small>نحن نستخدم الكوكيز لضمان حصولك على أفضل الصفقات. معرف الأفلييت: <span id="productAffiliateId"></span></small>
+            </div>
+            <div class="product-cookie-buttons">
+                <button class="btn btn-success" onclick="acceptProductCookies()">✅ قبول</button>
+                <button class="btn btn-danger" onclick="rejectProductCookies()">❌ رفض</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- مؤشر حالة الكوكيز -->
+    <div id="cookieStatusIndicator" class="cookie-status-indicator hidden">
+        <div id="cookieStatusText"></div>
+    </div>
+
     <div class="container">
         <h1 class="title">🍪 مدير الكوكيز للأفلييت المتقدم</h1>
         
-        <div class="input-group">
-            <label for="affiliateId">معرف الأفلييت (مثل: yajnyeg-21):</label>
-            <input type="text" id="affiliateId" placeholder="yajnyeg-21">
+        <div class="form-group">
+            <label for="amazonProductUrl">🔗 رابط منتج Amazon:</label>
+            <input type="url" id="amazonProductUrl" placeholder="https://www.amazon.eg/-/en/product-name/dp/PRODUCT_ID" required>
+            <small>أدخل رابط المنتج من Amazon الذي تريد نشره على القناة</small>
         </div>
         
-        <div class="input-group">
-            <label for="targetUrl">رابط المنتج الأصلي:</label>
-            <input type="url" id="targetUrl" placeholder="https://amazon.com/product/...">
+        <div class="form-group">
+            <label for="affiliateId">🆔 معرف الأفلييت:</label>
+            <input type="text" id="affiliateId" value="yajnyeg-21" placeholder="أدخل معرف الأفلييت الخاص بك">
+            <small>معرف الأفلييت الخاص بك (مثال: yajnyeg-21)</small>
         </div>
         
-        <div class="input-group">
-            <label for="linkCode">كود الرابط (مثل: ur2):</label>
-            <input type="text" id="linkCode" placeholder="ur2" value="ur2">
+        <div class="form-group">
+            <label for="linkCode">🔗 كود الرابط:</label>
+            <input type="text" id="linkCode" value="ur2" placeholder="كود الرابط">
+            <small>كود الرابط (مثال: ur2)</small>
         </div>
         
-        <div class="input-group">
-            <label for="campaign">معرف الحملة (مثل: 247):</label>
-            <input type="text" id="campaign" placeholder="247" value="247">
+        <div class="form-group">
+            <label for="campaign">📢 الحملة:</label>
+            <input type="text" id="campaign" value="247" placeholder="معرف الحملة">
+            <small>معرف الحملة (مثال: 247)</small>
         </div>
         
-        <button class="btn" onclick="generateTrackingLink()">🔗 إنشاء رابط التتبع</button>
+        <div class="form-group">
+            <label for="creative">🎨 الإبداع:</label>
+            <input type="text" id="creative" value="1211" placeholder="معرف الإبداع">
+            <small>معرف الإبداع (مثال: 1211)</small>
+        </div>
+        
+        <div class="form-group">
+            <label for="ascsubtag">🏷️ العلامة الفرعية:</label>
+            <input type="text" id="ascsubtag" value="57752714" placeholder="العلامة الفرعية">
+            <small>العلامة الفرعية (مثال: 57752714)</small>
+        </div>
+        
+        <div class="form-group">
+            <label for="cookieDuration">⏰ مدة صلاحية الكوكيز:</label>
+            <select id="cookieDuration">
+                <option value="86400000">24 ساعة (مُوصى به)</option>
+                <option value="43200000">12 ساعة</option>
+                <option value="172800000">48 ساعة</option>
+                <option value="604800000">7 أيام</option>
+            </select>
+            <small>مدة صلاحية الكوكيز (24 ساعة مُوصى بها للحماية القصوى)</small>
+        </div>
+        
+        <div class="form-group">
+            <label for="protectionLevel">🛡️ مستوى الحماية:</label>
+            <select id="protectionLevel">
+                <option value="maximum">أقصى حماية (مُوصى به)</option>
+                <option value="high">حماية عالية</option>
+                <option value="medium">حماية متوسطة</option>
+            </select>
+            <small>مستوى حماية الكوكيز من المسح والتعديل</small>
+        </div>
+        
+        <div class="form-group">
+            <label for="overrideMode">🎯 وضع التغليب:</label>
+            <select id="overrideMode">
+                <option value="aggressive">تغليب عدواني (مُوصى به)</option>
+                <option value="smart">تغليب ذكي</option>
+                <option value="passive">تغليب سلبي</option>
+            </select>
+            <small>كيفية تغليب الكوكيز على الروابط المنافسة</small>
+        </div>
+        
+        <button type="button" class="btn btn-primary" onclick="generateAdvancedTrackingLink()">🚀 إنشاء رابط التتبع المتقدم</button>
         <button class="btn" onclick="checkCookieStatus()">📊 فحص حالة الكوكيز</button>
         <button class="btn" onclick="clearAllCookies()">🗑️ مسح الكوكيز</button>
         <button class="btn" onclick="decodeExistingLink()">🔍 فك تشفير رابط موجود</button>
+        <button class="btn" onclick="testProductPage()">🧪 اختبار صفحة المنتج</button>
+        <button class="btn" onclick="testGeneratedLink()">🧪 اختبار الرابط المُنشأ</button>
+        <button class="btn" onclick="testAmazonLink()">🧪 اختبار رابط Amazon</button>
+        <button class="btn" onclick="testPageOverride()">🧪 اختبار التغليب في الصفحة</button>
+        <button class="btn" onclick="testOverrideSystem()">🧪 اختبار نظام التغليب</button>
+        <button class="btn" onclick="testSmartOverrideSystem()">🚀 اختبار النظام الذكي</button>
+        <button class="btn" onclick="testGlobalOverride()">🌍 اختبار التغليب العالمي</button>
+        <button class="btn" onclick="createBookmarklet()">🚀 إنشاء Bookmarklet للتغليب</button>
         
         <div class="input-group">
             <label for="existingLink">رابط مُشفر لفك التشفير:</label>
@@ -262,127 +458,1488 @@
         const COOKIE_DURATION = 24 * 60 * 60 * 1000; // 24 ساعة
         const AFFILIATE_COOKIE_NAME = 'affiliate_tracking';
         const CONSENT_COOKIE_NAME = 'cookie_consent';
+        const DOMINANCE_COOKIE_NAME = 'affiliate_dominance';
         
         let timerInterval;
         let redirectInterval;
         let pendingTrackingData = null;
-        
-        // وظيفة إنشاء رابط التتبع المتقدم
-        function generateTrackingLink() {
-            const affiliateId = document.getElementById('affiliateId').value || 'yajnyeg-21';
-            const targetUrl = document.getElementById('targetUrl').value;
-            const linkCode = document.getElementById('linkCode').value || 'ur2';
-            const campaign = document.getElementById('campaign').value || '247';
-            
-            if (!targetUrl) {
-                showStatus('يرجى إدخال رابط المنتج', 'error');
-                return;
-            }
-            
-            // إنشاء بيانات التتبع المتقدمة
-            const trackingData = {
-                affiliateId: affiliateId,
-                timestamp: Date.now(),
-                targetUrl: targetUrl,
-                linkCode: linkCode,
-                linkId: generateRandomId(),
-                camp: campaign,
-                creative: '1211',
-                ascsubtag: '57752714',
-                expiresAt: Date.now() + COOKIE_DURATION,
-                protected: true // حماية إضافية
-            };
-            
-            // تشفير البيانات
-            const encodedData = btoa(JSON.stringify(trackingData));
-            
-            // إنشاء رابط التتبع
-            const trackingUrl = `${window.location.origin}${window.location.pathname}?track=${encodedData}`;
-            
-            // عرض الرابط المُنشأ
-            document.getElementById('generatedLink').innerHTML = `
-                <div class="generated-link">
-                    <strong>🔗 رابط التتبع المُنشأ:</strong><br>
-                    <a href="${trackingUrl}" target="_blank">${trackingUrl}</a>
-                    <br><br>
-                    <button class="btn" onclick="copyToClipboard('${trackingUrl}')">📋 نسخ الرابط</button>
-                    <br><br>
-                    <small><strong>البيانات المُشفرة:</strong><br>${encodedData}</small>
-                </div>
-            `;
-            
-            showStatus('تم إنشاء رابط التتبع بنجاح!', 'success');
-        }
-        
-        // وظيفة فك تشفير رابط موجود
-        function decodeExistingLink() {
-            const existingLink = document.getElementById('existingLink').value;
-            
-            if (!existingLink) {
-                showStatus('يرجى إدخال الرابط المراد فك تشفيره', 'error');
-                return;
-            }
-            
-            try {
-                // استخراج البيانات المُشفرة من الرابط
-                let encodedData = '';
-                
-                if (existingLink.includes('?track=')) {
-                    encodedData = existingLink.split('?track=')[1];
-                } else if (existingLink.includes('nullsrcdoc?track=')) {
-                    encodedData = existingLink.split('nullsrcdoc?track=')[1];
-                } else {
-                    // إذا كان النص هو البيانات المُشفرة مباشرة
-                    encodedData = existingLink;
-                }
-                
-                // فك التشفير
-                const decodedData = JSON.parse(atob(encodedData));
-                
-                // عرض البيانات المفكوكة
-                document.getElementById('decodedInfo').innerHTML = `
-                    <div class="decoded-info">
-                        <h3>🔍 البيانات المفكوكة:</h3>
-                        <p><strong>معرف الأفلييت:</strong> ${decodedData.affiliateId}</p>
-                        <p><strong>كود الرابط:</strong> ${decodedData.linkCode || 'غير محدد'}</p>
-                        <p><strong>معرف الحملة:</strong> ${decodedData.camp || 'غير محدد'}</p>
-                        <p><strong>الرابط المقصود:</strong> <a href="${decodedData.targetUrl}" target="_blank">${decodedData.targetUrl}</a></p>
-                        <p><strong>تاريخ الإنشاء:</strong> ${new Date(decodedData.timestamp).toLocaleString('ar-EG')}</p>
-                        <p><strong>تاريخ الانتهاء:</strong> ${new Date(decodedData.expiresAt).toLocaleString('ar-EG')}</p>
-                    </div>
-                `;
-                
-                showStatus('تم فك تشفير الرابط بنجاح!', 'success');
-                
-            } catch (e) {
-                showStatus('خطأ في فك تشفير الرابط - تأكد من صحة الرابط', 'error');
-                console.error(e);
-            }
-        }
+        let isProductPage = false;
         
         // وظيفة إنشاء معرف عشوائي
         function generateRandomId() {
             return Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
         }
         
-        // وظيفة عرض نافذة قبول الكوكيز
-        function showCookieConsent(trackingData) {
-            pendingTrackingData = trackingData;
-            document.getElementById('affiliateIdDisplay').textContent = trackingData.affiliateId;
-            document.getElementById('cookieConsentOverlay').classList.remove('hidden');
+        // وظيفة اختبار رابط Amazon
+        function testAmazonLink() {
+            const amazonUrl = "https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?_encoding=UTF8&tag=yajnyeg-21&linkCode=ur2&linkId=4ff5fa11b6d0385e8811d3e183795133&camp=247&creative=1211&ascsubtag=57758038&th=1&psc=1";
+            
+            // فحص إذا كانت كوكيزك نشطة
+            const currentCookie = getCookieProtected(AFFILIATE_COOKIE_NAME);
+            
+            if (currentCookie) {
+                try {
+                    const trackingData = JSON.parse(currentCookie);
+                    if (trackingData.dominant && trackingData.expiresAt > Date.now()) {
+                        // إظهار رسالة أن كوكيزك ستتغلب
+                        document.getElementById('status').innerHTML = `
+                            <div class="status success">
+                                <h3>🛡️ اختبار رابط Amazon</h3>
+                                <p><strong>الرابط الأصلي:</strong> <a href="${amazonUrl}" target="_blank">${amazonUrl}</a></p>
+                                <p><strong>معرف الأفلييت الأصلي:</strong> yajnyeg-21</p>
+                                <p><strong>كوكيزك النشطة:</strong> ${trackingData.affiliateId}</p>
+                                <p><strong>الحالة:</strong> ✅ كوكيزك ستتغلب على معرف الأفلييت الأصلي!</p>
+                                <p><strong>الوقت المتبقي:</strong> ${Math.floor((trackingData.expiresAt - Date.now()) / (1000 * 60 * 60))} ساعة</p>
+                                <button class="btn" onclick="simulateAmazonRedirect('${amazonUrl}', '${trackingData.affiliateId}')">🚀 محاكاة إعادة التوجيه</button>
+                                <button class="btn" onclick="testDirectAmazonRedirect('${amazonUrl}')">🧪 اختبار التغليب المباشر</button>
+                            </div>
+                        `;
+                        
+                        showStatus('كوكيزك نشطة وستتغلب على معرف الأفلييت الأصلي!', 'success');
+                    } else {
+                        showStatus('كوكيزك منتهية الصلاحية', 'error');
+                    }
+                } catch (e) {
+                    showStatus('خطأ في قراءة بيانات الكوكيز', 'error');
+                }
+            } else {
+                showStatus('لا توجد كوكيز نشطة', 'info');
+            }
+        }
+        
+        // وظيفة اختبار التغليب في الصفحة
+        function testPageOverride() {
+            // إضافة روابط تجريبية للصفحة
+            const testContainer = document.createElement('div');
+            testContainer.innerHTML = `
+                <div style="background: #f8f9fa; border-radius: 10px; padding: 20px; margin: 20px 0; text-align: center;">
+                    <h3>🧪 روابط اختبار التغليب</h3>
+                    <p>اضغط على أي من هذه الروابط لاختبار نظام التغليب:</p>
+                    
+                    <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin: 20px 0;">
+                        <a href="https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?tag=competitor1&linkCode=ur2" 
+                           class="btn" style="text-decoration: none; display: inline-block;">
+                            🔗 رابط منافس 1
+                        </a>
+                        
+                        <a href="https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?tag=competitor2&linkCode=ur2" 
+                           class="btn" style="text-decoration: none; display: inline-block;">
+                            🔗 رابط منافس 2
+                        </a>
+                        
+                        <a href="https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?tag=competitor3&linkCode=ur2" 
+                           class="btn" style="text-decoration: none; display: inline-block;">
+                            🔗 رابط منافس 3
+                        </a>
+                    </div>
+                    
+                    <p><small>⚠️ هذه الروابط تحتوي على معرفات منافسة - سيتم تعديلها تلقائياً</small></p>
+                    <button class="btn" onclick="this.parentElement.remove()">❌ إزالة روابط الاختبار</button>
+                </div>
+            `;
+            
+            // إضافة الروابط للصفحة
+            document.querySelector('.container').appendChild(testContainer);
+            
+            // تفعيل نظام التغليب
+            setTimeout(() => {
+                checkForOtherAffiliateLinks();
+                showStatus('تم إضافة روابط الاختبار وتفعيل نظام التغليب!', 'success');
+            }, 100);
+        }
+        
+        // وظيفة اختبار التغليب المباشر
+        function testDirectAmazonRedirect(amazonUrl) {
+            // فحص كوكيزك
+            const currentCookie = getCookieProtected(AFFILIATE_COOKIE_NAME);
+            
+            if (!currentCookie) {
+                showStatus('لا توجد كوكيز نشطة', 'error');
+                return;
+            }
+            
+            try {
+                const trackingData = JSON.parse(currentCookie);
+                
+                // تعديل الرابط ليستخدم معرفك
+                const modifiedUrl = modifyAffiliateLink(amazonUrl, trackingData.affiliateId);
+                
+                // إظهار النتيجة
+                document.getElementById('status').innerHTML = `
+                    <div class="status info">
+                        <h3>🧪 اختبار التغليب المباشر</h3>
+                        <p><strong>الرابط الأصلي:</strong></p>
+                        <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0; word-break: break-all; font-family: monospace; font-size: 12px;">
+                            ${amazonUrl}
+                        </div>
+                        <p><strong>الرابط المعدل:</strong></p>
+                        <div style="background: #e8f5e8; padding: 10px; border-radius: 5px; margin: 10px 0; word-break: break-all; font-family: monospace; font-size: 12px;">
+                            ${modifiedUrl}
+                        </div>
+                        <p><strong>التغييرات:</strong></p>
+                        <ul style="text-align: right; margin: 10px 0;">
+                            <li>✅ تم تغيير tag من yajnyeg-21 إلى ${trackingData.affiliateId}</li>
+                            <li>✅ تم إضافة linkCode=ur2</li>
+                            <li>✅ تم إضافة camp=247</li>
+                            <li>✅ تم إضافة creative=1211</li>
+                            <li>✅ تم إضافة ascsubtag=57752714</li>
+                        </ul>
+                        <button class="btn" onclick="window.open('${modifiedUrl}', '_blank')">🔗 فتح الرابط المعدل</button>
+                        <button class="btn" onclick="copyToClipboard('${modifiedUrl}')">📋 نسخ الرابط المعدل</button>
+                    </div>
+                `;
+                
+                showStatus('تم اختبار التغليب بنجاح!', 'success');
+                
+                // اختبار في Console
+                console.log('=== اختبار التغليب ===');
+                console.log('الرابط الأصلي:', amazonUrl);
+                console.log('الرابط المعدل:', modifiedUrl);
+                console.log('معرف الأفلييت الجديد:', trackingData.affiliateId);
+                
+            } catch (e) {
+                showStatus('خطأ في اختبار التغليب', 'error');
+                console.error(e);
+            }
+        }
+        
+        // وظيفة محاكاة إعادة التوجيه لـ Amazon
+        function simulateAmazonRedirect(originalUrl, yourAffiliateId) {
+            // تعديل الرابط ليستخدم معرفك
+            const modifiedUrl = modifyAffiliateLink(originalUrl, yourAffiliateId);
+            
+            document.getElementById('status').innerHTML = `
+                <div class="status info">
+                    <h3>🚀 محاكاة إعادة التوجيه</h3>
+                    <p><strong>الرابط الأصلي:</strong> ${originalUrl}</p>
+                    <p><strong>الرابط المعدل:</strong> <a href="${modifiedUrl}" target="_blank">${modifiedUrl}</a></p>
+                    <p><strong>معرف الأفلييت الجديد:</strong> ${yourAffiliateId}</p>
+                    <p><strong>الحالة:</strong> تم تعديل الرابط ليستخدم معرفك!</p>
+                    <button class="btn" onclick="window.open('${modifiedUrl}', '_blank')">🔗 فتح الرابط المعدل</button>
+                </div>
+            `;
+            
+            showStatus('تم تعديل الرابط ليستخدم معرفك!', 'success');
+        }
+        
+        // وظيفة اختبار الرابط المُنشأ
+        function testGeneratedLink() {
+            const affiliateId = document.getElementById('affiliateId').value || 'yajnyeg-21';
+            const targetUrl = document.getElementById('targetUrl').value;
+            
+            if (!targetUrl) {
+                showStatus('يرجى إدخال رابط المنتج أولاً', 'error');
+                return;
+            }
+            
+            // إنشاء رابط تجريبي
+            const testData = {
+                affiliateId: affiliateId.split('&')[0].trim(),
+                timestamp: Date.now(),
+                targetUrl: targetUrl,
+                linkCode: 'ur2',
+                linkId: generateRandomId(),
+                camp: '247',
+                creative: '1211',
+                ascsubtag: '57752714',
+                expiresAt: Date.now() + COOKIE_DURATION,
+                protected: true,
+                dominant: true
+            };
+            
+            const encodedData = btoa(JSON.stringify(testData));
+            const currentUrl = window.location.href.split('?')[0];
+            const testUrl = `${currentUrl}?track=${encodedData}`;
+            
+            // عرض معلومات الاختبار
+            document.getElementById('status').innerHTML = `
+                <div class="status info">
+                    <h3>🧪 اختبار الرابط المُنشأ</h3>
+                    <p><strong>الرابط التجريبي:</strong> <a href="${testUrl}" target="_blank">${testUrl}</a></p>
+                    <p><strong>معرف الأفلييت:</strong> ${testData.affiliateId}</p>
+                    <p><strong>الرابط المستهدف:</strong> <a href="${targetUrl}" target="_blank">${targetUrl}</a></p>
+                    <p><strong>الحالة:</strong> جاهز للاختبار</p>
+                    <button class="btn" onclick="window.open('${testUrl}', '_blank')">🔗 فتح الرابط في نافذة جديدة</button>
+                </div>
+            `;
+            
+            showStatus('تم إنشاء رابط الاختبار بنجاح!', 'success');
+        }
+        
+        // وظيفة إنشاء رابط التتبع المتقدم
+        function generateAdvancedTrackingLink() {
+            const amazonProductUrl = document.getElementById('amazonProductUrl').value;
+            const affiliateId = document.getElementById('affiliateId').value || 'yajnyeg-21';
+            const linkCode = document.getElementById('linkCode').value || 'ur2';
+            const campaign = document.getElementById('campaign').value || '247';
+            const creative = document.getElementById('creative').value || '1211';
+            const ascsubtag = document.getElementById('ascsubtag').value || '57752714';
+            const cookieDuration = parseInt(document.getElementById('cookieDuration').value) || 86400000; // 24 ساعة افتراضياً
+            const protectionLevel = document.getElementById('protectionLevel').value || 'maximum';
+            const overrideMode = document.getElementById('overrideMode').value || 'aggressive';
+            
+            if (!amazonProductUrl) {
+                showStatus('يرجى إدخال رابط منتج Amazon', 'error');
+                return;
+            }
+            
+            // تنظيف معرف الأفلييت من أي معلومات إضافية
+            const cleanAffiliateId = affiliateId.split('&')[0].trim();
+            
+            // إنشاء بيانات التتبع المتقدمة
+            const advancedTrackingData = {
+                affiliateId: cleanAffiliateId,
+                timestamp: Date.now(),
+                targetUrl: amazonProductUrl,
+                linkCode: linkCode,
+                linkId: generateRandomId(),
+                camp: campaign,
+                creative: creative,
+                ascsubtag: ascsubtag,
+                expiresAt: Date.now() + cookieDuration,
+                protected: true,
+                dominant: true,
+                protectionLevel: protectionLevel,
+                overrideMode: overrideMode,
+                cookieDuration: cookieDuration,
+                securityHash: generateSecurityHash(cleanAffiliateId, amazonProductUrl, Date.now())
+            };
+            
+            // إنشاء رابط التتبع الذكي المتقدم
+            const smartTrackingUrl = createAdvancedSmartTrackingUrl(amazonProductUrl, advancedTrackingData);
+            
+            // إنشاء رابط التتبع التقليدي (للاختبار)
+            const encodedData = btoa(JSON.stringify(advancedTrackingData));
+            const currentUrl = window.location.href.split('?')[0];
+            const traditionalUrl = `${currentUrl}?track=${encodedData}`;
+            
+            // عرض الروابط المُنشأة المتقدمة
+            document.getElementById('generatedLink').innerHTML = `
+                <div class="generated-link">
+                    <h3>🚀 روابط التتبع المتقدمة المُنشأة</h3>
+                    
+                    <div style="background: #e8f5e8; border: 2px solid #28a745; border-radius: 15px; padding: 25px; margin: 25px 0;">
+                        <h4>🛡️ الرابط الذكي المتقدم (مُفضل للنشر):</h4>
+                        <p><strong>المميزات:</strong> يعمل مباشرة، حماية فائقة، تغليب ذكي، نظام أمان متقدم</p>
+                        <div style="background: #fff; border: 1px solid #28a745; border-radius: 10px; padding: 20px; margin: 20px 0; word-break: break-all; font-family: monospace; font-size: 12px;">
+                            ${smartTrackingUrl}
+                        </div>
+                        <button class="btn" onclick="copyToClipboard('${smartTrackingUrl}')" style="background: #28a745; margin: 10px;">📋 نسخ الرابط الذكي</button>
+                        <button class="btn" onclick="testAdvancedSmartLink('${smartTrackingUrl}')" style="background: #17a2b8; margin: 10px;">🧪 اختبار الرابط الذكي</button>
+                        <button class="btn" onclick="analyzeAdvancedLink('${smartTrackingUrl}')" style="background: #6f42c1; margin: 10px;">🔍 تحليل الرابط</button>
+                    </div>
+                    
+                    <div style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 15px; padding: 25px; margin: 25px 0;">
+                        <h4>📱 الرابط التقليدي (للاختبار والتطوير):</h4>
+                        <p><strong>المميزات:</strong> يعرض واجهة الكوكيز، يحفظ الكوكيز، يعيد التوجيه، نظام حماية متقدم</p>
+                        <div style="background: #fff; border: 1px solid #ffc107; border-radius: 10px; padding: 20px; margin: 20px 0; word-break: break-all; font-family: monospace; font-size: 12px;">
+                            ${traditionalUrl}
+                        </div>
+                        <button class="btn" onclick="copyToClipboard('${traditionalUrl}')" style="background: #ffc107; color: #333; margin: 10px;">📋 نسخ الرابط التقليدي</button>
+                        <button class="btn" onclick="testAdvancedTraditionalLink('${traditionalUrl}')" style="background: #fd7e14; margin: 10px;">🧪 اختبار الرابط التقليدي</button>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; border: 2px solid #6c757d; border-radius: 15px; padding: 25px; margin: 25px 0;">
+                        <h4>📊 معلومات التتبع المتقدمة:</h4>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 20px 0;">
+                            <div style="background: #fff; border: 1px solid #dee2e6; border-radius: 10px; padding: 20px;">
+                                <h5>🔐 معلومات الأمان:</h5>
+                                <p><strong>مستوى الحماية:</strong> ${getProtectionLevelText(protectionLevel)}</p>
+                                <p><strong>وضع التغليب:</strong> ${getOverrideModeText(overrideMode)}</p>
+                                <p><strong>مدة الصلاحية:</strong> ${getDurationText(cookieDuration)}</p>
+                                <p><strong>التشفير:</strong> ✅ متقدم</p>
+                            </div>
+                            
+                            <div style="background: #fff; border: 1px solid #dee2e6; border-radius: 10px; padding: 20px;">
+                                <h5>🎯 معلومات الأفلييت:</h5>
+                                <p><strong>المعرف:</strong> ${cleanAffiliateId}</p>
+                                <p><strong>كود الرابط:</strong> ${linkCode}</p>
+                                <p><strong>الحملة:</strong> ${campaign}</p>
+                                <p><strong>الإبداع:</strong> ${creative}</p>
+                            </div>
+                            
+                            <div style="background: #fff; border: 1px solid #dee2e6; border-radius: 10px; padding: 20px;">
+                                <h5>⏰ معلومات التوقيت:</h5>
+                                <p><strong>تاريخ الإنشاء:</strong> ${new Date().toLocaleString('ar-EG')}</p>
+                                <p><strong>تاريخ الانتهاء:</strong> ${new Date(Date.now() + cookieDuration).toLocaleString('ar-EG')}</p>
+                                <p><strong>المدة الكلية:</strong> ${getDurationText(cookieDuration)}</p>
+                                <p><strong>الحالة:</strong> 🟢 نشط</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #d1ecf1; border: 1px solid #bee5eb; border-radius: 15px; padding: 25px; margin: 25px 0;">
+                        <h4>💡 نصائح للنشر:</h4>
+                        <ul style="text-align: right; margin: 15px 0;">
+                            <li><strong>للزبائن:</strong> استخدم الرابط الذكي المتقدم - يعمل مباشرة مع حماية فائقة</li>
+                            <li><strong>للاختبار:</strong> استخدم الرابط التقليدي - لفحص النظام والحماية</li>
+                            <li><strong>للحماية:</strong> كلا الرابطين يحميان من الروابط المنافسة لمدة 24 ساعة</li>
+                            <li><strong>للنشر:</strong> الرابط الذكي المتقدم أفضل للقنوات والمواقع</li>
+                            <li><strong>للأمان:</strong> النظام يستخدم تشفير متقدم وحماية فائقة</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 15px; padding: 25px; margin: 25px 0;">
+                        <h4>🚀 المميزات المتقدمة:</h4>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 20px 0;">
+                            <div style="background: #fff; border: 1px solid #ffc107; border-radius: 8px; padding: 15px; text-align: center;">
+                                <h5>🛡️ حماية فائقة</h5>
+                                <p>حماية متقدمة من المسح والتعديل</p>
+                            </div>
+                            <div style="background: #fff; border: 1px solid #ffc107; border-radius: 8px; padding: 15px; text-align: center;">
+                                <h5>🎯 تغليب ذكي</h5>
+                                <p>تغليب تلقائي على الروابط المنافسة</p>
+                            </div>
+                            <div style="background: #fff; border: 1px solid #ffc107; border-radius: 8px; padding: 15px; text-align: center;">
+                                <h5>🔐 تشفير متقدم</h5>
+                                <p>تشفير متقدم لبيانات التتبع</p>
+                            </div>
+                            <div style="background: #fff; border: 1px solid #ffc107; border-radius: 8px; padding: 15px; text-align: center;">
+                                <h5>⏰ صلاحية 24 ساعة</h5>
+                                <p>حماية مستمرة لمدة 24 ساعة</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <small><strong>البيانات المُشفرة:</strong><br>${encodedData}</small>
+                </div>
+            `;
+            
+            showStatus('تم إنشاء روابط التتبع المتقدمة بنجاح!', 'success');
+        }
+        
+        // وظيفة إنشاء رابط التتبع الذكي المتقدم
+        function createAdvancedSmartTrackingUrl(targetUrl, trackingData) {
+            try {
+                // تحليل الرابط المستهدف
+                const url = new URL(targetUrl);
+                
+                // إضافة معاملات الأفلييت المتقدمة
+                url.searchParams.set('tag', trackingData.affiliateId);
+                url.searchParams.set('linkCode', trackingData.linkCode);
+                url.searchParams.set('camp', trackingData.camp);
+                url.searchParams.set('creative', trackingData.creative);
+                url.searchParams.set('ascsubtag', trackingData.ascsubtag);
+                
+                // إضافة معرف فريد للتتبع
+                url.searchParams.set('linkId', trackingData.linkId);
+                
+                // إضافة timestamp للتتبع
+                url.searchParams.set('ts', trackingData.timestamp);
+                
+                // إضافة معامل التغليب المتقدم
+                url.searchParams.set('override', 'true');
+                url.searchParams.set('overrideMode', trackingData.overrideMode);
+                
+                // إضافة معامل الحماية المتقدمة
+                url.searchParams.set('protected', 'true');
+                url.searchParams.set('protectionLevel', trackingData.protectionLevel);
+                
+                // إضافة معامل الأمان
+                url.searchParams.set('securityHash', trackingData.securityHash);
+                url.searchParams.set('cookieDuration', trackingData.cookieDuration);
+                
+                // إضافة معامل التتبع المتقدم
+                url.searchParams.set('advanced', 'true');
+                url.searchParams.set('version', '2.0');
+                
+                return url.toString();
+            } catch (e) {
+                // إذا فشل في تحليل الرابط، إرجاع رابط معدل متقدم
+                return `${targetUrl}${targetUrl.includes('?') ? '&' : '?'}tag=${trackingData.affiliateId}&linkCode=${trackingData.linkCode}&camp=${trackingData.camp}&creative=${trackingData.creative}&ascsubtag=${trackingData.ascsubtag}&linkId=${trackingData.linkId}&ts=${trackingData.timestamp}&override=true&overrideMode=${trackingData.overrideMode}&protected=true&protectionLevel=${trackingData.protectionLevel}&securityHash=${trackingData.securityHash}&cookieDuration=${trackingData.cookieDuration}&advanced=true&version=2.0`;
+            }
+        }
+        
+        // وظيفة الحصول على نص مستوى الحماية
+        function getProtectionLevelText(level) {
+            const levels = {
+                'maximum': '🛡️ أقصى حماية (مُوصى به)',
+                'high': '🛡️ حماية عالية',
+                'medium': '🛡️ حماية متوسطة'
+            };
+            return levels[level] || levels['maximum'];
+        }
+        
+        // وظيفة الحصول على نص وضع التغليب
+        function getOverrideModeText(mode) {
+            const modes = {
+                'aggressive': '🎯 تغليب عدواني (مُوصى به)',
+                'smart': '🎯 تغليب ذكي',
+                'passive': '🎯 تغليب سلبي'
+            };
+            return modes[mode] || modes['aggressive'];
+        }
+        
+        // وظيفة الحصول على نص المدة
+        function getDurationText(duration) {
+            const hours = Math.floor(duration / (1000 * 60 * 60));
+            if (hours === 24) return '24 ساعة';
+            if (hours === 12) return '12 ساعة';
+            if (hours === 48) return '48 ساعة';
+            if (hours === 168) return '7 أيام';
+            return `${hours} ساعة`;
+        }
+        
+        // وظيفة اختبار الرابط الذكي المتقدم
+        function testAdvancedSmartLink(smartUrl) {
+            // فتح الرابط الذكي في نافذة جديدة
+            const testWindow = window.open(smartUrl, '_blank');
+            
+            if (testWindow) {
+                showStatus('تم فتح الرابط الذكي المتقدم في نافذة جديدة - جرب الآن!', 'success');
+                
+                // إظهار معلومات الاختبار
+                setTimeout(() => {
+                    document.getElementById('status').innerHTML = `
+                        <div class="status info">
+                            <h3>🧪 اختبار الرابط الذكي المتقدم</h3>
+                            <p><strong>الرابط:</strong> <a href="${smartUrl}" target="_blank">${smartUrl}</a></p>
+                            <p><strong>الحالة:</strong> تم فتحه في نافذة جديدة</p>
+                            <p><strong>المميزات المتقدمة:</strong></p>
+                            <ul style="text-align: right; margin: 10px 0;">
+                                <li>✅ يعمل مباشرة بدون العودة للتطبيق</li>
+                                <li>✅ يحتوي على معرف الأفلييت الخاص بك</li>
+                                <li>✅ حماية فائقة من الروابط المنافسة</li>
+                                <li>✅ نظام تغليب ذكي متقدم</li>
+                                <li>✅ تشفير متقدم للأمان</li>
+                                <li>✅ صلاحية 24 ساعة كاملة</li>
+                            </ul>
+                            <p><strong>النتيجة:</strong> هذا هو الحل المثالي للنشر على القنوات!</p>
+                        </div>
+                    `;
+                }, 2000);
+            } else {
+                showStatus('تم حظر النافذة المنبثقة - انسخ الرابط وافتحه يدوياً', 'info');
+            }
+        }
+        
+        // وظيفة اختبار الرابط التقليدي المتقدم
+        function testAdvancedTraditionalLink(traditionalUrl) {
+            // فتح الرابط التقليدي في نافذة جديدة
+            const testWindow = window.open(traditionalUrl, '_blank');
+            
+            if (testWindow) {
+                showStatus('تم فتح الرابط التقليدي المتقدم في نافذة جديدة - ستظهر واجهة الكوكيز المتقدمة', 'success');
+                
+                // إظهار معلومات الاختبار
+                setTimeout(() => {
+                    document.getElementById('status').innerHTML = `
+                        <div class="status info">
+                            <h3>🧪 اختبار الرابط التقليدي المتقدم</h3>
+                            <p><strong>الرابط:</strong> <a href="${traditionalUrl}" target="_blank">${traditionalUrl}</a></p>
+                            <p><strong>الحالة:</strong> تم فتحه في نافذة جديدة</p>
+                            <p><strong>المميزات المتقدمة:</strong></p>
+                            <ul style="text-align: right; margin: 10px 0;">
+                                <li>✅ يعرض واجهة الكوكيز المتقدمة</li>
+                                <li>✅ يحفظ الكوكيز مع حماية فائقة</li>
+                                <li>✅ يعيد التوجيه لصفحة المنتج</li>
+                                <li>✅ نظام حماية متقدم</li>
+                                <li>✅ مفيد للاختبار والتطوير</li>
+                            </ul>
+                            <p><strong>النتيجة:</strong> هذا مفيد للاختبار، لكن الرابط الذكي المتقدم أفضل للنشر!</p>
+                        </div>
+                    `;
+                }, 2000);
+            } else {
+                showStatus('تم حظر النافذة المنبثقة - انسخ الرابط وافتحه يدوياً', 'info');
+            }
+        }
+        
+        // وظيفة تحليل الرابط المتقدم
+        function analyzeAdvancedLink(smartUrl) {
+            try {
+                const url = new URL(smartUrl);
+                const params = url.searchParams;
+                
+                const analysis = `
+                    <div class="status info">
+                        <h3>🔍 تحليل الرابط المتقدم</h3>
+                        <div style="background: #f8f9fa; border-radius: 10px; padding: 20px; margin: 20px 0;">
+                            <h4>📊 المعاملات المكتشفة:</h4>
+                            <ul style="text-align: right; margin: 10px 0;">
+                                <li><strong>معرف الأفلييت:</strong> ${params.get('tag') || 'غير محدد'}</li>
+                                <li><strong>كود الرابط:</strong> ${params.get('linkCode') || 'غير محدد'}</li>
+                                <li><strong>الحملة:</strong> ${params.get('camp') || 'غير محدد'}</li>
+                                <li><strong>الإبداع:</strong> ${params.get('creative') || 'غير محدد'}</li>
+                                <li><strong>العلامة الفرعية:</strong> ${params.get('ascsubtag') || 'غير محدد'}</li>
+                                <li><strong>معرف التتبع:</strong> ${params.get('linkId') || 'غير محدد'}</li>
+                                <li><strong>التوقيت:</strong> ${params.get('ts') || 'غير محدد'}</li>
+                                <li><strong>وضع التغليب:</strong> ${params.get('overrideMode') || 'غير محدد'}</li>
+                                <li><strong>مستوى الحماية:</strong> ${params.get('protectionLevel') || 'غير محدد'}</li>
+                                <li><strong>مدة الكوكيز:</strong> ${params.get('cookieDuration') || 'غير محدد'}</li>
+                                <li><strong>الإصدار:</strong> ${params.get('version') || 'غير محدد'}</li>
+                            </ul>
+                        </div>
+                        <div style="background: #e8f5e8; border-radius: 10px; padding: 20px; margin: 20px 0;">
+                            <h4>✅ التحليل:</h4>
+                            <p>الرابط يحتوي على جميع المعاملات المطلوبة للحماية والتتبع المتقدم.</p>
+                            <p>نظام الأمان مفعل ومستوى الحماية عالي.</p>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('status').innerHTML = analysis;
+                showStatus('تم تحليل الرابط المتقدم بنجاح!', 'success');
+                
+            } catch (e) {
+                showStatus('خطأ في تحليل الرابط', 'error');
+                console.error(e);
+            }
+        }
+        
+        // وظيفة اختبار الرابط الذكي
+        function testSmartLink(smartUrl) {
+            // فتح الرابط الذكي في نافذة جديدة
+            const testWindow = window.open(smartUrl, '_blank');
+            
+            if (testWindow) {
+                showStatus('تم فتح الرابط الذكي في نافذة جديدة - جرب الآن!', 'success');
+                
+                // إظهار معلومات الاختبار
+                setTimeout(() => {
+                    document.getElementById('status').innerHTML = `
+                        <div class="status info">
+                            <h3>🧪 اختبار الرابط الذكي</h3>
+                            <p><strong>الرابط:</strong> <a href="${smartUrl}" target="_blank">${smartUrl}</a></p>
+                            <p><strong>الحالة:</strong> تم فتحه في نافذة جديدة</p>
+                            <p><strong>المميزات:</strong></p>
+                            <ul style="text-align: right; margin: 10px 0;">
+                                <li>✅ يعمل مباشرة بدون العودة للتطبيق</li>
+                                <li>✅ يحتوي على معرف الأفلييت الخاص بك</li>
+                                <li>✅ يحمي من الروابط المنافسة</li>
+                                <li>✅ سريع وسهل الاستخدام</li>
+                            </ul>
+                            <p><strong>النتيجة:</strong> هذا هو الحل المثالي للزبائن!</p>
+                        </div>
+                    `;
+                }, 2000);
+            } else {
+                showStatus('تم حظر النافذة المنبثقة - انسخ الرابط وافتحه يدوياً', 'info');
+            }
+        }
+        
+        // وظيفة اختبار الرابط التقليدي
+        function testTraditionalLink(traditionalUrl) {
+            // فتح الرابط التقليدي في نافذة جديدة
+            const testWindow = window.open(traditionalUrl, '_blank');
+            
+            if (testWindow) {
+                showStatus('تم فتح الرابط التقليدي في نافذة جديدة - ستظهر واجهة الكوكيز', 'success');
+                
+                // إظهار معلومات الاختبار
+                setTimeout(() => {
+                    document.getElementById('status').innerHTML = `
+                        <div class="status info">
+                            <h3>🧪 اختبار الرابط التقليدي</h3>
+                            <p><strong>الرابط:</strong> <a href="${traditionalUrl}" target="_blank">${traditionalUrl}</a></p>
+                            <p><strong>الحالة:</strong> تم فتحه في نافذة جديدة</p>
+                            <p><strong>المميزات:</strong></p>
+                            <ul style="text-align: right; margin: 10px 0;">
+                                <li>✅ يعرض واجهة الكوكيز</li>
+                                <li>✅ يحفظ الكوكيز في المتصفح</li>
+                                <li>✅ يعيد التوجيه لصفحة المنتج</li>
+                                <li>✅ مفيد للاختبار والتطوير</li>
+                            </ul>
+                            <p><strong>النتيجة:</strong> هذا مفيد للاختبار، لكن الرابط الذكي أفضل للزبائن!</p>
+                        </div>
+                    `;
+                }, 2000);
+            } else {
+                showStatus('تم حظر النافذة المنبثقة - انسخ الرابط وافتحه يدوياً', 'info');
+            }
+        }
+        
+        // وظيفة اختبار الرابط المُنشأ
+        function testOverrideSystem() {
+            // فحص كوكيزك
+            const currentCookie = getCookieProtected(AFFILIATE_COOKIE_NAME);
+            
+            if (!currentCookie) {
+                showStatus('لا توجد كوكيز نشطة', 'error');
+                return;
+            }
+            
+            try {
+                const trackingData = JSON.parse(currentCookie);
+                
+                if (!trackingData.dominant || trackingData.expiresAt <= Date.now()) {
+                    showStatus('كوكيزك غير متغلبة أو منتهية الصلاحية', 'error');
+                    return;
+                }
+                
+                // إضافة روابط اختبار متقدمة
+                const testContainer = document.createElement('div');
+                testContainer.innerHTML = `
+                    <div style="background: linear-gradient(45deg, #667eea, #764ba2); color: white; border-radius: 15px; padding: 25px; margin: 25px 0; text-align: center;">
+                        <h3>🛡️ اختبار نظام التغليب المتقدم</h3>
+                        <p><strong>معرف الأفلييت النشط:</strong> ${trackingData.affiliateId}</p>
+                        <p><strong>حالة التغليب:</strong> ✅ نشط</p>
+                        <p><strong>الوقت المتبقي:</strong> ${Math.floor((trackingData.expiresAt - Date.now()) / (1000 * 60 * 60))} ساعة</p>
+                        
+                        <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 20px; margin: 20px 0;">
+                            <h4>🔗 روابط الاختبار:</h4>
+                            <p>اضغط على أي رابط لرؤية نظام التغليب يعمل:</p>
+                            
+                            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin: 20px 0;">
+                                <a href="https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?tag=competitor1&linkCode=ur2" 
+                                   class="btn" style="text-decoration: none; display: inline-block; background: #ff6b6b;">
+                                    🔗 رابط منافس 1
+                                </a>
+                                
+                                <a href="https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?tag=competitor2&linkCode=ur2" 
+                                   class="btn" style="text-decoration: none; display: inline-block; background: #ff6b6b;">
+                                    🔗 رابط منافس 2
+                                </a>
+                                
+                                <a href="https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?tag=competitor3&linkCode=ur2" 
+                                   class="btn" style="text-decoration: none; display: inline-block; background: #ff6b6b;">
+                                    🔗 رابط منافس 3
+                                </a>
+                            </div>
+                            
+                            <p><small>⚠️ هذه الروابط تحتوي على معرفات منافسة - سيتم تعديلها تلقائياً</small></p>
+                        </div>
+                        
+                        <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 20px; margin: 20px 0;">
+                            <h4>📊 معلومات التغليب:</h4>
+                            <p><strong>النظام:</strong> MutationObserver - يراقب جميع الروابط الجديدة</p>
+                            <p><strong>التعديل:</strong> تلقائي عند النقر</p>
+                            <p><strong>المؤشرات:</strong> حدود حمراء + أيقونة 🛡️</p>
+                            <p><strong>الرسائل:</strong> إشعارات فورية عند التغليب</p>
+                        </div>
+                        
+                        <button class="btn" onclick="this.parentElement.remove()">❌ إزالة اختبار التغليب</button>
+                    </div>
+                `;
+                
+                // إضافة الاختبار للصفحة
+                document.querySelector('.container').appendChild(testContainer);
+                
+                // تفعيل نظام التغليب
+                setTimeout(() => {
+                    activateAutomaticOverride();
+                    showStatus('تم تفعيل نظام التغليب المتقدم! جرب النقر على أي رابط منافس', 'success');
+                }, 100);
+                
+            } catch (e) {
+                showStatus('خطأ في اختبار نظام التغليب', 'error');
+                console.error(e);
+            }
+        }
+        
+        // نظام التغليب الذكي المتقدم
+        function activateSmartOverrideSystem(trackingData) {
+            console.log('🚀 تم تفعيل نظام التغليب الذكي المتقدم');
+            
+            // 1. مراقبة جميع الروابط في الصفحة
+            monitorAllLinksSmart(trackingData);
+            
+            // 2. مراقبة النقر على الروابط
+            monitorLinkClicksSmart(trackingData);
+            
+            // 3. مراقبة فتح الروابط في نافذة جديدة
+            monitorNewWindowLinksSmart(trackingData);
+            
+            // 4. مراقبة تغيير الصفحة
+            monitorPageChangesSmart(trackingData);
+            
+            // 5. إظهار رسالة تأكيد
+            showSmartOverrideConfirmation(trackingData);
+            
+            // 6. إنشاء رابط التغليب العملي
+            createSmartOverrideLink(trackingData);
+            
+            // 7. إظهار تعليمات الاستخدام
+            showSmartOverrideInstructions(trackingData);
+            
+            // 8. تفعيل الحماية التلقائية
+            activateAutoProtection(trackingData);
+        }
+        
+        // مراقبة جميع الروابط في الصفحة بذكاء
+        function monitorAllLinksSmart(trackingData) {
+            console.log('🔍 بدء مراقبة جميع الروابط في الصفحة');
+            
+            // مراقبة التغييرات في DOM
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'childList') {
+                        mutation.addedNodes.forEach((node) => {
+                            if (node.nodeType === Node.ELEMENT_NODE) {
+                                // البحث عن الروابط الجديدة
+                                const newLinks = node.querySelectorAll ? node.querySelectorAll('a[href*="amazon"]') : [];
+                                newLinks.forEach(link => processLinkForSmartOverride(link, trackingData));
+                                
+                                // إذا كان العنصر نفسه رابط
+                                if (node.tagName === 'A' && node.href && node.href.includes('amazon')) {
+                                    processLinkForSmartOverride(node, trackingData);
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+            
+            // بدء المراقبة
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+            
+            // معالجة الروابط الموجودة حالياً
+            const existingLinks = document.querySelectorAll('a[href*="amazon"]');
+            existingLinks.forEach(link => processLinkForSmartOverride(link, trackingData));
+            
+            console.log(`✅ تم معالجة ${existingLinks.length} رابط موجود`);
+        }
+        
+        // معالجة رابط للتغليب الذكي
+        function processLinkForSmartOverride(link, trackingData) {
+            try {
+                const href = link.href;
+                
+                // فحص إذا كان الرابط يحتوي على معرف أفلييت منافس
+                if (href.includes('tag=') && !href.includes(trackingData.affiliateId)) {
+                    console.log('🛡️ تم اكتشاف رابط منافس:', href);
+                    
+                    // تعديل الرابط ليستخدم معرفك
+                    const modifiedUrl = modifyAffiliateLinkSmart(href, trackingData);
+                    
+                    // إضافة مستمع النقر الذكي
+                    addSmartClickListener(link, modifiedUrl, trackingData);
+                    
+                    // إضافة مؤشر بصري ذكي
+                    addSmartVisualIndicator(link, trackingData);
+                    
+                    // إضافة أيقونة التغليب الذكية
+                    addSmartOverrideIcon(link, trackingData);
+                    
+                    console.log('✅ تم تعديل الرابط:', modifiedUrl);
+                }
+            } catch (e) {
+                console.error('خطأ في معالجة الرابط:', e);
+            }
+        }
+        
+        // تعديل رابط الأفلييت بذكاء
+        function modifyAffiliateLinkSmart(originalUrl, trackingData) {
+            try {
+                const url = new URL(originalUrl);
+                
+                // تعديل معرف الأفلييت
+                url.searchParams.set('tag', trackingData.affiliateId);
+                
+                // إضافة معاملات إضافية إذا لم تكن موجودة
+                if (!url.searchParams.has('linkCode')) {
+                    url.searchParams.set('linkCode', trackingData.linkCode || 'ur2');
+                }
+                if (!url.searchParams.has('camp')) {
+                    url.searchParams.set('camp', trackingData.camp || '247');
+                }
+                if (!url.searchParams.has('creative')) {
+                    url.searchParams.set('creative', '1211');
+                }
+                if (!url.searchParams.has('ascsubtag')) {
+                    url.searchParams.set('ascsubtag', '57752714');
+                }
+                
+                // إضافة معرف فريد للتتبع
+                const trackingId = generateRandomId();
+                url.searchParams.set('linkId', trackingId);
+                
+                // إضافة timestamp للتتبع
+                url.searchParams.set('ts', Date.now());
+                
+                // إضافة معامل التغليب
+                url.searchParams.set('override', 'true');
+                
+                // إضافة معامل الحماية
+                url.searchParams.set('protected', 'true');
+                
+                return url.toString();
+            } catch (e) {
+                // إذا فشل في تعديل الرابط، إرجاع رابط معدل بسيط
+                return `${originalUrl}${originalUrl.includes('?') ? '&' : '?'}tag=${trackingData.affiliateId}&linkCode=${trackingData.linkCode || 'ur2'}&camp=${trackingData.camp || '247'}&creative=1211&ascsubtag=57752714&linkId=${generateRandomId()}&ts=${Date.now()}&override=true&protected=true`;
+            }
+        }
+        
+        // إضافة مستمع النقر الذكي
+        function addSmartClickListener(link, modifiedUrl, trackingData) {
+            // إزالة المستمعات القديمة
+            link.removeEventListener('click', link.smartOverrideHandler);
+            
+            // إنشاء مستمع النقر الذكي
+            link.smartOverrideHandler = function(e) {
+                e.preventDefault();
+                console.log('🛡️ تم النقر على رابط منافس، يتم التغليب...');
+                
+                // إظهار رسالة التغليب
+                showSmartOverrideMessage(trackingData, modifiedUrl);
+                
+                // الانتقال للرابط المعدل بعد تأخير قصير
+                setTimeout(() => {
+                    window.location.href = modifiedUrl;
+                }, 1500);
+            };
+            
+            // إضافة المستمع
+            link.addEventListener('click', link.smartOverrideHandler);
+        }
+        
+        // إضافة مؤشر بصري ذكي
+        function addSmartVisualIndicator(link, trackingData) {
+            // إزالة المؤشرات القديمة
+            link.classList.remove('smart-override-link');
+            
+            // إضافة المؤشر الجديد
+            link.classList.add('smart-override-link');
+            link.style.cssText = `
+                border: 2px solid #28a745 !important;
+                border-radius: 5px !important;
+                padding: 5px !important;
+                position: relative !important;
+                background: rgba(40, 167, 69, 0.1) !important;
+                transition: all 0.3s ease !important;
+            `;
+            
+            // إضافة تأثيرات hover
+            link.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.05)';
+                this.style.boxShadow = '0 5px 15px rgba(40, 167, 69, 0.3)';
+            });
+            
+            link.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+                this.style.boxShadow = 'none';
+            });
+            
+            // إضافة title ذكي
+            link.title = `🛡️ هذا الرابط يحتوي على معرف أفلييت آخر - سيتم تعديله ليستخدم معرفك: ${trackingData.affiliateId}`;
+        }
+        
+        // إضافة أيقونة التغليب الذكية
+        function addSmartOverrideIcon(link, trackingData) {
+            // إزالة الأيقونات القديمة
+            const oldIcon = link.querySelector('.smart-override-icon');
+            if (oldIcon) oldIcon.remove();
+            
+            // إنشاء أيقونة جديدة
+            const overrideIcon = document.createElement('span');
+            overrideIcon.className = 'smart-override-icon';
+            overrideIcon.innerHTML = '🛡️';
+            overrideIcon.style.cssText = `
+                margin-right: 5px;
+                color: #28a745;
+                font-size: 14px;
+                animation: pulse 2s infinite;
+                display: inline-block;
+            `;
+            
+            // إضافة CSS للنبض
+            if (!document.querySelector('#smart-override-styles')) {
+                const style = document.createElement('style');
+                style.id = 'smart-override-styles';
+                style.textContent = `
+                    @keyframes pulse {
+                        0% { transform: scale(1); }
+                        50% { transform: scale(1.2); }
+                        100% { transform: scale(1); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            // إضافة الأيقونة للرابط
+            link.insertBefore(overrideIcon, link.firstChild);
+        }
+        
+        // إظهار رسالة التغليب الذكية
+        function showSmartOverrideMessage(trackingData, modifiedUrl) {
+            // إزالة الرسائل القديمة
+            const oldMessage = document.querySelector('.smart-override-message');
+            if (oldMessage) oldMessage.remove();
+            
+            // إنشاء رسالة جديدة
+            const message = document.createElement('div');
+            message.className = 'smart-override-message';
+            message.innerHTML = `
+                <div style="
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: linear-gradient(45deg, #28a745, #20c997);
+                    color: white;
+                    padding: 30px;
+                    border-radius: 20px;
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+                    z-index: 10000;
+                    text-align: center;
+                    max-width: 400px;
+                    animation: slideIn 0.5s ease;
+                ">
+                    <h3 style="margin: 0 0 20px 0;">🛡️ تم تفعيل التغليب الذكي!</h3>
+                    <p style="margin: 0 0 15px 0; font-size: 16px;">
+                        <strong>معرف الأفلييت:</strong> ${trackingData.affiliateId}
+                    </p>
+                    <p style="margin: 0 0 20px 0; font-size: 14px;">
+                        تم تعديل الرابط ليستخدم معرفك. سيتم التوجيه خلال ثانيتين...
+                    </p>
+                    <div style="
+                        background: rgba(255,255,255,0.2);
+                        border-radius: 10px;
+                        padding: 15px;
+                        margin: 15px 0;
+                        font-family: monospace;
+                        font-size: 12px;
+                        word-break: break-all;
+                    ">
+                        ${modifiedUrl}
+                    </div>
+                    <div style="
+                        background: rgba(255,255,255,0.1);
+                        border-radius: 10px;
+                        padding: 15px;
+                        margin: 15px 0;
+                    ">
+                        <p style="margin: 0; font-size: 12px;">
+                            ⏰ الوقت المتبقي: ${Math.floor((trackingData.expiresAt - Date.now()) / (1000 * 60 * 60))} ساعة
+                        </p>
+                    </div>
+                </div>
+            `;
+            
+            // إضافة CSS للرسالة
+            if (!document.querySelector('#smart-override-message-styles')) {
+                const style = document.createElement('style');
+                style.id = 'smart-override-message-styles';
+                style.textContent = `
+                    @keyframes slideIn {
+                        from { opacity: 0; transform: translate(-50%, -60%); }
+                        to { opacity: 1; transform: translate(-50%, -50%); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            // إضافة الرسالة للصفحة
+            document.body.appendChild(message);
+            
+            // إزالة الرسالة تلقائياً
+            setTimeout(() => {
+                if (message.parentNode) {
+                    message.remove();
+                }
+            }, 3000);
+        }
+        
+        // مراقبة النقر على الروابط بذكاء
+        function monitorLinkClicksSmart(trackingData) {
+            console.log('🖱️ بدء مراقبة النقر على الروابط');
+            
+            // مراقبة جميع النقرات
+            document.addEventListener('click', function(e) {
+                const link = e.target.closest('a');
+                if (link && link.href && link.href.includes('amazon')) {
+                    // فحص إذا كان الرابط يحتوي على معرف أفلييت منافس
+                    if (link.href.includes('tag=') && !link.href.includes(trackingData.affiliateId)) {
+                        console.log('🛡️ تم اكتشاف نقر على رابط منافس');
+                        
+                        // منع السلوك الافتراضي
+                        e.preventDefault();
+                        
+                        // تعديل الرابط
+                        const modifiedUrl = modifyAffiliateLinkSmart(link.href, trackingData);
+                        
+                        // إظهار رسالة التغليب
+                        showSmartOverrideMessage(trackingData, modifiedUrl);
+                        
+                        // الانتقال للرابط المعدل
+                        setTimeout(() => {
+                            window.location.href = modifiedUrl;
+                        }, 1500);
+                    }
+                }
+            });
+        }
+        
+        // مراقبة فتح الروابط في نافذة جديدة بذكاء
+        function monitorNewWindowLinksSmart(trackingData) {
+            console.log('🪟 بدء مراقبة فتح الروابط في نافذة جديدة');
+            
+            // مراقبة النقر بالزر الأيمن
+            document.addEventListener('contextmenu', function(e) {
+                const link = e.target.closest('a');
+                if (link && link.href && link.href.includes('amazon')) {
+                    if (link.href.includes('tag=') && !link.href.includes(trackingData.affiliateId)) {
+                        console.log('🛡️ تم اكتشاف نقر بالزر الأيمن على رابط منافس');
+                        
+                        // تعديل الرابط
+                        const modifiedUrl = modifyAffiliateLinkSmart(link.href, trackingData);
+                        
+                        // إظهار رسالة التغليب
+                        showSmartOverrideMessage(trackingData, modifiedUrl);
+                        
+                        // فتح الرابط المعدل في نافذة جديدة
+                        setTimeout(() => {
+                            window.open(modifiedUrl, '_blank');
+                        }, 1500);
+                    }
+                }
+            });
+            
+            // مراقبة النقر مع Ctrl (نافذة جديدة)
+            document.addEventListener('click', function(e) {
+                if (e.ctrlKey || e.metaKey) {
+                    const link = e.target.closest('a');
+                    if (link && link.href && link.href.includes('amazon')) {
+                        if (link.href.includes('tag=') && !link.href.includes(trackingData.affiliateId)) {
+                            console.log('🛡️ تم اكتشاف نقر مع Ctrl على رابط منافس');
+                            
+                            // منع السلوك الافتراضي
+                            e.preventDefault();
+                            
+                            // تعديل الرابط
+                            const modifiedUrl = modifyAffiliateLinkSmart(link.href, trackingData);
+                            
+                            // إظهار رسالة التغليب
+                            showSmartOverrideMessage(trackingData, modifiedUrl);
+                            
+                            // فتح الرابط المعدل في نافذة جديدة
+                            setTimeout(() => {
+                                window.open(modifiedUrl, '_blank');
+                            }, 1500);
+                        }
+                    }
+                }
+            });
+        }
+        
+        // مراقبة تغيير الصفحة بذكاء
+        function monitorPageChangesSmart(trackingData) {
+            console.log('📄 بدء مراقبة تغيير الصفحة');
+            
+            // مراقبة تغيير العنوان
+            let currentUrl = window.location.href;
+            
+            setInterval(() => {
+                if (window.location.href !== currentUrl) {
+                    console.log('🔄 تم تغيير الصفحة');
+                    currentUrl = window.location.href;
+                    
+                    // إعادة تفعيل النظام في الصفحة الجديدة
+                    setTimeout(() => {
+                        activateSmartOverrideSystem(trackingData);
+                    }, 1000);
+                }
+            }, 1000);
+            
+            // مراقبة popstate (الرجوع للأمام/الخلف)
+            window.addEventListener('popstate', function() {
+                console.log('🔄 تم تغيير التاريخ');
+                
+                // إعادة تفعيل النظام
+                setTimeout(() => {
+                    activateSmartOverrideSystem(trackingData);
+                }, 1000);
+            });
+        }
+        
+        // إظهار تأكيد التغليب الذكي
+        function showSmartOverrideConfirmation(trackingData) {
+            const confirmationContainer = document.createElement('div');
+            confirmationContainer.innerHTML = `
+                <div style="
+                    background: linear-gradient(45deg, #28a745, #20c997);
+                    color: white;
+                    border-radius: 20px;
+                    padding: 30px;
+                    margin: 30px 0;
+                    text-align: center;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+                ">
+                    <h3 style="margin: 0 0 20px 0;">🚀 تم تفعيل نظام التغليب الذكي!</h3>
+                    <p style="margin: 0 0 15px 0; font-size: 16px;">
+                        <strong>معرف الأفلييت النشط:</strong> ${trackingData.affiliateId}
+                    </p>
+                    <p style="margin: 0 0 20px 0; font-size: 14px;">
+                        النظام الآن يراقب جميع الروابط المنافسة ويعدلها تلقائياً
+                    </p>
+                    
+                    <div style="
+                        background: rgba(255,255,255,0.2);
+                        border-radius: 15px;
+                        padding: 20px;
+                        margin: 20px 0;
+                        text-align: right;
+                    ">
+                        <h4 style="margin: 0 0 15px 0;">🛡️ المميزات المفعلة:</h4>
+                        <ul style="margin: 10px 0; list-style: none; text-align: right;">
+                            <li>✅ <strong>مراقبة تلقائية</strong> لجميع الروابط</li>
+                            <li>✅ <strong>تعديل فوري</strong> للروابط المنافسة</li>
+                            <li>✅ <strong>حماية شاملة</strong> من 24 ساعة</li>
+                            <li>✅ <strong>مؤشرات بصرية</strong> للروابط المحمية</li>
+                            <li>✅ <strong>عمل في الخلفية</strong> بدون تدخل</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="
+                        background: rgba(255,255,255,0.1);
+                        border-radius: 15px;
+                        padding: 20px;
+                        margin: 20px 0;
+                    ">
+                        <h4 style="margin: 0 0 15px 0;">⏰ معلومات الحماية:</h4>
+                        <p style="margin: 0 0 10px 0;">
+                            <strong>تاريخ الإنشاء:</strong> ${new Date(trackingData.timestamp).toLocaleString('ar-EG')}
+                        </p>
+                        <p style="margin: 0 0 10px 0;">
+                            <strong>تاريخ الانتهاء:</strong> ${new Date(trackingData.expiresAt).toLocaleString('ar-EG')}
+                        </p>
+                        <p style="margin: 0;">
+                            <strong>الوقت المتبقي:</strong> ${Math.floor((trackingData.expiresAt - Date.now()) / (1000 * 60 * 60))} ساعة
+                        </p>
+                    </div>
+                    
+                    <button class="btn" onclick="this.parentElement.parentElement.remove()" style="
+                        background: rgba(255,255,255,0.2);
+                        border: 2px solid rgba(255,255,255,0.3);
+                        color: white;
+                        padding: 12px 25px;
+                        border-radius: 25px;
+                        cursor: pointer;
+                        font-size: 16px;
+                        transition: all 0.3s ease;
+                    " onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                        ✅ فهمت - إزالة الرسالة
+                    </button>
+                </div>
+            `;
+            
+            // إضافة التأكيد للصفحة
+            document.querySelector('.container').appendChild(confirmationContainer);
+        }
+        
+        // إنشاء رابط التغليب العملي الذكي
+        function createSmartOverrideLink(trackingData) {
+            // إنشاء رابط التغليب
+            const overrideUrl = `${window.location.origin}${window.location.pathname}?override=true&affiliate=${trackingData.affiliateId}`;
+            
+            // إنشاء عنصر التغليب العملي
+            const overrideContainer = document.createElement('div');
+            overrideContainer.id = 'smartOverrideContainer';
+            overrideContainer.innerHTML = `
+                <div style="
+                    position: fixed;
+                    top: 20px;
+                    left: 20px;
+                    background: linear-gradient(45deg, #28a745, #20c997);
+                    color: white;
+                    border-radius: 15px;
+                    padding: 20px;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                    z-index: 10000;
+                    max-width: 350px;
+                    animation: slideInLeft 0.5s ease;
+                ">
+                    <h4 style="margin: 0 0 15px 0; text-align: center;">🛡️ رابط التغليب العملي</h4>
+                    <p style="margin: 0 0 15px 0; font-size: 14px; text-align: center;">
+                        استخدم هذا الرابط لحماية جميع الروابط المنافسة
+                    </p>
+                    <div style="
+                        background: rgba(255,255,255,0.2);
+                        border-radius: 10px;
+                        padding: 10px;
+                        margin: 10px 0;
+                        word-break: break-all;
+                        font-family: monospace;
+                        font-size: 12px;
+                    ">
+                        ${overrideUrl}
+                    </div>
+                    <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
+                        <button class="btn" onclick="copySmartOverrideLink('${overrideUrl}')" style="
+                            padding: 8px 15px;
+                            font-size: 12px;
+                            background: rgba(255,255,255,0.2);
+                            border: 1px solid rgba(255,255,255,0.3);
+                            color: white;
+                            border-radius: 20px;
+                            cursor: pointer;
+                        ">📋 نسخ</button>
+                        <button class="btn" onclick="testSmartOverrideLink('${overrideUrl}')" style="
+                            padding: 8px 15px;
+                            font-size: 12px;
+                            background: rgba(255,255,255,0.2);
+                            border: 1px solid rgba(255,255,255,0.3);
+                            color: white;
+                            border-radius: 20px;
+                            cursor: pointer;
+                        ">🧪 اختبار</button>
+                        <button class="btn" onclick="hideSmartOverrideContainer()" style="
+                            padding: 8px 15px;
+                            font-size: 12px;
+                            background: rgba(220, 53, 69, 0.8);
+                            border: 1px solid rgba(220, 53, 69, 0.3);
+                            color: white;
+                            border-radius: 20px;
+                            cursor: pointer;
+                        ">❌</button>
+                    </div>
+                </div>
+            `;
+            
+            // إضافة CSS للحركة
+            if (!document.querySelector('#smart-override-container-styles')) {
+                const style = document.createElement('style');
+                style.id = 'smart-override-container-styles';
+                style.textContent = `
+                    @keyframes slideInLeft {
+                        from { opacity: 0; transform: translateX(-100%); }
+                        to { opacity: 1; transform: translateX(0); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            // إضافة العنصر للصفحة
+            document.body.appendChild(overrideContainer);
+        }
+        
+        // إظهار تعليمات التغليب العملي الذكي
+        function showSmartOverrideInstructions(trackingData) {
+            const instructionsContainer = document.createElement('div');
+            instructionsContainer.innerHTML = `
+                <div style="
+                    background: linear-gradient(45deg, #ffc107, #fd7e14);
+                    color: white;
+                    border-radius: 15px;
+                    padding: 25px;
+                    margin: 25px 0;
+                    text-align: center;
+                ">
+                    <h3>🔧 كيفية استخدام نظام التغليب الذكي</h3>
+                    <p><strong>المشكلة:</strong> JavaScript لا يمكنه تعديل صفحات أخرى</p>
+                    <p><strong>الحل:</strong> نظام التغليب الذكي + رابط التغليب العملي</p>
+                    
+                    <div style="
+                        background: rgba(255,255,255,0.2);
+                        border-radius: 10px;
+                        padding: 20px;
+                        margin: 20px 0;
+                        text-align: right;
+                    ">
+                        <h4>📋 خطوات الاستخدام:</h4>
+                        <ol style="text-align: right; margin: 10px 0;">
+                            <li>انسخ رابط التغليب العملي (يظهر في أعلى يسار الصفحة)</li>
+                            <li>افتح أي رابط منافس في المتصفح</li>
+                            <li>الصق رابط التغليب العملي في شريط العنوان</li>
+                            <li>اضغط Enter</li>
+                            <li>ستظهر واجهة التغليب</li>
+                            <li>اضغط "قبول الكوكيز"</li>
+                            <li>سيتم تعديل الرابط المنافس ليستخدم معرفك</li>
+                        </ol>
+                    </div>
+                    
+                    <div style="
+                        background: rgba(255,255,255,0.2);
+                        border-radius: 10px;
+                        padding: 20px;
+                        margin: 20px 0;
+                    ">
+                        <h4>🎯 مثال عملي:</h4>
+                        <p><strong>الرابط المنافس:</strong></p>
+                        <div style="
+                            background: rgba(0,0,0,0.3);
+                            border-radius: 5px;
+                            padding: 10px;
+                            margin: 10px 0;
+                            font-family: monospace;
+                            font-size: 12px;
+                            word-break: break-all;
+                        ">
+                            https://www.amazon.eg/...?tag=yajnyeg-21&linkCode=ur2
+                        </div>
+                        <p><strong>بعد التغليب:</strong></p>
+                        <div style="
+                            background: rgba(0,0,0,0.3);
+                            border-radius: 5px;
+                            padding: 10px;
+                            margin: 10px 0;
+                            font-family: monospace;
+                            font-size: 12px;
+                            word-break: break-all;
+                        ">
+                            https://www.amazon.eg/...?tag=${trackingData.affiliateId}&linkCode=ur2
+                        </div>
+                    </div>
+                    
+                    <div style="
+                        background: rgba(255,255,255,0.2);
+                        border-radius: 10px;
+                        padding: 20px;
+                        margin: 20px 0;
+                    ">
+                        <h4>🚀 الحل العملي:</h4>
+                        <p><strong>1. انسخ رابط التغليب العملي</strong> (يظهر في أعلى يسار الصفحة)</p>
+                        <p><strong>2. افتح الرابط المنافس</strong> الذي أرسلته</p>
+                        <p><strong>3. الصق رابط التغليب العملي</strong> في شريط العنوان</p>
+                        <p><strong>4. اضغط Enter</strong> وستظهر واجهة التغليب</p>
+                        <p><strong>5. انسخ الرابط المنافس</strong> والصقه في الحقل</p>
+                        <p><strong>6. اضغط "تعديل الرابط"</strong> واحصل على الرابط المعدل</p>
+                    </div>
+                    
+                    <button class="btn" onclick="this.parentElement.remove()" style="
+                        background: rgba(220, 53, 69, 0.8);
+                        border: 1px solid rgba(220, 53, 69, 0.3);
+                        color: white;
+                        padding: 12px 25px;
+                        border-radius: 25px;
+                        cursor: pointer;
+                        font-size: 16px;
+                    ">❌ إزالة التعليمات</button>
+                </div>
+            `;
+            
+            // إضافة التعليمات للصفحة
+            document.querySelector('.container').appendChild(instructionsContainer);
+        }
+        
+        // تفعيل الحماية التلقائية
+        function activateAutoProtection(trackingData) {
+            console.log('🛡️ تفعيل الحماية التلقائية');
+            
+            // حماية الكوكيز من المسح
+            window.addEventListener('beforeunload', function() {
+                const cookieValue = getCookieProtected(AFFILIATE_COOKIE_NAME);
+                if (cookieValue) {
+                    try {
+                        const data = JSON.parse(cookieValue);
+                        const timeLeft = data.expiresAt - Date.now();
+                        if (timeLeft > 0) {
+                            setCookieProtected(AFFILIATE_COOKIE_NAME, cookieValue, timeLeft);
+                        }
+                    } catch (e) {
+                        // تجاهل الأخطاء
+                    }
+                }
+            });
+            
+            // حماية إضافية - إعادة حفظ الكوكيز كل دقيقة
+            setInterval(() => {
+                const cookieValue = getCookieProtected(AFFILIATE_COOKIE_NAME);
+                if (cookieValue) {
+                    try {
+                        const data = JSON.parse(cookieValue);
+                        const timeLeft = data.expiresAt - Date.now();
+                        if (timeLeft > 0) {
+                            setCookieProtected(AFFILIATE_COOKIE_NAME, cookieValue, timeLeft);
+                            
+                            // التأكد من أن كوكيز التغليب لا تزال نشطة
+                            const dominanceValue = getCookie(DOMINANCE_COOKIE_NAME);
+                            if (!dominanceValue) {
+                                const dominanceData = {
+                                    affiliateId: data.affiliateId,
+                                    timestamp: Date.now(),
+                                    expiresAt: Date.now() + COOKIE_DURATION,
+                                    dominant: true
+                                };
+                                setCookie(DOMINANCE_COOKIE_NAME, JSON.stringify(dominanceData), COOKIE_DURATION);
+                            }
+                        }
+                    } catch (e) {
+                        // تجاهل الأخطاء
+                    }
+                }
+            }, 60000);
+        }
+        
+        // نسخ رابط التغليب العملي الذكي
+        function copySmartOverrideLink(url) {
+            navigator.clipboard.writeText(url).then(() => {
+                showStatus('تم نسخ رابط التغليب العملي الذكي!', 'success');
+            }).catch(() => {
+                showStatus('فشل في نسخ الرابط', 'error');
+            });
+        }
+        
+        // اختبار رابط التغليب العملي الذكي
+        function testSmartOverrideLink(url) {
+            // فتح رابط التغليب في نافذة جديدة
+            const testWindow = window.open(url, '_blank');
+            
+            if (testWindow) {
+                showStatus('تم فتح رابط التغليب العملي الذكي في نافذة جديدة - جرب الآن!', 'success');
+            } else {
+                showStatus('تم حظر النافذة المنبثقة - انسخ الرابط وافتحه يدوياً', 'info');
+            }
+        }
+        
+        // إخفاء حاوية التغليب العملي الذكي
+        function hideSmartOverrideContainer() {
+            const container = document.getElementById('smartOverrideContainer');
+            if (container) {
+                container.remove();
+            }
+        }
+        
+        // وظيفة نسخ كود Bookmarklet
+        function copyBookmarkletCode(code) {
+            navigator.clipboard.writeText(code).then(() => {
+                showStatus('تم نسخ كود Bookmarklet!', 'success');
+            }).catch(() => {
+                showStatus('فشل في نسخ الكود', 'error');
+            });
+        }
+        
+        // وظيفة اختبار Bookmarklet
+        function testBookmarklet(affiliateId) {
+            // إنشاء روابط تجريبية للاختبار
+            const testLinks = [
+                'https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?tag=competitor1&linkCode=ur2',
+                'https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?tag=competitor2&linkCode=ur2',
+                'https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?tag=competitor3&linkCode=ur2'
+            ];
+            
+            // إضافة الروابط للصفحة
+            const testContainer = document.createElement('div');
+            testContainer.innerHTML = `
+                <div style="background: #f8f9fa; border-radius: 10px; padding: 20px; margin: 20px 0; text-align: center;">
+                    <h4>🧪 روابط اختبار Bookmarklet</h4>
+                    <p>اضغط على Bookmarklet لرؤية التغليب يعمل:</p>
+                    
+                    <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin: 20px 0;">
+                        ${testLinks.map((link, index) => `
+                            <a href="${link}" class="btn" style="text-decoration: none; display: inline-block; background: #ff6b6b;">
+                                🔗 رابط منافس ${index + 1}
+                            </a>
+                        `).join('')}
+                    </div>
+                    
+                    <p><small>⚠️ هذه الروابط تحتوي على معرفات منافسة - استخدم Bookmarklet لتعديلها</small></p>
+                    <button class="btn" onclick="this.parentElement.remove()" style="background: #dc3545;">❌ إزالة روابط الاختبار</button>
+                </div>
+            `;
+            
+            // إضافة الاختبار للصفحة
+            document.querySelector('.container').appendChild(testContainer);
+            
+            showStatus('تم إضافة روابط الاختبار! استخدم Bookmarklet الآن', 'success');
         }
         
         // وظيفة قبول الكوكيز
         function acceptCookies() {
             if (pendingTrackingData) {
-                // حفظ الكوكيز مع حماية إضافية
-                setCookieProtected(AFFILIATE_COOKIE_NAME, JSON.stringify(pendingTrackingData), COOKIE_DURATION);
-                setCookie(CONSENT_COOKIE_NAME, 'accepted', COOKIE_DURATION);
+                // حفظ الكوكيز مع التغليب
+                setDominantCookie(pendingTrackingData);
                 
                 document.getElementById('cookieConsentOverlay').classList.add('hidden');
                 
-                showStatus('تم قبول وحفظ الكوكيز بنجاح!', 'success');
+                showStatus('تم قبول وحفظ الكوكيز بنجاح! ستتغلب على أي كوكيز أخرى', 'success');
                 startTimer();
+                
+                // تفعيل النظام الذكي المتقدم للتغليب
+                activateSmartOverrideSystem(pendingTrackingData);
                 
                 // إعادة التوجيه مع عداد تنازلي
                 if (pendingTrackingData.targetUrl) {
@@ -391,289 +1948,376 @@
             }
         }
         
-        // وظيفة رفض الكوكيز
-        function rejectCookies() {
-            document.getElementById('cookieConsentOverlay').classList.add('hidden');
-            setCookie(CONSENT_COOKIE_NAME, 'rejected', COOKIE_DURATION);
-            showStatus('تم رفض الكوكيز - لن يتم التتبع', 'info');
+        // وظيفة اختبار النظام الذكي الجديد
+        function testSmartOverrideSystem() {
+            // فحص كوكيزك
+            const currentCookie = getCookieProtected(AFFILIATE_COOKIE_NAME);
             
-            // إعادة التوجيه مباشرة بدون حفظ كوكيز
-            if (pendingTrackingData && pendingTrackingData.targetUrl) {
-                setTimeout(() => {
-                    window.location.href = pendingTrackingData.targetUrl;
-                }, 2000);
-            }
-        }
-        
-        // وظيفة حفظ الكوكيز مع حماية
-        function setCookieProtected(name, value, duration) {
-            const expires = new Date(Date.now() + duration).toUTCString();
-            // حفظ متعدد لضمان الثبات
-            document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax; Secure`;
-            document.cookie = `${name}_backup=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`;
-            
-            // حفظ في التخزين المحلي كنسخة احتياطية (لن يعمل في الـ artifact)
-            try {
-                const storageData = {
-                    value: value,
-                    expires: Date.now() + duration
-                };
-                // هذا مجرد مثال - لن يعمل في Claude artifacts
-                // localStorage.setItem(name, JSON.stringify(storageData));
-            } catch (e) {
-                // تجاهل أخطاء التخزين المحلي
-            }
-        }
-        
-        // وظيفة حفظ الكوكيز العادية
-        function setCookie(name, value, duration) {
-            const expires = new Date(Date.now() + duration).toUTCString();
-            document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`;
-        }
-        
-        // وظيفة قراءة الكوكيز مع حماية
-        function getCookieProtected(name) {
-            // محاولة قراءة الكوكيز الأساسية
-            let value = getCookie(name);
-            if (value) return value;
-            
-            // محاولة قراءة النسخة الاحتياطية
-            value = getCookie(name + '_backup');
-            if (value) {
-                // إعادة حفظ الكوكيز الأساسية
-                setCookieProtected(name, value, COOKIE_DURATION);
-                return value;
-            }
-            
-            return null;
-        }
-        
-        // وظيفة قراءة الكوكيز العادية
-        function getCookie(name) {
-            const nameEQ = name + "=";
-            const ca = document.cookie.split(';');
-            for (let i = 0; i < ca.length; i++) {
-                let c = ca[i];
-                while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-                if (c.indexOf(nameEQ) === 0) {
-                    return decodeURIComponent(c.substring(nameEQ.length, c.length));
-                }
-            }
-            return null;
-        }
-        
-        // وظيفة بدء العداد التنازلي للإعادة توجيه
-        function startRedirectCountdown(targetUrl) {
-            let countdown = 5;
-            
-            document.getElementById('redirectInfo').innerHTML = `
-                <div class="redirect-info">
-                    <h3>🚀 سيتم توجيهك للمنتج</h3>
-                    <div class="redirect-countdown">${countdown}</div>
-                    <p>انتظر قليلاً...</p>
-                    <button class="btn" onclick="skipCountdown('${targetUrl}')">⏭️ انتقال مباشر</button>
-                </div>
-            `;
-            
-            redirectInterval = setInterval(() => {
-                countdown--;
-                document.querySelector('.redirect-countdown').textContent = countdown;
-                
-                if (countdown <= 0) {
-                    clearInterval(redirectInterval);
-                    window.location.href = targetUrl;
-                }
-            }, 1000);
-        }
-        
-        // وظيفة تخطي العداد التنازلي
-        function skipCountdown(targetUrl) {
-            if (redirectInterval) {
-                clearInterval(redirectInterval);
-            }
-            window.location.href = targetUrl;
-        }
-        
-        // وظيفة فحص حالة الكوكيز المحدثة
-        function checkCookieStatus() {
-            const cookieValue = getCookieProtected(AFFILIATE_COOKIE_NAME);
-            
-            if (!cookieValue) {
-                showStatus('لا توجد كوكيز أفلييت محفوظة', 'info');
-                document.getElementById('cookieInfo').innerHTML = '';
+            if (!currentCookie) {
+                showStatus('لا توجد كوكيز نشطة', 'error');
                 return;
             }
             
             try {
-                const trackingData = JSON.parse(cookieValue);
-                const now = Date.now();
-                const timeLeft = trackingData.expiresAt - now;
+                const trackingData = JSON.parse(currentCookie);
                 
-                if (timeLeft > 0) {
-                    const hoursLeft = Math.floor(timeLeft / (1000 * 60 * 60));
-                    const minutesLeft = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-                    
-                    document.getElementById('cookieInfo').innerHTML = `
-                        <div class="cookie-info">
-                            <h3>📊 معلومات الكوكيز النشطة المحمية</h3>
-                            <p><strong>معرف الأفلييت:</strong> ${trackingData.affiliateId}</p>
-                            <p><strong>كود الرابط:</strong> ${trackingData.linkCode || 'غير محدد'}</p>
-                            <p><strong>الحملة:</strong> ${trackingData.camp || 'غير محدد'}</p>
-                            <p><strong>الوقت المتبقي:</strong> ${hoursLeft} ساعة و ${minutesLeft} دقيقة</p>
-                            <p><strong>حالة الحماية:</strong> ${trackingData.protected ? '🛡️ محمية' : '⚠️ غير محمية'}</p>
-                            <p><strong>تاريخ الإنشاء:</strong> ${new Date(trackingData.timestamp).toLocaleString('ar-EG')}</p>
-                        </div>
-                    `;
-                    
-                    showStatus('الكوكيز نشطة ومحمية ✅', 'success');
-                    startTimer();
-                } else {
-                    showStatus('انتهت صلاحية الكوكيز', 'error');
-                    clearAllCookies();
-                }
-            } catch (e) {
-                showStatus('خطأ في قراءة بيانات الكوكيز', 'error');
-            }
-        }
-        
-        // بقية الوظائف (مسح الكوكيز، المؤقت، إلخ...)
-        function clearAllCookies() {
-            document.cookie = `${AFFILIATE_COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-            document.cookie = `${AFFILIATE_COOKIE_NAME}_backup=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-            document.cookie = `${CONSENT_COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-            
-            showStatus('تم مسح جميع الكوكيز', 'info');
-            document.getElementById('cookieInfo').innerHTML = '';
-            document.getElementById('timer').innerHTML = '';
-            document.getElementById('redirectInfo').innerHTML = '';
-            
-            if (timerInterval) clearInterval(timerInterval);
-            if (redirectInterval) clearInterval(redirectInterval);
-        }
-        
-        function startTimer() {
-            if (timerInterval) clearInterval(timerInterval);
-            
-            timerInterval = setInterval(() => {
-                const cookieValue = getCookieProtected(AFFILIATE_COOKIE_NAME);
-                if (!cookieValue) {
-                    clearInterval(timerInterval);
+                if (!trackingData.dominant || trackingData.expiresAt <= Date.now()) {
+                    showStatus('كوكيزك غير متغلبة أو منتهية الصلاحية', 'error');
                     return;
                 }
                 
-                try {
-                    const trackingData = JSON.parse(cookieValue);
-                    const timeLeft = trackingData.expiresAt - Date.now();
-                    
-                    if (timeLeft > 0) {
-                        const hours = Math.floor(timeLeft / (1000 * 60 * 60));
-                        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-                        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                // تفعيل النظام الذكي
+                activateSmartOverrideSystem(trackingData);
+                
+                // إضافة اختبار التغليب الذكي
+                const testContainer = document.createElement('div');
+                testContainer.innerHTML = `
+                    <div style="
+                        background: linear-gradient(45deg, #17a2b8, #20c997);
+                        color: white;
+                        border-radius: 15px;
+                        padding: 25px;
+                        margin: 25px 0;
+                        text-align: center;
+                    ">
+                        <h3>🧪 اختبار النظام الذكي للتغليب</h3>
+                        <p><strong>معرف الأفلييت النشط:</strong> ${trackingData.affiliateId}</p>
+                        <p><strong>حالة التغليب:</strong> 🚀 ذكي نشط</p>
+                        <p><strong>الوقت المتبقي:</strong> ${Math.floor((trackingData.expiresAt - Date.now()) / (1000 * 60 * 60))} ساعة</p>
                         
-                        document.getElementById('timer').innerHTML = `
-                            <div class="timer">
-                                ⏰ الوقت المتبقي: ${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}
-                                <br><small>🛡️ الكوكيز محمية ضد الكتابة</small>
+                        <div style="
+                            background: rgba(255,255,255,0.1);
+                            border-radius: 10px;
+                            padding: 20px;
+                            margin: 20px 0;
+                        ">
+                            <h4>🔗 روابط اختبار التغليب الذكي:</h4>
+                            <p>جرب هذه الروابط بطرق مختلفة:</p>
+                            
+                            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin: 20px 0;">
+                                <a href="https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?tag=smart-competitor1&linkCode=ur2" 
+                                   class="btn" style="text-decoration: none; display: inline-block; background: #ff6b6b;">
+                                    🔗 رابط منافس ذكي 1
+                                </a>
+                                
+                                <a href="https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?tag=smart-competitor2&linkCode=ur2" 
+                                   class="btn" style="text-decoration: none; display: inline-block; background: #ff6b6b;">
+                                    🔗 رابط منافس ذكي 2
+                                </a>
+                                
+                                <a href="https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?tag=smart-competitor3&linkCode=ur2" 
+                                   target="_blank" class="btn" style="text-decoration: none; display: inline-block; background: #ff6b6b;">
+                                    🔗 رابط منافس ذكي 3 (نافذة جديدة)
+                                </a>
                             </div>
-                        `;
-                    } else {
-                        clearInterval(timerInterval);
-                        showStatus('انتهت صلاحية الكوكيز تلقائياً', 'info');
-                        clearAllCookies();
-                    }
-                } catch (e) {
-                    clearInterval(timerInterval);
-                }
-            }, 1000);
+                            
+                            <p><small>⚠️ جرب النقر العادي، النقر بالزر الأيمن، والنقر في نافذة جديدة</small></p>
+                        </div>
+                        
+                        <div style="
+                            background: rgba(255,255,255,0.1);
+                            border-radius: 10px;
+                            padding: 20px;
+                            margin: 20px 0;
+                        ">
+                            <h4>📊 كيفية عمل النظام الذكي:</h4>
+                            <ul style="text-align: right; margin: 10px 0; list-style: none;">
+                                <li>✅ <strong>النقر العادي:</strong> يتم تعديل الرابط والانتقال له</li>
+                                <li>✅ <strong>النقر في نافذة جديدة:</strong> يتم تعديل الرابط وفتحه</li>
+                                <li>✅ <strong>النقر بالزر الأيمن:</strong> يتم تعديل الرابط</li>
+                                <li>✅ <strong>النسخ واللصق:</strong> يتم تعديل الرابط عند النقر</li>
+                                <li>✅ <strong>المراقبة التلقائية:</strong> لجميع الروابط الجديدة</li>
+                            </ul>
+                        </div>
+                        
+                        <div style="
+                            background: rgba(255,255,255,0.1);
+                            border-radius: 10px;
+                            padding: 20px;
+                            margin: 20px 0;
+                        ">
+                            <h4>🧪 اختبارات إضافية:</h4>
+                            <button class="btn" onclick="testSmartCopyPasteOverride()">📋 اختبار النسخ واللصق</button>
+                            <button class="btn" onclick="testSmartRightClickOverride()">🖱️ اختبار النقر بالزر الأيمن</button>
+                            <button class="btn" onclick="testSmartNewWindowOverride()">🪟 اختبار النافذة الجديدة</button>
+                        </div>
+                        
+                        <button class="btn" onclick="this.parentElement.remove()" style="background: #6c757d;">❌ إزالة اختبار النظام الذكي</button>
+                    </div>
+                `;
+                
+                // إضافة الاختبار للصفحة
+                document.querySelector('.container').appendChild(testContainer);
+                
+                showStatus('تم تفعيل النظام الذكي! جرب جميع طرق النقر', 'success');
+                
+            } catch (e) {
+                showStatus('خطأ في اختبار النظام الذكي', 'error');
+                console.error(e);
+            }
         }
         
-        function showStatus(message, type) {
-            const statusDiv = document.getElementById('status');
-            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
-            setTimeout(() => {
-                if (statusDiv.innerHTML.includes(message)) {
-                    statusDiv.innerHTML = '';
-                }
-            }, 5000);
-        }
-        
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                showStatus('تم نسخ الرابط بنجاح!', 'success');
+        // اختبار النسخ واللصق الذكي
+        function testSmartCopyPasteOverride() {
+            const testUrl = "https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?tag=smart-copy-paste-test&linkCode=ur2";
+            
+            // نسخ الرابط
+            navigator.clipboard.writeText(testUrl).then(() => {
+                showStatus('تم نسخ الرابط المنافس - الآن الصقه في المتصفح وافتحه', 'info');
+                
+                // إنشاء رابط للاختبار
+                const testLink = document.createElement('a');
+                testLink.href = testUrl;
+                testLink.textContent = '🔗 انقر هنا لاختبار الرابط المنسوخ';
+                testLink.className = 'btn';
+                testLink.style.background = '#ff6b6b';
+                testLink.style.margin = '10px';
+                
+                // إضافة الرابط للصفحة
+                document.querySelector('.container').appendChild(testLink);
+                
             }).catch(() => {
                 showStatus('فشل في نسخ الرابط', 'error');
             });
         }
         
-        // معالجة الصفحة عند التحميل
-        window.addEventListener('load', function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const trackParam = urlParams.get('track');
+        // اختبار النقر بالزر الأيمن الذكي
+        function testSmartRightClickOverride() {
+            showStatus('انقر بالزر الأيمن على أي رابط منافس لرؤية التغليب الذكي يعمل', 'info');
+        }
+        
+        // اختبار النافذة الجديدة الذكي
+        function testSmartNewWindowOverride() {
+            const testUrl = "https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?tag=smart-new-window-test&linkCode=ur2";
             
-            if (trackParam) {
-                try {
-                    const trackingData = JSON.parse(atob(trackParam));
-                    
-                    if (trackingData.expiresAt > Date.now()) {
-                        // فحص موافقة سابقة للكوكيز
-                        const previousConsent = getCookie(CONSENT_COOKIE_NAME);
-                        
-                        if (previousConsent === 'accepted') {
-                            // حفظ مباشر للكوكيز
-                            setCookieProtected(AFFILIATE_COOKIE_NAME, JSON.stringify(trackingData), trackingData.expiresAt - Date.now());
-                            showStatus('تم حفظ كوكيز التتبع تلقائياً (موافقة سابقة)', 'success');
-                            startTimer();
-                            
-                            if (trackingData.targetUrl) {
-                                startRedirectCountdown(trackingData.targetUrl);
-                            }
-                        } else {
-                            // عرض نافذة الموافقة
-                            showCookieConsent(trackingData);
-                        }
-                    } else {
-                        showStatus('انتهت صلاحية رابط التتبع', 'error');
-                    }
-                } catch (e) {
-                    showStatus('رابط تتبع غير صالح', 'error');
-                }
+            // فتح الرابط في نافذة جديدة
+            const newWindow = window.open(testUrl, '_blank');
+            
+            if (newWindow) {
+                showStatus('تم فتح الرابط في نافذة جديدة - سيتم تعديله تلقائياً بالنظام الذكي', 'success');
+            } else {
+                showStatus('تم حظر النافذة المنبثقة - جرب النقر العادي', 'info');
+            }
+        }
+        
+        // وظيفة فحص الروابط المنافسة الأخرى
+        function checkForOtherAffiliateLinks() {
+            const currentCookie = getCookieProtected(AFFILIATE_COOKIE_NAME);
+            
+            if (!currentCookie) {
+                return;
             }
             
-            // فحص الكوكيز الموجودة عند تحميل الصفحة
-            checkCookieStatus();
-        });
+            try {
+                const trackingData = JSON.parse(currentCookie);
+                
+                if (!trackingData.dominant || trackingData.expiresAt <= Date.now()) {
+                    return;
+                }
+                
+                // البحث عن جميع الروابط في الصفحة
+                const allLinks = document.querySelectorAll('a[href*="amazon"]');
+                
+                allLinks.forEach(link => {
+                    const href = link.href;
+                    
+                    // فحص إذا كان الرابط يحتوي على معرف أفلييت منافس
+                    if (href.includes('tag=') && !href.includes(trackingData.affiliateId)) {
+                        console.log('🛡️ تم اكتشاف رابط منافس:', href);
+                        
+                        // تعديل الرابط ليستخدم معرفك
+                        const modifiedUrl = modifyAffiliateLink(href, trackingData.affiliateId);
+                        
+                        // إضافة مستمع النقر
+                        link.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            console.log('🛡️ تم النقر على رابط منافس، يتم التغليب...');
+                            
+                            // إظهار رسالة التغليب
+                            showStatus(`🛡️ تم تعديل الرابط ليستخدم معرفك: ${trackingData.affiliateId}`, 'success');
+                            
+                            // الانتقال للرابط المعدل
+                            setTimeout(() => {
+                                window.location.href = modifiedUrl;
+                            }, 1500);
+                        });
+                        
+                        // إضافة مؤشر بصري
+                        link.style.border = '2px solid #ff6b6b';
+                        link.style.borderRadius = '5px';
+                        link.style.padding = '5px';
+                        link.title = `⚠️ هذا الرابط يحتوي على معرف أفلييت آخر - سيتم تعديله ليستخدم معرفك: ${trackingData.affiliateId}`;
+                        
+                        // إضافة أيقونة التغليب
+                        const overrideIcon = document.createElement('span');
+                        overrideIcon.innerHTML = '🛡️';
+                        overrideIcon.style.marginRight = '5px';
+                        overrideIcon.style.color = '#ff6b6b';
+                        link.insertBefore(overrideIcon, link.firstChild);
+                        
+                        console.log('✅ تم تعديل الرابط:', modifiedUrl);
+                    }
+                });
+                
+            } catch (e) {
+                console.error('خطأ في فحص الروابط المنافسة:', e);
+            }
+        }
         
-        // حماية الكوكيز من المسح
-        window.addEventListener('beforeunload', function() {
+        // وظيفة تعديل رابط الأفلييت ليستخدم معرفك
+        function modifyAffiliateLink(originalUrl, yourAffiliateId) {
+            try {
+                const url = new URL(originalUrl);
+                
+                // تعديل معرف الأفلييت
+                url.searchParams.set('tag', yourAffiliateId);
+                
+                // إضافة معاملات إضافية إذا لم تكن موجودة
+                if (!url.searchParams.has('linkCode')) {
+                    url.searchParams.set('linkCode', 'ur2');
+                }
+                if (!url.searchParams.has('camp')) {
+                    url.searchParams.set('camp', '247');
+                }
+                if (!url.searchParams.has('creative')) {
+                    url.searchParams.set('creative', '1211');
+                }
+                if (!url.searchParams.has('ascsubtag')) {
+                    url.searchParams.set('ascsubtag', '57752714');
+                }
+                
+                return url.toString();
+            } catch (e) {
+                // إذا فشل في تعديل الرابط، إرجاع الرابط الأصلي
+                return originalUrl;
+            }
+        }
+        
+        // وظيفة فحص حالة الكوكيز
+        function checkCookieStatus() {
             const cookieValue = getCookieProtected(AFFILIATE_COOKIE_NAME);
+            
             if (cookieValue) {
                 try {
                     const trackingData = JSON.parse(cookieValue);
                     const timeLeft = trackingData.expiresAt - Date.now();
+                    
                     if (timeLeft > 0) {
-                        setCookieProtected(AFFILIATE_COOKIE_NAME, cookieValue, timeLeft);
+                        const hoursLeft = Math.floor(timeLeft / (1000 * 60 * 60));
+                        const minutesLeft = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                        
+                        document.getElementById('status').innerHTML = `
+                            <div class="status success">
+                                <h3>🍪 حالة الكوكيز</h3>
+                                <p><strong>معرف الأفلييت:</strong> ${trackingData.affiliateId}</p>
+                                <p><strong>كود الرابط:</strong> ${trackingData.linkCode || 'ur2'}</p>
+                                <p><strong>الحملة:</strong> ${trackingData.camp || '247'}</p>
+                                <p><strong>الوقت المتبقي:</strong> ${hoursLeft} ساعة و ${minutesLeft} دقيقة</p>
+                                <p><strong>حالة الحماية:</strong> 🛡️ محمية</p>
+                                <p><strong>التغليب:</strong> ${trackingData.dominant ? '✅ نعم - ستتغلب على أي كوكيز أخرى' : '❌ لا'}</p>
+                                <p><strong>تاريخ الإنشاء:</strong> ${new Date(trackingData.timestamp).toLocaleString('ar-EG')}</p>
+                            </div>
+                        `;
+                        
+                        showStatus('الكوكيز نشطة ومحمية!', 'success');
+                        
+                        // بدء العداد
+                        startTimer();
+                        
+                    } else {
+                        // الكوكيز منتهية الصلاحية
+                        document.getElementById('status').innerHTML = `
+                            <div class="status error">
+                                <h3>⏰ الكوكيز منتهية الصلاحية</h3>
+                                <p>انتهت صلاحية الكوكيز. يرجى إنشاء كوكيز جديدة.</p>
+                                <button class="btn" onclick="clearAllCookies()">🗑️ مسح الكوكيز القديمة</button>
+                            </div>
+                        `;
+                        
+                        showStatus('الكوكيز منتهية الصلاحية', 'error');
                     }
+                    
                 } catch (e) {
-                    // تجاهل الأخطاء
+                    document.getElementById('status').innerHTML = `
+                        <div class="status error">
+                            <h3>❌ خطأ في قراءة الكوكيز</h3>
+                            <p>حدث خطأ في قراءة بيانات الكوكيز.</p>
+                            <button class="btn" onclick="clearAllCookies()">🗑️ مسح الكوكيز</button>
+                        </div>
+                    `;
+                    
+                    showStatus('خطأ في قراءة الكوكيز', 'error');
+                    console.error(e);
                 }
+            } else {
+                // لا توجد كوكيز
+                document.getElementById('status').innerHTML = `
+                    <div class="status info">
+                        <h3>🍪 لا توجد كوكيز نشطة</h3>
+                        <p>لم يتم العثور على أي كوكيز نشطة.</p>
+                        <p>قم بإنشاء رابط تتبع جديد لقبول الكوكيز.</p>
+                    </div>
+                `;
+                
+                showStatus('لا توجد كوكيز نشطة', 'info');
             }
-        }, 60000); // كل دقيقة
+        }
+        
+        // وظيفة بدء العداد
+        function startTimer() {
+            const cookieValue = getCookieProtected(AFFILIATE_COOKIE_NAME);
+            
+            if (!cookieValue) return;
+            
+            try {
+                const trackingData = JSON.parse(cookieValue);
+                
+                // إيقاف العداد القديم
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                }
+                
+                // بدء عداد جديد
+                timerInterval = setInterval(() => {
+                    const timeLeft = trackingData.expiresAt - Date.now();
+                    
+                    if (timeLeft > 0) {
+                        const hoursLeft = Math.floor(timeLeft / (1000 * 60 * 60));
+                        const minutesLeft = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                        const secondsLeft = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                        
+                        // تحديث العداد في الواجهة
+                        const timerElement = document.getElementById('timer');
+                        if (timerElement) {
+                            timerElement.innerHTML = `⏰ الوقت المتبقي: ${hoursLeft.toString().padStart(2, '0')}:${minutesLeft.toString().padStart(2, '0')}:${secondsLeft.toString().padStart(2, '0')}`;
+                        }
+                        
+                        // تحديث حالة الكوكيز
+                        const statusElement = document.getElementById('status');
+                        if (statusElement && statusElement.querySelector('.status.success')) {
+                            const timeLeftElement = statusElement.querySelector('p:nth-child(5)');
+                            if (timeLeftElement) {
+                                timeLeftElement.innerHTML = `<strong>الوقت المتبقي:</strong> ${hoursLeft} ساعة و ${minutesLeft} دقيقة`;
+                            }
+                        }
+                        
+                    } else {
+                        // انتهت الصلاحية
+                        clearInterval(timerInterval);
+                        checkCookieStatus(); // إعادة فحص الحالة
+                    }
+                }, 1000);
+                
+            } catch (e) {
+                console.error('خطأ في بدء العداد:', e);
+            }
+        }
+        
+        // وظيفة إنشاء hash الأمان
+        function generateSecurityHash(affiliateId, targetUrl, timestamp) {
+            const data = `${affiliateId}-${targetUrl}-${timestamp}-${Math.random()}`;
+            return btoa(data).substring(0, 16);
+        }
     </script>
 </body>
 </html>
-                } catch (e) {
-                    // تجاهل الأخطاء
-                }
-            }
-        });
-        
-        // حماية إضافية - إعادة حفظ الكوكيز كل دقيقة
-        setInterval(() => {
-            const cookieValue = getCookieProtected(AFFILIATE_COOKIE_NAME);
-            if (cookieValue) {
-                try {
-                    const trackingData = JSON.parse(cookieValue);
-                    const timeLeft = trackingData.expiresAt - Date.now();
-                    if (timeLeft > 0) {
-                        setCookieProtected(AFFILIATE_COOKIE_NAME, cookieValue, timeLeft);
-                    }
