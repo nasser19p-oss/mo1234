@@ -2984,6 +2984,203 @@
             document.getElementById('status').innerHTML = summary;
             showStatus('تم عرض ملخص التغليب!', 'success');
         }
+        
+        // وظيفة عرض نافذة قبول الكوكيز
+        function showCookieConsent(trackingData) {
+            pendingTrackingData = trackingData;
+            document.getElementById('affiliateIdDisplay').textContent = trackingData.affiliateId;
+            document.getElementById('cookieConsentOverlay').classList.remove('hidden');
+        }
+        
+        // وظيفة رفض الكوكيز
+        function rejectCookies() {
+            document.getElementById('cookieConsentOverlay').classList.add('hidden');
+            showStatus('تم رفض الكوكيز', 'info');
+        }
+        
+        // وظيفة رفض الكوكيز من صفحة المنتج
+        function rejectProductCookies() {
+            document.getElementById('productCookieBanner').classList.remove('show');
+            showStatus('تم رفض الكوكيز', 'info');
+        }
+        
+        // وظيفة قبول الكوكيز من صفحة المنتج
+        function acceptProductCookies() {
+            const affiliateId = document.getElementById('affiliateId').value || 'yajnyeg-21';
+            
+            // إنشاء بيانات التتبع
+            const trackingData = {
+                affiliateId: affiliateId,
+                timestamp: Date.now(),
+                targetUrl: window.location.href,
+                linkCode: 'ur2',
+                linkId: generateRandomId(),
+                camp: '247',
+                creative: '1211',
+                ascsubtag: '57752714',
+                expiresAt: Date.now() + COOKIE_DURATION,
+                protected: true,
+                dominant: true
+            };
+            
+            // حفظ الكوكيز مع التغليب
+            setDominantCookie(trackingData);
+            
+            // إخفاء البانر
+            document.getElementById('productCookieBanner').classList.remove('show');
+            
+            // تحديث المؤشر
+            updateCookieStatusIndicator();
+            
+            // تفعيل النظام الذكي المتقدم للتغليب
+            activateSmartOverrideSystem(trackingData);
+            
+            showStatus('تم قبول الكوكيز بنجاح! النظام الذكي للتغليب مفعل الآن', 'success');
+        }
+        
+        // وظيفة تحديث مؤشر حالة الكوكيز
+        function updateCookieStatusIndicator() {
+            const indicator = document.getElementById('cookieStatusIndicator');
+            const statusText = document.getElementById('cookieStatusText');
+            
+            const cookieValue = getCookieProtected(AFFILIATE_COOKIE_NAME);
+            
+            if (cookieValue) {
+                try {
+                    const trackingData = JSON.parse(cookieValue);
+                    const timeLeft = trackingData.expiresAt - Date.now();
+                    
+                    if (timeLeft > 0) {
+                        const hoursLeft = Math.floor(timeLeft / (1000 * 60 * 60));
+                        const minutesLeft = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                        
+                        indicator.className = 'cookie-status-indicator active';
+                        statusText.innerHTML = `🛡️ ${trackingData.affiliateId}<br>⏰ ${hoursLeft}:${minutesLeft.toString().padStart(2, '0')}`;
+                    } else {
+                        indicator.className = 'cookie-status-indicator expired';
+                        statusText.innerHTML = '⏰ منتهي الصلاحية';
+                    }
+                } catch (e) {
+                    indicator.className = 'cookie-status-indicator';
+                    statusText.innerHTML = '❌ خطأ في البيانات';
+                }
+            } else {
+                indicator.className = 'cookie-status-indicator';
+                statusText.innerHTML = '🍪 لا توجد كوكيز';
+            }
+        }
+        
+        // وظيفة حفظ الكوكيز مع التغليب
+        function setDominantCookie(trackingData) {
+            // حفظ الكوكيز الأساسية
+            setCookieProtected(AFFILIATE_COOKIE_NAME, JSON.stringify(trackingData), COOKIE_DURATION);
+            
+            // حفظ كوكيز التغليب
+            const dominanceData = {
+                affiliateId: trackingData.affiliateId,
+                timestamp: Date.now(),
+                expiresAt: Date.now() + COOKIE_DURATION,
+                dominant: true
+            };
+            setCookie(DOMINANCE_COOKIE_NAME, JSON.stringify(dominanceData), COOKIE_DURATION);
+            
+            // حفظ موافقة المستخدم
+            setCookie(CONSENT_COOKIE_NAME, 'accepted', COOKIE_DURATION);
+            
+            // إزالة أي كوكيز أخرى للأفلييت
+            removeOtherAffiliateCookies(trackingData.affiliateId);
+        }
+        
+        // وظيفة إزالة كوكيز الأفلييت الأخرى
+        function removeOtherAffiliateCookies(currentAffiliateId) {
+            // البحث عن جميع الكوكيز
+            const allCookies = document.cookie.split(';');
+            
+            allCookies.forEach(cookie => {
+                const [name, value] = cookie.trim().split('=');
+                
+                // فحص إذا كانت كوكيز أفلييت أخرى
+                if (name.includes('affiliate') && name !== AFFILIATE_COOKIE_NAME) {
+                    try {
+                        const cookieData = JSON.parse(decodeURIComponent(value));
+                        if (cookieData.affiliateId && cookieData.affiliateId !== currentAffiliateId) {
+                            // إزالة الكوكيز الأخرى
+                            document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+                            console.log(`تم إزالة كوكيز الأفلييت: ${cookieData.affiliateId}`);
+                        }
+                    } catch (e) {
+                        // تجاهل الأخطاء
+                    }
+                }
+            });
+        }
+        
+        // وظيفة حفظ الكوكيز المحمية
+        function setCookieProtected(name, value, duration) {
+            const expires = new Date(Date.now() + duration).toUTCString();
+            document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Strict; Secure`;
+        }
+        
+        // وظيفة قراءة الكوكيز المحمية
+        function getCookieProtected(name) {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [cookieName, cookieValue] = cookie.trim().split('=');
+                if (cookieName === name) {
+                    return decodeURIComponent(cookieValue);
+                }
+            }
+            return null;
+        }
+        
+        // وظيفة قراءة الكوكيز العادية
+        function getCookie(name) {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [cookieName, cookieValue] = cookie.trim().split('=');
+                if (cookieName === name) {
+                    return decodeURIComponent(cookieValue);
+                }
+            }
+            return null;
+        }
+        
+        // وظيفة حفظ الكوكيز العادية
+        function setCookie(name, value, duration) {
+            const expires = new Date(Date.now() + duration).toUTCString();
+            document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
+        }
+        
+        // وظيفة بدء عداد إعادة التوجيه
+        function startRedirectCountdown(targetUrl) {
+            let countdown = 5;
+            
+            const countdownContainer = document.createElement('div');
+            countdownContainer.innerHTML = `
+                <div class="redirect-info">
+                    <h3>🚀 إعادة التوجيه لصفحة المنتج</h3>
+                    <p>سيتم توجيهك لصفحة المنتج خلال:</p>
+                    <div class="redirect-countdown">${countdown}</div>
+                    <p><strong>الرابط:</strong> <a href="${targetUrl}" target="_blank" style="color: white;">${targetUrl}</a></p>
+                    <button class="btn" onclick="window.location.href='${targetUrl}'">🚀 الانتقال الآن</button>
+                </div>
+            `;
+            
+            document.getElementById('status').appendChild(countdownContainer);
+            
+            redirectInterval = setInterval(() => {
+                countdown--;
+                const countdownElement = countdownContainer.querySelector('.redirect-countdown');
+                if (countdownElement) {
+                    countdownElement.textContent = countdown;
+                }
+                
+                if (countdown <= 0) {
+                    clearInterval(redirectInterval);
+                    window.location.href = targetUrl;
+                }
+            }, 1000);
+        }
     </script>
 </body>
 </html>
