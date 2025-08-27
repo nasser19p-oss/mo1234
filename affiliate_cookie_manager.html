@@ -422,6 +422,8 @@
                 <button class="btn btn-success" onclick="activateSystem()">🛡️ تفعيل النظام</button>
                 <button class="btn btn-info" onclick="showSystemInfo()">ℹ️ معلومات النظام</button>
                 <button class="btn btn-danger" onclick="resetSystem()">🔄 إعادة تعيين</button>
+                <button class="btn btn-primary" onclick="injectCookieSystem()">🚀 حقن النظام في Amazon</button>
+                <button class="btn btn-info" onclick="createBookmarklet()">📋 إنشاء Bookmarklet</button>
             </div>
         </div>
     </div>
@@ -717,6 +719,55 @@
                 updateStatus();
                 showAlert('تم إعادة تعيين النظام', 'info');
             }
+        }
+        
+        // حقن النظام في Amazon
+        function injectCookieSystem() {
+            // فحص إذا كنا في صفحة Amazon
+            if (window.location.href.includes('amazon')) {
+                // إنشاء script tag
+                const script = document.createElement('script');
+                script.src = 'amazon_cookie_system.js';
+                script.onload = function() {
+                    showAlert('تم حقن النظام بنجاح! ستظهر نافذة الكوكيز خلال ثوان', 'success');
+                };
+                script.onerror = function() {
+                    showAlert('فشل في تحميل النظام. تأكد من وجود الملف', 'error');
+                };
+                
+                document.head.appendChild(script);
+            } else {
+                // إذا لم نكن في Amazon، نفتح صفحة Amazon
+                const amazonUrl = 'https://www.amazon.eg/dp/B093ZW533Y/?smid=A1ZVRGNO5AYLOV&&_encoding=UTF8&tag=yajnyeg-21&linkCode=ur2&linkId=4ff5fa11b6d0385e8811d3e183795133&camp=247&creative=1211&ascsubtag=57861114';
+                
+                if (confirm('أنت لست في صفحة Amazon. هل تريد فتح صفحة Amazon لاختبار النظام؟')) {
+                    window.open(amazonUrl, '_blank');
+                    showAlert('تم فتح Amazon في نافذة جديدة. احقن النظام هناك', 'info');
+                }
+            }
+        }
+        
+        // إنشاء Bookmarklet لحقن النظام
+        function createBookmarklet() {
+            const bookmarkletCode = `javascript:(function(){
+                var script=document.createElement('script');
+                script.src='${window.location.origin}/amazon_cookie_system.js';
+                script.onload=function(){
+                    alert('تم حقن نظام الكوكيز بنجاح!');
+                };
+                script.onerror=function(){
+                    alert('فشل في تحميل النظام');
+                };
+                document.head.appendChild(script);
+            })();`;
+            
+            // نسخ الكود للـ clipboard
+            navigator.clipboard.writeText(bookmarkletCode).then(() => {
+                showAlert('تم نسخ Bookmarklet! اسحبه إلى شريط الإشارات المرجعية', 'success');
+            }).catch(() => {
+                // عرض الكود في alert
+                alert('انسخ هذا الكود في bookmark جديد:\n\n' + bookmarkletCode);
+            });
         }
         
         // عرض تنبيه
