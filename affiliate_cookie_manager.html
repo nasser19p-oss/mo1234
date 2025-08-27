@@ -329,21 +329,39 @@
             const currentUrl = window.location.href;
             const urlParams = new URLSearchParams(window.location.search);
             const currentTag = urlParams.get('tag');
+            const currentAscsubtag = urlParams.get('ascsubtag');
             
-            if (currentTag && currentTag !== AFFILIATE_CONFIG.tag) {
-                console.log('🛡️ تم اكتشاف معرف أفلييت منافس:', currentTag);
-                showOverrideMessage(currentTag);
+            // فحص إذا كان الرابط يحتوي على معرف أفلييت منافس
+            if (currentTag && (currentTag !== AFFILIATE_CONFIG.tag || 
+                (currentAscsubtag && currentAscsubtag !== AFFILIATE_CONFIG.ascsubtag))) {
+                
+                console.log('🛡️ تم اكتشاف رابط منافس!');
+                console.log('معرف الأفلييت الحالي:', currentTag);
+                console.log('ascsubtag الحالي:', currentAscsubtag);
+                console.log('معرفك الأساسي:', AFFILIATE_CONFIG.tag);
+                console.log('ascsubtag الأساسي:', AFFILIATE_CONFIG.ascsubtag);
+                
+                showOverrideMessage(currentTag, currentAscsubtag);
             }
         }
         
         // إظهار رسالة التغليب
-        function showOverrideMessage(competitorTag) {
+        function showOverrideMessage(competitorTag, competitorAscsubtag = null) {
             const message = document.createElement('div');
             message.className = 'override-message';
-            message.innerHTML = `
-                <h3>🛡️ تم اكتشاف معرف أفلييت منافس!</h3>
-                <p><strong>المعرف الحالي:</strong> ${competitorTag}</p>
-                <p><strong>معرفك:</strong> ${AFFILIATE_CONFIG.tag}</p>
+            
+            let messageContent = `
+                <h3>🛡️ تم اكتشاف رابط منافس!</h3>
+                <p><strong>معرف الأفلييت:</strong> ${competitorTag}</p>
+            `;
+            
+            if (competitorAscsubtag) {
+                messageContent += `<p><strong>ascsubtag:</strong> ${competitorAscsubtag}</p>`;
+            }
+            
+            messageContent += `
+                <p><strong>معرفك الأساسي:</strong> ${AFFILIATE_CONFIG.tag}</p>
+                <p><strong>ascsubtag الأساسي:</strong> ${AFFILIATE_CONFIG.ascsubtag}</p>
                 <p>سيتم تعديل الرابط ليستخدم معرفك تلقائياً</p>
                 <div class="url-display">
                     ${window.location.href}
@@ -351,14 +369,16 @@
                 <button class="action-btn success" onclick="this.parentElement.remove()">✅ فهمت</button>
             `;
             
+            message.innerHTML = messageContent;
+            
             document.body.appendChild(message);
             
-            // إزالة الرسالة تلقائياً بعد 5 ثوان
+            // إزالة الرسالة تلقائياً بعد 8 ثوان
             setTimeout(() => {
                 if (message.parentNode) {
                     message.remove();
                 }
-            }, 5000);
+            }, 8000);
         }
         
         // إظهار واجهة الكوكيز للمنتج
@@ -635,19 +655,32 @@
             try {
                 const href = link.href;
                 
-                if (href.includes('tag=') && !href.includes(trackingData.affiliateId)) {
-                    console.log('🛡️ تم اكتشاف رابط منافس:', href);
+                // فحص إذا كان الرابط يحتوي على معرف أفلييت منافس
+                // حتى لو كان يستخدم نفس المعرف، نتحقق من ascsubtag
+                if (href.includes('tag=') && href.includes('ascsubtag=')) {
+                    const urlParams = new URLSearchParams(href);
+                    const currentTag = urlParams.get('tag');
+                    const currentAscsubtag = urlParams.get('ascsubtag');
                     
-                    // تعديل الرابط
-                    const modifiedUrl = modifyAffiliateLink(href, trackingData);
-                    
-                    // إضافة مؤشر بصري
-                    addVisualIndicator(link);
-                    
-                    // إضافة مستمع النقر
-                    addClickListener(link, modifiedUrl, trackingData);
-                    
-                    console.log('✅ تم تعديل الرابط:', modifiedUrl);
+                    // فحص إذا كان الرابط منافس (معرف مختلف أو ascsubtag مختلف)
+                    if (currentTag !== trackingData.affiliateId || 
+                        (currentAscsubtag && currentAscsubtag !== trackingData.ascsubtag)) {
+                        
+                        console.log('🛡️ تم اكتشاف رابط منافس:', href);
+                        console.log('معرف الأفلييت الحالي:', currentTag);
+                        console.log('ascsubtag الحالي:', currentAscsubtag);
+                        
+                        // تعديل الرابط
+                        const modifiedUrl = modifyAffiliateLink(href, trackingData);
+                        
+                        // إضافة مؤشر بصري
+                        addVisualIndicator(link);
+                        
+                        // إضافة مستمع النقر
+                        addClickListener(link, modifiedUrl, trackingData);
+                        
+                        console.log('✅ تم تعديل الرابط:', modifiedUrl);
+                    }
                 }
             } catch (e) {
                 console.error('خطأ في معالجة الرابط:', e);
@@ -714,15 +747,24 @@
             document.addEventListener('click', function(e) {
                 const link = e.target.closest('a');
                 if (link && link.href && link.href.includes('amazon')) {
-                    if (link.href.includes('tag=') && !link.href.includes(trackingData.affiliateId)) {
-                        e.preventDefault();
+                    if (link.href.includes('tag=') && link.href.includes('ascsubtag=')) {
+                        const urlParams = new URLSearchParams(link.href);
+                        const currentTag = urlParams.get('tag');
+                        const currentAscsubtag = urlParams.get('ascsubtag');
                         
-                        const modifiedUrl = modifyAffiliateLink(link.href, trackingData);
-                        showOverrideMessage(modifiedUrl, trackingData);
-                        
-                        setTimeout(() => {
-                            window.location.href = modifiedUrl;
-                        }, 2000);
+                        // فحص إذا كان الرابط منافس
+                        if (currentTag !== trackingData.affiliateId || 
+                            (currentAscsubtag && currentAscsubtag !== trackingData.ascsubtag)) {
+                            
+                            e.preventDefault();
+                            
+                            const modifiedUrl = modifyAffiliateLink(link.href, trackingData);
+                            showOverrideMessage(modifiedUrl, trackingData);
+                            
+                            setTimeout(() => {
+                                window.location.href = modifiedUrl;
+                            }, 2000);
+                        }
                     }
                 }
             });
@@ -751,7 +793,7 @@
                 return;
             }
             
-            // إضافة روابط اختبار
+            // إضافة روابط اختبار مع الروابط المحددة
             const testContainer = document.createElement('div');
             testContainer.innerHTML = `
                 <div style="
@@ -766,13 +808,13 @@
                     box-shadow: 0 20px 40px rgba(0,0,0,0.3);
                     z-index: 10000;
                     text-align: center;
-                    max-width: 500px;
+                    max-width: 600px;
                 ">
                     <h3>🧪 اختبار نظام التغليب</h3>
                     <p>اضغط على أي رابط لرؤية النظام يعمل:</p>
                     
                     <div style="margin: 20px 0;">
-                        <a href="https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?tag=competitor1&linkCode=ur2" 
+                        <a href="https://www.amazon.eg/Dabur-Ayurvedic-Toothpaste-Ingredients-Complete/dp/B0BT822SWP?th=1&_=undefined&_encoding=UTF8&tag=yajnyeg-21&linkCode=ur2&linkId=4ff5fa11b6d0385e8811d3e183795133&camp=247&creative=1211&ascsubtag=57859024" 
                            style="
                                display: inline-block;
                                background: #ff6b6b;
@@ -782,10 +824,23 @@
                                text-decoration: none;
                                margin: 10px;
                            ">
-                            🔗 رابط منافس 1
+                            🔗 رابط منافس (ascsubtag: 57859024)
                         </a>
                         
-                        <a href="https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?tag=competitor2&linkCode=ur2" 
+                        <a href="https://www.amazon.eg/Dabur-Ayurvedic-Toothpaste-Ingredients-Complete/dp/B0BT822SWP?th=1&_=undefined&_encoding=UTF8&tag=yajnyeg-21&linkCode=ur2&linkId=4ff5fa11b6d0385e8811d3e183795133&camp=247&creative=1211&ascsubtag=57859192" 
+                           style="
+                               display: inline-block;
+                               background: #28a745;
+                               color: white;
+                               padding: 10px 20px;
+                               border-radius: 25px;
+                               text-decoration: none;
+                               margin: 10px;
+                           ">
+                            🔗 رابط أساسي (ascsubtag: 57859192)
+                        </a>
+                        
+                        <a href="https://www.amazon.eg/-/en/Dice-Men-Winter-Underset-Black-M/dp/B0BG64C776?tag=competitor1&linkCode=ur2&ascsubtag=12345" 
                            style="
                                display: inline-block;
                                background: #ff6b6b;
@@ -795,11 +850,18 @@
                                text-decoration: none;
                                margin: 10px;
                            ">
-                            🔗 رابط منافس 2
+                            🔗 رابط منافس (معرف مختلف)
                         </a>
                     </div>
                     
-                    <p><small>⚠️ هذه الروابط تحتوي على معرفات منافسة - سيتم تعديلها تلقائياً</small></p>
+                    <div style="background: rgba(255,255,255,0.2); border-radius: 10px; padding: 15px; margin: 15px 0; text-align: right;">
+                        <h4>📊 معلومات الاختبار:</h4>
+                        <p><strong>الرابط الأحمر:</strong> ascsubtag مختلف (57859024)</p>
+                        <p><strong>الرابط الأخضر:</strong> ascsubtag أساسي (57859192)</p>
+                        <p><strong>الرابط الأحمر الثاني:</strong> معرف مختلف</p>
+                        <p><small>النظام الآن يتعرف على الروابط المنافسة حتى لو كانت تستخدم نفس المعرف!</small></p>
+                    </div>
+                    
                     <button class="action-btn danger" onclick="this.parentElement.remove()">❌ إغلاق</button>
                 </div>
             `;
