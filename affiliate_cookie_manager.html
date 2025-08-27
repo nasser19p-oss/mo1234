@@ -423,6 +423,7 @@
                 <button class="btn btn-info" onclick="showSystemInfo()">ℹ️ معلومات النظام</button>
                 <button class="btn btn-danger" onclick="resetSystem()">🔄 إعادة تعيين</button>
                 <button class="btn btn-primary" onclick="injectCookieSystem()">🚀 حقن النظام في Amazon</button>
+                <button class="btn btn-success" onclick="injectSystemDirectly()">⚡ حقن مباشر (بدون ملف)</button>
                 <button class="btn btn-info" onclick="createBookmarklet()">📋 إنشاء Bookmarklet</button>
             </div>
         </div>
@@ -732,7 +733,9 @@
                     showAlert('تم حقن النظام بنجاح! ستظهر نافذة الكوكيز خلال ثوان', 'success');
                 };
                 script.onerror = function() {
-                    showAlert('فشل في تحميل النظام. تأكد من وجود الملف', 'error');
+                    showAlert('فشل في تحميل النظام. سنحاول الطريقة البديلة', 'error');
+                    // الطريقة البديلة: حقن النظام مباشرة
+                    injectSystemDirectly();
                 };
                 
                 document.head.appendChild(script);
@@ -745,6 +748,140 @@
                     showAlert('تم فتح Amazon في نافذة جديدة. احقن النظام هناك', 'info');
                 }
             }
+        }
+        
+        // حقن النظام مباشرة (بدون ملف خارجي)
+        function injectSystemDirectly() {
+            console.log('🚀 حقن النظام مباشرة...');
+            
+            // إنشاء CSS للبانر
+            const style = document.createElement('style');
+            style.textContent = `
+                .affiliate-cookie-banner {
+                    position: fixed;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    background: linear-gradient(45deg, #667eea, #764ba2);
+                    color: white;
+                    padding: 20px;
+                    box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
+                    z-index: 999999;
+                    transform: translateY(100%);
+                    transition: transform 0.5s ease-in-out;
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                }
+                
+                .affiliate-cookie-banner.show {
+                    transform: translateY(0);
+                }
+                
+                .banner-content {
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    flex-wrap: wrap;
+                    gap: 20px;
+                }
+                
+                .banner-text {
+                    flex: 1;
+                    text-align: right;
+                }
+                
+                .banner-text h3 {
+                    margin: 0 0 10px 0;
+                    font-size: 1.5em;
+                }
+                
+                .banner-text p {
+                    margin: 5px 0;
+                    font-size: 14px;
+                    opacity: 0.9;
+                }
+                
+                .banner-buttons {
+                    display: flex;
+                    gap: 15px;
+                    flex-wrap: wrap;
+                }
+                
+                .banner-buttons button {
+                    padding: 12px 25px;
+                    border: none;
+                    border-radius: 25px;
+                    font-size: 14px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                }
+                
+                .btn-accept {
+                    background: linear-gradient(45deg, #28a745, #20c997);
+                    color: white;
+                }
+                
+                .btn-reject {
+                    background: linear-gradient(45deg, #dc3545, #e83e8c);
+                    color: white;
+                }
+                
+                .banner-buttons button:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // إنشاء البانر
+            const banner = document.createElement('div');
+            banner.className = 'affiliate-cookie-banner';
+            banner.innerHTML = `
+                <div class="banner-content">
+                    <div class="banner-text">
+                        <h3>🍪 إشعار الكوكيز</h3>
+                        <p>نحن نستخدم الكوكيز لضمان حصولك على أفضل الصفقات</p>
+                        <p><strong>معرف الأفلييت:</strong> ${SYSTEM_CONFIG.affiliateId}</p>
+                    </div>
+                    <div class="banner-buttons">
+                        <button class="btn-accept" onclick="window.acceptCookiesDirect()">✅ قبول</button>
+                        <button class="btn-reject" onclick="window.rejectCookiesDirect()">❌ رفض</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(banner);
+            
+            // إظهار البانر
+            setTimeout(() => {
+                banner.classList.add('show');
+                console.log('✅ تم إظهار واجهة الكوكيز بنجاح');
+            }, 100);
+            
+            // إضافة دوال القبول والرفض
+            window.acceptCookiesDirect = function() {
+                console.log('✅ تم قبول الكوكيز');
+                banner.classList.remove('show');
+                setTimeout(() => banner.remove(), 500);
+                showAlert('تم قبول الكوكيز! النظام مفعل الآن', 'success');
+                
+                // تفعيل النظام
+                systemActive = true;
+                saveSystemData();
+                updateStatus();
+                startTimer();
+            };
+            
+            window.rejectCookiesDirect = function() {
+                console.log('❌ تم رفض الكوكيز');
+                banner.classList.remove('show');
+                setTimeout(() => banner.remove(), 500);
+                showAlert('تم رفض الكوكيز', 'info');
+            };
+            
+            showAlert('تم حقن النظام مباشرة! نافذة الكوكيز ظاهرة الآن', 'success');
         }
         
         // إنشاء Bookmarklet لحقن النظام
