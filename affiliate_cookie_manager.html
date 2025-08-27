@@ -367,6 +367,35 @@
                 </div>
             </div>
             
+            <!-- قسم معاملات الأفلييت -->
+            <div class="status-section">
+                <h3>🔧 معاملات الأفلييت</h3>
+                <div class="status-item">
+                    <span class="status-label">معرف المنصة (tag):</span>
+                    <span class="status-value status-active">${SYSTEM_CONFIG.affiliateId}</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">نوع الرابط (linkCode):</span>
+                    <span class="status-value status-active">${SYSTEM_CONFIG.linkCode}</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">معرف الرابط (linkId):</span>
+                    <span class="status-value status-active">${SYSTEM_CONFIG.linkId}</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">معرف الحملة (camp):</span>
+                    <span class="status-value status-active">${SYSTEM_CONFIG.camp}</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">معرف الإبداع (creative):</span>
+                    <span class="status-value status-active">${SYSTEM_CONFIG.creative}</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">المعرف الفرعي (ascsubtag):</span>
+                    <span class="status-value status-active">${SYSTEM_CONFIG.ascsubtag}</span>
+                </div>
+            </div>
+            
             <!-- قسم حالة النظام -->
             <div class="status-section">
                 <h3>📋 حالة النظام</h3>
@@ -492,7 +521,7 @@
             try {
                 const url = new URL(originalUrl);
                 
-                // إضافة معاملات التتبع
+                // إضافة جميع معاملات التتبع
                 url.searchParams.set('tag', SYSTEM_CONFIG.affiliateId);
                 url.searchParams.set('linkCode', SYSTEM_CONFIG.linkCode);
                 url.searchParams.set('linkId', SYSTEM_CONFIG.linkId);
@@ -638,16 +667,33 @@
                 • نظام تغليب تلقائي للروابط المنافسة
                 • واجهة إدارية احترافية
                 
+                🔧 معاملات الأفلييت:
+                • معرف المنصة (tag): ${SYSTEM_CONFIG.affiliateId}
+                • نوع الرابط (linkCode): ${SYSTEM_CONFIG.linkCode}
+                • معرف الرابط (linkId): ${SYSTEM_CONFIG.linkId}
+                • معرف الحملة (camp): ${SYSTEM_CONFIG.camp}
+                • معرف الإبداع (creative): ${SYSTEM_CONFIG.creative}
+                • المعرف الفرعي (ascsubtag): ${SYSTEM_CONFIG.ascsubtag}
+                
                 🔧 الإعدادات:
-                • معرف الأفلييت: ${SYSTEM_CONFIG.affiliateId}
                 • مدة الكوكيز: 24 ساعة
                 • مستوى الحماية: عالي
+                • نظام التغليب: شامل لجميع المعاملات
                 
                 📱 الاستخدام:
                 1. أدخل رابط المنتج
                 2. اضغط "إنشاء رابط التتبع"
                 3. شارك الرابط مع المستخدمين
                 4. النظام يعمل تلقائياً
+                
+                🛡️ نظام التغليب:
+                النظام يتعرف على الروابط المنافسة بناءً على:
+                • معرف المنصة (tag) مختلف
+                • نوع الرابط (linkCode) مختلف
+                • معرف الحملة (camp) مختلف
+                • معرف الإبداع (creative) مختلف
+                • المعرف الفرعي (ascsubtag) مختلف
+                • معرف الرابط (linkId) مختلف
             `;
             
             alert(info);

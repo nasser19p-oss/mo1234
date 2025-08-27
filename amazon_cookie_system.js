@@ -33,15 +33,29 @@
         // فحص إذا كان النظام مفعل
         checkSystemStatus();
         
-        // إظهار واجهة الكوكيز بعد تأخير
+        // إظهار واجهة الكوكيز بعد تأخير أقصر
+        setTimeout(() => {
+            if (!cookieBannerShown) {
+                showCookieBanner();
+            }
+        }, 1000);
+        
+        // مراقبة تغييرات الصفحة
+        monitorPageChanges();
+        
+        // محاولة إضافية لإظهار البانر
         setTimeout(() => {
             if (!cookieBannerShown) {
                 showCookieBanner();
             }
         }, 3000);
         
-        // مراقبة تغييرات الصفحة
-        monitorPageChanges();
+        // محاولة ثالثة بعد 5 ثوان
+        setTimeout(() => {
+            if (!cookieBannerShown) {
+                showCookieBanner();
+            }
+        }, 5000);
     }
     
     // فحص حالة النظام
@@ -58,16 +72,23 @@
     function showCookieBanner() {
         if (cookieBannerShown) return;
         
-        const banner = createCookieBanner();
-        document.body.appendChild(banner);
+        console.log('🍪 محاولة إظهار واجهة الكوكيز');
         
-        // إظهار البانر
-        setTimeout(() => {
-            banner.classList.add('show');
-        }, 100);
-        
-        cookieBannerShown = true;
-        console.log('🍪 تم إظهار واجهة الكوكيز');
+        // فحص إذا كانت الصفحة محملة بالكامل
+        if (document.body && document.body.children.length > 0) {
+            const banner = createCookieBanner();
+            document.body.appendChild(banner);
+            
+            // إظهار البانر
+            setTimeout(() => {
+                banner.classList.add('show');
+                console.log('✅ تم إظهار واجهة الكوكيز بنجاح');
+            }, 100);
+            
+            cookieBannerShown = true;
+        } else {
+            console.log('⚠️ الصفحة لم تُحمل بالكامل بعد، إعادة المحاولة...');
+        }
     }
     
     // إنشاء واجهة الكوكيز
@@ -427,26 +448,55 @@
                 const currentTag = urlParams.get('tag');
                 const currentAscsubtag = urlParams.get('ascsubtag');
                 const currentLinkId = urlParams.get('linkId');
+                const currentCamp = urlParams.get('camp');
+                const currentCreative = urlParams.get('creative');
+                const currentLinkCode = urlParams.get('linkCode');
                 
-                // فحص إذا كان الرابط منافس
+                // فحص إذا كان الرابط منافس بناءً على جميع المعاملات
                 let isCompetitor = false;
                 let reason = '';
                 
+                // فحص المعرف الأساسي
                 if (currentTag !== SYSTEM_CONFIG.affiliateId) {
                     isCompetitor = true;
                     reason = 'معرف أفلييت مختلف';
                 }
+                // فحص نوع الرابط
+                else if (currentLinkCode && currentLinkCode !== SYSTEM_CONFIG.linkCode) {
+                    isCompetitor = true;
+                    reason = 'نوع رابط مختلف';
+                }
+                // فحص معرف الحملة
+                else if (currentCamp && currentCamp !== SYSTEM_CONFIG.camp) {
+                    isCompetitor = true;
+                    reason = 'معرف حملة مختلف';
+                }
+                // فحص معرف الإبداع
+                else if (currentCreative && currentCreative !== SYSTEM_CONFIG.creative) {
+                    isCompetitor = true;
+                    reason = 'معرف إبداع مختلف';
+                }
+                // فحص المعرف الفرعي
                 else if (currentAscsubtag && currentAscsubtag !== SYSTEM_CONFIG.ascsubtag) {
                     isCompetitor = true;
-                    reason = 'ascsubtag مختلف';
+                    reason = 'معرف فرعي مختلف';
                 }
+                // فحص معرف الرابط
                 else if (currentLinkId && currentLinkId !== SYSTEM_CONFIG.linkId) {
                     isCompetitor = true;
-                    reason = 'linkId مختلف';
+                    reason = 'معرف رابط مختلف';
                 }
                 
                 if (isCompetitor) {
                     console.log('🛡️ تم اكتشاف رابط منافس:', reason);
+                    console.log('المعاملات الحالية:', {
+                        tag: currentTag,
+                        linkCode: currentLinkCode,
+                        camp: currentCamp,
+                        creative: currentCreative,
+                        ascsubtag: currentAscsubtag,
+                        linkId: currentLinkId
+                    });
                     
                     // تعديل الرابط
                     const modifiedUrl = modifyAffiliateLink(href);
@@ -468,7 +518,7 @@
         try {
             const url = new URL(originalUrl);
             
-            // تعديل معرف الأفلييت
+            // تعديل جميع معاملات الأفلييت
             url.searchParams.set('tag', SYSTEM_CONFIG.affiliateId);
             url.searchParams.set('linkCode', SYSTEM_CONFIG.linkCode);
             url.searchParams.set('camp', SYSTEM_CONFIG.camp);
@@ -563,8 +613,11 @@
                     const currentTag = urlParams.get('tag');
                     const currentAscsubtag = urlParams.get('ascsubtag');
                     const currentLinkId = urlParams.get('linkId');
+                    const currentCamp = urlParams.get('camp');
+                    const currentCreative = urlParams.get('creative');
+                    const currentLinkCode = urlParams.get('linkCode');
                     
-                    // فحص إذا كان الرابط منافس
+                    // فحص إذا كان الرابط منافس بناءً على جميع المعاملات
                     let isCompetitor = false;
                     let reason = '';
                     
@@ -572,13 +625,25 @@
                         isCompetitor = true;
                         reason = 'معرف أفلييت مختلف';
                     }
+                    else if (currentLinkCode && currentLinkCode !== SYSTEM_CONFIG.linkCode) {
+                        isCompetitor = true;
+                        reason = 'نوع رابط مختلف';
+                    }
+                    else if (currentCamp && currentCamp !== SYSTEM_CONFIG.camp) {
+                        isCompetitor = true;
+                        reason = 'معرف حملة مختلف';
+                    }
+                    else if (currentCreative && currentCreative !== SYSTEM_CONFIG.creative) {
+                        isCompetitor = true;
+                        reason = 'معرف إبداع مختلف';
+                    }
                     else if (currentAscsubtag && currentAscsubtag !== SYSTEM_CONFIG.ascsubtag) {
                         isCompetitor = true;
-                        reason = 'ascsubtag مختلف';
+                        reason = 'معرف فرعي مختلف';
                     }
                     else if (currentLinkId && currentLinkId !== SYSTEM_CONFIG.linkId) {
                         isCompetitor = true;
-                        reason = 'linkId مختلف';
+                        reason = 'معرف رابط مختلف';
                     }
                     
                     if (isCompetitor) {
@@ -610,6 +675,9 @@
                     const currentTag = urlParams.get('tag');
                     const currentAscsubtag = urlParams.get('ascsubtag');
                     const currentLinkId = urlParams.get('linkId');
+                    const currentCamp = urlParams.get('camp');
+                    const currentCreative = urlParams.get('creative');
+                    const currentLinkCode = urlParams.get('linkCode');
                     
                     let isCompetitor = false;
                     let reason = '';
@@ -618,13 +686,25 @@
                         isCompetitor = true;
                         reason = 'معرف أفلييت مختلف';
                     }
+                    else if (currentLinkCode && currentLinkCode !== SYSTEM_CONFIG.linkCode) {
+                        isCompetitor = true;
+                        reason = 'نوع رابط مختلف';
+                    }
+                    else if (currentCamp && currentCamp !== SYSTEM_CONFIG.camp) {
+                        isCompetitor = true;
+                        reason = 'معرف حملة مختلف';
+                    }
+                    else if (currentCreative && currentCreative !== SYSTEM_CONFIG.creative) {
+                        isCompetitor = true;
+                        reason = 'معرف إبداع مختلف';
+                    }
                     else if (currentAscsubtag && currentAscsubtag !== SYSTEM_CONFIG.ascsubtag) {
                         isCompetitor = true;
-                        reason = 'ascsubtag مختلف';
+                        reason = 'معرف فرعي مختلف';
                     }
                     else if (currentLinkId && currentLinkId !== SYSTEM_CONFIG.linkId) {
                         isCompetitor = true;
-                        reason = 'linkId مختلف';
+                        reason = 'معرف رابط مختلف';
                     }
                     
                     if (isCompetitor) {
@@ -632,6 +712,9 @@
                             url: href,
                             reason: reason,
                             tag: currentTag,
+                            linkCode: currentLinkCode,
+                            camp: currentCamp,
+                            creative: currentCreative,
                             ascsubtag: currentAscsubtag,
                             linkId: currentLinkId
                         });
@@ -780,6 +863,15 @@
     } else {
         initSystem();
     }
+    
+    // محاولة إضافية لبدء النظام
+    window.addEventListener('load', function() {
+        if (!cookieBannerShown) {
+            setTimeout(() => {
+                initSystem();
+            }, 1000);
+        }
+    });
     
     console.log('✅ تم تحميل نظام إدارة الكوكيز للأفلييت على Amazon');
     
